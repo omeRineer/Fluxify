@@ -1,0 +1,56 @@
+﻿using Fluxify.Application.Services.Interfaces;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using System.Security.Claims;
+using System.Text.Encodings.Web;
+
+namespace Fluxify.Api.Hub.Auth
+{
+    public class FluxifyHubAuthenticationOptions : AuthenticationSchemeOptions
+    {
+    }
+    public class FluxifyHubAuthenticationHandler : AuthenticationHandler<FluxifyHubAuthenticationOptions>
+    {
+        const string ApiKeyHeaderName = "Fluxify-Api-Key";
+        readonly ISubscriberService NotificationSubscriberService;
+        public FluxifyHubAuthenticationHandler(IOptionsMonitor<FluxifyHubAuthenticationOptions> options, ISubscriberService notificationSubscriberService, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock) : base(options, logger, encoder, clock)
+        {
+            NotificationSubscriberService = notificationSubscriberService;
+        }
+
+        protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
+        {
+            if (!Request.Headers.TryGetValue(ApiKeyHeaderName, out var headers) &
+                !Request.Query.TryGetValue(ApiKeyHeaderName, out var queries))
+                return AuthenticateResult.Fail("API Key is not provided.");
+
+            var providedApiKey = headers.FirstOrDefault() ?? queries.FirstOrDefault();
+            var subscriber = (await NotificationSubscriberService.GetDetailAsync(providedApiKey)).Data;
+
+            if (subscriber == null)
+                return AuthenticateResult.Fail("Invalid API Key.");
+
+            if (subscriber.ExpireDate != null && subscriber.ExpireDate < DateTime.Now)
+                return AuthenticateResult.Fail("API Key is expired.");
+
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, subscriber.Key),
+                new Claim("ApiKey", subscriber.ApiKey),
+                new Claim("NameSpace", subscriber.NameSpace.ToString()),
+                new Claim(ClaimTypes.Name, subscriber.Name)
+            };
+
+            if (subscriber.Topics != null && subscriber.Topics.Count > 0)
+                foreach (var topic in subscriber.Topics)
+                    claims.Add(new Claim("Topic", topic));
+
+            var identity = new ClaimsIdentity(claims, Scheme.Name);
+            var principal = new ClaimsPrincipal(identity);
+            var ticket = new AuthenticationTicket(principal, Scheme.Name);
+
+            return AuthenticateResult.Success(ticket);
+        }
+    }
+}

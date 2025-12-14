@@ -1,0 +1,9 @@
+﻿namespace Fluxify.Application.Models.Rest.Channel
+{
+    public class UpdateChannelRequest
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; }
+        public List<string>? Topics { get; set; }
+    }
+}

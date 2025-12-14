@@ -1,0 +1,16 @@
+﻿using Fluxify.Domain;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Fluxify.Domain.Core
+{
+    public class NameSpace : MongoEntity<Guid>
+    {
+        public string Signature { get; set; }
+        public string Name { get; set; }
+        public DateTime? ExpireDate { get; set; }
+    }
+}
