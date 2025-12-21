@@ -20,4 +20,10 @@
 		<ProjectReference Include="..\Fluxify.Domain\Fluxify.Domain.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="Rules\Channel\" />
+	  <Folder Include="Rules\NameSpace\" />
+	  <Folder Include="Rules\Subscriber\" />
+	</ItemGroup>
+
 </Project>

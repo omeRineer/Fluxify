@@ -23,10 +23,11 @@ namespace Fluxify.Application.Hubs
         {
             HubConnectionManager.AddConnection(Context);
 
-            await Clients.All.SendAsync("UserConnected", new PushToClientUserConnectedInfoModel
+            await Clients.All.SendAsync("UserState", new PushToClientUserStateInfoModel
             {
                 UserId = Context.UserIdentifier,
-                ConnectedDate = DateTime.Now
+                Date = DateTime.Now,
+                IsConnected = true
             });
 
             await base.OnConnectedAsync();
@@ -36,13 +37,26 @@ namespace Fluxify.Application.Hubs
         {
             HubConnectionManager.RemoveConnection(Context);
 
-            await Clients.All.SendAsync("UserConnected", new PushToClientUserDisconnectedInfoModel
+            await Clients.All.SendAsync("UserState", new PushToClientUserStateInfoModel
             {
                 UserId = Context.UserIdentifier,
-                DisconnectedDate = DateTime.Now
+                Date = DateTime.Now,
+                IsConnected = false
             });
 
             await base.OnDisconnectedAsync(exception);
+        }
+
+        public async Task<List<PushToClientUserStateInfoModel>> GetOnlineSubscribers()
+        {
+            var nameSpace = Context.User.Claims.Single(f => f.Type == "NameSpace")?.Value;
+
+            return await Task.FromResult(HubConnectionManager.GetAllConnections(nameSpace).Select(s => new PushToClientUserStateInfoModel
+            {
+                UserId = s.Id,
+                Date = s.ConnectedDate,
+                IsConnected = true
+            }).ToList());
         }
     }
 }

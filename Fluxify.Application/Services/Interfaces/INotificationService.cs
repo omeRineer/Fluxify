@@ -1,5 +1,6 @@
 ﻿using Fluxify.Application.Models.Rest.Notification;
 using Fluxify.Application.Utilities.ApiResponse;
+using Fluxify.Application.Utilities.Result;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,8 +11,8 @@ namespace Fluxify.Application.Services.Interfaces
 {
     public interface INotificationService
     {
-        Task<ApiDataResponse<GetNotificationsResponse>> GetListAsync();
-        Task<ApiDataResponse<GetNotificationDetailResponse>> GetDetailAsync(Guid id);
-        Task<ApiResponse> CreateAsync(CreateNotificationRequest req);
+        Task<IDataResult<GetNotificationsResponse>> GetListAsync();
+        Task<IDataResult<GetNotificationDetailResponse>> GetDetailAsync(Guid id);
+        Task<IResult> CreateAsync(CreateNotificationRequest req);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Fluxify.Application.Models.Rest.Channel;
 using Fluxify.Application.Models.Rest.Subscriber;
 using Fluxify.Application.Utilities.ApiResponse;
+using Fluxify.Application.Utilities.Result;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,11 +12,11 @@ namespace Fluxify.Application.Services.Interfaces
 {
     public interface ISubscriberService
     {
-        Task<ApiDataResponse<CreateSubscriberResponse>> CreateAsync(CreateSubscriberRequest model);
-        Task<ApiDataResponse<UpdateSubscriberResponse>> UpdateAsync(UpdateSubscriberRequest model);
-        Task<ApiDataResponse<GetSubscriberDetailResponse>> GetDetailAsync(Guid id);
-        Task<ApiDataResponse<GetSubscriberDetailResponse?>> GetDetailAsync(string apiKey);
-        Task<ApiDataResponse<GetSubscriberListResponse>> GetSubscribersByNameSpaceAsync(Guid nameSpace);
+        Task<IDataResult<CreateSubscriberResponse>> CreateAsync(CreateSubscriberRequest model);
+        Task<IDataResult<UpdateSubscriberResponse>> UpdateAsync(UpdateSubscriberRequest model);
+        Task<IDataResult<GetSubscriberDetailResponse>> GetDetailAsync(Guid id);
+        Task<IDataResult<GetSubscriberDetailResponse?>> GetDetailAsync(string apiKey);
+        Task<IDataResult<List<SubscriberResponse>>> GetListByNameSpaceAsync(Guid nameSpace);
 
     }
 }

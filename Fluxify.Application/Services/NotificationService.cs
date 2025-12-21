@@ -5,6 +5,7 @@ using Fluxify.Application.Repositories;
 using Fluxify.Application.Services.Interfaces;
 using Fluxify.Application.Utilities.ApiResponse;
 using Fluxify.Application.Utilities.Helpers;
+using Fluxify.Application.Utilities.Result;
 using Fluxify.Domain.Core;
 using Microsoft.AspNetCore.SignalR;
 using System;
@@ -31,7 +32,7 @@ namespace Fluxify.Application.Services
             RabbitMqClient = rabbitMqClientService;
         }
 
-        public async Task<ApiResponse> CreateAsync(CreateNotificationRequest req)
+        public async Task<IResult> CreateAsync(CreateNotificationRequest req)
         {
             var ticketId = Guid.NewGuid();
             var newNotification = new Notification
@@ -52,10 +53,10 @@ namespace Fluxify.Application.Services
 
             await RabbitMqClient.PushAsync("Notification_Queue", ticketId);
 
-            return ApiResponseHelper.Success("Notification creating is successful");
+            return new SuccessResult("Notification creating is successful");
         }
 
-        public async Task<ApiDataResponse<GetNotificationDetailResponse>> GetDetailAsync(Guid id)
+        public async Task<IDataResult<GetNotificationDetailResponse>> GetDetailAsync(Guid id)
         {
             var notification = await NotificationRepository.GetSingleAsync(f => f.Id == id);
 
@@ -84,10 +85,10 @@ namespace Fluxify.Application.Services
                 Custom = notification.Custom
             };
 
-            return ApiResponseHelper.Success<GetNotificationDetailResponse>(data: result);
+            return new SuccessDataResult<GetNotificationDetailResponse>(result);
         }
 
-        public async Task<ApiDataResponse<GetNotificationsResponse>> GetListAsync()
+        public async Task<IDataResult<GetNotificationsResponse>> GetListAsync()
         {
             var notifications = await NotificationRepository.GetListAsync(f => (f.NameSpace == CurrentUser.NameSpace) &&
                                                                                (f.Sender == CurrentUser.Key ||
@@ -109,7 +110,7 @@ namespace Fluxify.Application.Services
                 }).ToList()
             };
 
-            return ApiResponseHelper.Success<GetNotificationsResponse>(data: result);
+            return new SuccessDataResult<GetNotificationsResponse>(result);
         }
     }
 }

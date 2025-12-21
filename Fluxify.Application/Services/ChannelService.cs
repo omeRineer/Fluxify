@@ -1,8 +1,12 @@
 ﻿using AutoMapper;
 using Fluxify.Application.Models.Rest.Channel;
+using Fluxify.Application.Models.Rest.Subscriber;
 using Fluxify.Application.Repositories;
+using Fluxify.Application.Rules.Common;
+using Fluxify.Application.Rules;
 using Fluxify.Application.Services.Interfaces;
 using Fluxify.Application.Utilities.ApiResponse;
+using Fluxify.Application.Utilities.Result;
 using Fluxify.Domain.Core;
 using System;
 using System.Collections.Generic;
@@ -24,27 +28,33 @@ namespace Fluxify.Application.Services
             Mapper = mapper;
         }
 
-        public async Task<ApiDataResponse<CreateChannelResponse>> CreateAsync(CreateChannelRequest model)
+        public async Task<IDataResult<CreateChannelResponse>> CreateAsync(CreateChannelRequest model)
         {
-            var isAvaible = await channelRepository.GetSingleOrDefaultAsync(f => f.Prefix == model.Prefix);
-            if (isAvaible != null)
-                return ApiResponseHelper.Error<CreateChannelResponse>(message: "Channel is avaible. Please, set a difference name value.");
+            var channel = await channelRepository.GetSingleOrDefaultAsync(f => f.Prefix == model.Prefix);
+            var businessResult = await BusinessRuleEngine.Run(
+                    new DataMustBeAvaibleRule(channel, "Channel is avaible")
+            );
+            if (!businessResult.IsSuccess)
+                return new ErrorDataResult<CreateChannelResponse>(message: businessResult.Message);
 
-            var channel = Mapper.Map<Channel>(model);
-            channel.Topics = channel.Topics?.Select(s => $"{model.Prefix}_{s}").ToList();
+            var newChannel = Mapper.Map<Channel>(model);
+            newChannel.Topics = newChannel.Topics?.Select(s => $"{model.Prefix}_{s}").ToList();
 
-            await channelRepository.AddAsync(channel);
+            await channelRepository.AddAsync(newChannel);
 
-            var result = Mapper.Map<CreateChannelResponse>(channel);
+            var result = Mapper.Map<CreateChannelResponse>(newChannel);
 
-            return ApiResponseHelper.Success(result, "Channel is created.");
+            return new SuccessDataResult<CreateChannelResponse>(result, "Channel is created");
         }
 
-        public async Task<ApiDataResponse<UpdateChannelResponse>> UpdateAsync(UpdateChannelRequest model)
+        public async Task<IDataResult<UpdateChannelResponse>> UpdateAsync(UpdateChannelRequest model)
         {
             var channel = await channelRepository.GetSingleOrDefaultAsync(f => f.Id == model.Id);
-            if (channel == null)
-                return ApiResponseHelper.Error<UpdateChannelResponse>(message: "Channel is not found.");
+            var businessResult = await BusinessRuleEngine.Run(
+                    new DataMustBeFoundRule(channel, "Channel is not found")
+            );
+            if (!businessResult.IsSuccess)
+                return new ErrorDataResult<UpdateChannelResponse>(message: businessResult.Message);
 
             channel = Mapper.Map(model, channel);
             channel.Topics = channel.Topics?.Select(s => $"{channel.Prefix}{s}").ToList();
@@ -53,18 +63,21 @@ namespace Fluxify.Application.Services
 
             var result = Mapper.Map<UpdateChannelResponse>(channel);
 
-            return ApiResponseHelper.Success(result, "Channel is updated.");
+            return new SuccessDataResult<UpdateChannelResponse>(result, "Channel is updated.");
         }
 
-        public async Task<ApiDataResponse<GetChannelDetailResponse>> GetDetailAsync(Guid id)
+        public async Task<IDataResult<GetChannelDetailResponse>> GetDetailAsync(Guid id)
         {
             var channel = await channelRepository.GetSingleOrDefaultAsync(f => f.Id == id);
-            if (channel == null)
-                return ApiResponseHelper.Error<GetChannelDetailResponse>(message: "Channel is not found.");
+            var businessResult = await BusinessRuleEngine.Run(
+                    new DataMustBeFoundRule(channel, "Channel is not found")
+            );
+            if (!businessResult.IsSuccess)
+                return new ErrorDataResult<GetChannelDetailResponse>(message: businessResult.Message);
 
             var result = Mapper.Map<GetChannelDetailResponse>(channel);
 
-            return ApiResponseHelper.Success(result);
+            return new SuccessDataResult<GetChannelDetailResponse>(result);
         }
 
     }

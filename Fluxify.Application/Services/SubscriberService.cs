@@ -1,10 +1,14 @@
 ﻿using AutoMapper;
 using Fluxify.Application.Models.Rest.Subscriber;
 using Fluxify.Application.Repositories;
+using Fluxify.Application.Rules;
+using Fluxify.Application.Rules.Common;
 using Fluxify.Application.Services.Interfaces;
 using Fluxify.Application.Utilities.ApiResponse;
 using Fluxify.Application.Utilities.Helpers;
+using Fluxify.Application.Utilities.Result;
 using Fluxify.Domain.Core;
+using System.Threading.Channels;
 
 namespace Fluxify.Application.Services
 {
@@ -23,28 +27,30 @@ namespace Fluxify.Application.Services
             ChannelRepository = channelRepository;
         }
 
-        public async Task<ApiDataResponse<CreateSubscriberResponse>> CreateAsync(CreateSubscriberRequest model)
+        public async Task<IDataResult<CreateSubscriberResponse>> CreateAsync(CreateSubscriberRequest model)
         {
-            var client = await NameSpaceRepository.GetSingleOrDefaultAsync(f => f.Id == model.NameSpace);
-            if (client == null)
-                return ApiResponseHelper.Error<CreateSubscriberResponse>(message: "Namespace is not avaible.");
-
+            var nameSpace = await NameSpaceRepository.GetSingleOrDefaultAsync(f => f.Id == model.NameSpace);
             var avaibleSubscriber = await SubscriberRepository.GetSingleOrDefaultAsync(f => f.Key == model.Key && f.NameSpace == model.NameSpace);
-            if (avaibleSubscriber != null)
-                return ApiResponseHelper.Error<CreateSubscriberResponse>(message: "Subscriber is avaible. Please, set a different key");
+            var businessResult = await BusinessRuleEngine.Run(
+                    new DataMustBeFoundRule(nameSpace, "Namespace is not found."),
+                    new DataMustBeAvaibleRule(avaibleSubscriber, "Subscriber is avaible. Please, set a different key")
+            );
+            if (!businessResult.IsSuccess)
+                return new ErrorDataResult<CreateSubscriberResponse>(message: businessResult.Message);
 
             if (model.Topics != null && model.Topics.Count > 0)
             {
-                var channel = await ChannelRepository.GetSingleAsync(f => f.Name == "Notification");
-                if (channel.Topics == null)
-                    return ApiResponseHelper.Error<CreateSubscriberResponse>(message: "There is not any topics in the channel.");
+                var topics = (await ChannelRepository.GetListAsync()).SelectMany(s => s.Topics);
+                var isNotAvaibleTopic = model.Topics.FirstOrDefault(x => !topics.Contains(x));
 
-                var isNotAvaibleTopic = model.Topics.FirstOrDefault(x => !channel.Topics.Contains(x));
-                if (isNotAvaibleTopic != null)
-                    return ApiResponseHelper.Error<CreateSubscriberResponse>(message: $"{isNotAvaibleTopic} is not avaible in the {channel.Name} channel.");
+                businessResult = await BusinessRuleEngine.Run(
+                    new DataMustBeAvaibleRule(isNotAvaibleTopic, $"{isNotAvaibleTopic} is not found")
+                );
+                if (!businessResult.IsSuccess)
+                    return new ErrorDataResult<CreateSubscriberResponse>(message: businessResult.Message);
             }
 
-            string apiKey = CryptoHelper.Encrypt(model.Key, client.Signature);
+            string apiKey = CryptoHelper.Encrypt(model.Key, nameSpace.Signature);
             var subscriber = new Subscriber
             {
                 NameSpace = model.NameSpace,
@@ -58,24 +64,28 @@ namespace Fluxify.Application.Services
 
             var result = Mapper.Map<CreateSubscriberResponse>(subscriber);
 
-            return ApiResponseHelper.Success<CreateSubscriberResponse>(result, "Subscriber is created.");
+            return new SuccessDataResult<CreateSubscriberResponse>(result, "Subscriber is created.");
         }
 
-        public async Task<ApiDataResponse<UpdateSubscriberResponse>> UpdateAsync(UpdateSubscriberRequest model)
+        public async Task<IDataResult<UpdateSubscriberResponse>> UpdateAsync(UpdateSubscriberRequest model)
         {
             var subscriber = await SubscriberRepository.GetSingleOrDefaultAsync(f => f.Id == model.Id);
-            if (subscriber == null)
-                return ApiResponseHelper.Error<UpdateSubscriberResponse>(message: "Subscriber is not found.");
+            var businessResult = await BusinessRuleEngine.Run(
+                    new DataMustBeFoundRule(subscriber, "Subscriber is not found.")
+            );
+            if (!businessResult.IsSuccess)
+                return new ErrorDataResult<UpdateSubscriberResponse>(message: businessResult.Message);
 
             if (model.Topics != null && model.Topics.Count > 0)
             {
-                var channel = await ChannelRepository.GetSingleAsync(f => f.Name == "Notification");
-                if (channel.Topics == null)
-                    return ApiResponseHelper.Error<UpdateSubscriberResponse>(message: $"There is not any topics in the channel.");
+                var topics = (await ChannelRepository.GetListAsync()).SelectMany(s => s.Topics);
+                var isNotAvaibleTopic = model.Topics.FirstOrDefault(x => !topics.Contains(x));
 
-                var isNotAvaibleTopic = model.Topics.FirstOrDefault(x => !channel.Topics.Contains(x));
-                if (isNotAvaibleTopic != null)
-                    return ApiResponseHelper.Error<UpdateSubscriberResponse>(message: $"{isNotAvaibleTopic} is not avaible in the {channel.Name} channel.");
+                businessResult = await BusinessRuleEngine.Run(
+                    new DataMustBeFoundRule(isNotAvaibleTopic, $"{isNotAvaibleTopic} is not found")
+                );
+                if (!businessResult.IsSuccess)
+                    return new ErrorDataResult<UpdateSubscriberResponse>(message: businessResult.Message);
             }
 
             subscriber = Mapper.Map(model, subscriber);
@@ -84,43 +94,44 @@ namespace Fluxify.Application.Services
 
             var result = Mapper.Map<UpdateSubscriberResponse>(subscriber);
 
-            return ApiResponseHelper.Success<UpdateSubscriberResponse>(result, "Subscriber is updated.");
+            return new SuccessDataResult<UpdateSubscriberResponse>(result, "Subscriber is updated.");
         }
 
-        public async Task<ApiDataResponse<GetSubscriberDetailResponse>> GetDetailAsync(Guid id)
+        public async Task<IDataResult<GetSubscriberDetailResponse>> GetDetailAsync(Guid id)
         {
             var subscriber = await SubscriberRepository.GetSingleOrDefaultAsync(f => f.Id == id);
-
-            if (subscriber == null)
-                return ApiResponseHelper.Error<GetSubscriberDetailResponse>(message: "Subscriber is not avaible.");
+            var businessResult = await BusinessRuleEngine.Run(
+                                new DataMustBeFoundRule(subscriber, "Subscriber is not found.")
+                        );
+            if (!businessResult.IsSuccess)
+                return new ErrorDataResult<GetSubscriberDetailResponse>(message: businessResult.Message);
 
             var result = Mapper.Map<GetSubscriberDetailResponse>(subscriber);
 
-            return ApiResponseHelper.Success<GetSubscriberDetailResponse>(data: result);
+            return new SuccessDataResult<GetSubscriberDetailResponse>(data: result);
         }
 
-        public async Task<ApiDataResponse<GetSubscriberDetailResponse?>> GetDetailAsync(string apiKey)
+        public async Task<IDataResult<GetSubscriberDetailResponse?>> GetDetailAsync(string apiKey)
         {
             var subscriber = await SubscriberRepository.GetSingleOrDefaultAsync(f => f.ApiKey == apiKey);
-
-            if (subscriber == null)
-                return ApiResponseHelper.Error<GetSubscriberDetailResponse?>(message: "Subscriber is not avaible.");
+            var businessResult = await BusinessRuleEngine.Run(
+                    new DataMustBeFoundRule(subscriber, "Subscriber is not found.")
+            );
+            if (!businessResult.IsSuccess)
+                return new ErrorDataResult<GetSubscriberDetailResponse?>(message: businessResult.Message);
 
             var result = Mapper.Map<GetSubscriberDetailResponse>(subscriber);
 
-            return ApiResponseHelper.Success<GetSubscriberDetailResponse?>(result);
+            return new SuccessDataResult<GetSubscriberDetailResponse?>(result);
         }
 
-        public async Task<ApiDataResponse<GetSubscriberListResponse>> GetSubscribersByNameSpaceAsync(Guid nameSpace)
+        public async Task<IDataResult<List<SubscriberResponse>>> GetListByNameSpaceAsync(Guid nameSpace)
         {
             var subscribers = await SubscriberRepository.GetListAsync(f => f.NameSpace == nameSpace);
 
-            var result = new GetSubscriberListResponse
-            {
-                Subscribers = Mapper.Map<List<SubscriberResponse>>(subscribers)
-            };
+            var result = Mapper.Map<List<SubscriberResponse>>(subscribers);
 
-            return ApiResponseHelper.Success<GetSubscriberListResponse>(result);
+            return new SuccessDataResult<List<SubscriberResponse>>(result);
         }
     }
 }

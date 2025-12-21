@@ -21,7 +21,7 @@ namespace Fluxify.Api.Web.Controllers
         {
             var result = await NameSpaceService.GetDetailAsync(id);
 
-            return Response(result);
+            return Ok(result);
         }
 
         [HttpPost("Create")]
@@ -29,7 +29,7 @@ namespace Fluxify.Api.Web.Controllers
         {
             var result = await NameSpaceService.CreateAsync(model);
 
-            return Response(result);
+            return Ok(result);
         }
 
         [HttpPost("Update")]
@@ -37,7 +37,7 @@ namespace Fluxify.Api.Web.Controllers
         {
             var result = await NameSpaceService.UpdateAsync(model);
 
-            return Response(result);
+            return Ok(result);
         }
     }
 }

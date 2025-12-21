@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Authorization;
 namespace Fluxify.Api.Web.Controllers
 {
     [Route("webapi/[controller]")]
-    [AllowAnonymous]
     public class BaseController : ControllerBase
     {
         readonly CurrentUser CurrentUser;

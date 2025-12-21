@@ -20,7 +20,7 @@ namespace Fluxify.Api.Web.Controllers
         {
             var result = await channelService.GetDetailAsync(id);
 
-            return Response(result);
+            return Ok(result);
         }
 
         [HttpPost("Create")]
@@ -28,7 +28,7 @@ namespace Fluxify.Api.Web.Controllers
         {
             var result = await channelService.CreateAsync(model);
 
-            return Response(result);
+            return Ok(result);
         }
 
         [HttpPost("Update")]
@@ -36,7 +36,7 @@ namespace Fluxify.Api.Web.Controllers
         {
             var result = await channelService.UpdateAsync(model);
 
-            return Response(result);
+            return Ok(result);
         }
     }
 }

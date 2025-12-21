@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 
 namespace Fluxify.Application.Models.SignalR
 {
-    public class PushToClientUserConnectedInfoModel
+    public class PushToClientUserStateInfoModel
     {
         public string UserId { get; set; }
-        public DateTime ConnectedDate { get; set; }
+        public DateTime Date { get; set; }
+        public bool IsConnected { get; set; }
     }
 }

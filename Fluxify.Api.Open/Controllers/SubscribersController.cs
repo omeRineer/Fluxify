@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Fluxify.Api.Open.Controllers
 {
-    [Authorize(AuthenticationSchemes = "FluxifySecurityScheme")]
     public class SubscribersController : BaseController
     {
         readonly ISubscriberService SubscriberService;
@@ -18,9 +17,9 @@ namespace Fluxify.Api.Open.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetSubscribersAsync()
+        public async Task<IActionResult> GetListAsync()
         {
-            var result = await SubscriberService.GetSubscribersByNameSpaceAsync(CurrentUser.NameSpace);
+            var result = await SubscriberService.GetListByNameSpaceAsync(CurrentUser.NameSpace);
 
             return Ok(result);
         }
