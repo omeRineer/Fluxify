@@ -1,6 +1,6 @@
 ﻿namespace Fluxify.Application.Models.Rest.Subscriber
 {
-    public class UpdateSubscriberRequest
+    public class UpdateUserRequest
     {
         public Guid Id { get; set; }
         public string Name { get; set; }

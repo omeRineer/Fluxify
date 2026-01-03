@@ -1,4 +1,5 @@
-﻿using Fluxify.Application.Services.Interfaces;
+﻿using Fluxify.Application.Models.Enums;
+using Fluxify.Application.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -13,8 +14,8 @@ namespace Fluxify.Api.Hub.Auth
     public class FluxifyHubAuthenticationHandler : AuthenticationHandler<FluxifyHubAuthenticationOptions>
     {
         const string ApiKeyHeaderName = "Fluxify-Api-Key";
-        readonly ISubscriberService NotificationSubscriberService;
-        public FluxifyHubAuthenticationHandler(IOptionsMonitor<FluxifyHubAuthenticationOptions> options, ISubscriberService notificationSubscriberService, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock) : base(options, logger, encoder, clock)
+        readonly IUserService NotificationSubscriberService;
+        public FluxifyHubAuthenticationHandler(IOptionsMonitor<FluxifyHubAuthenticationOptions> options, IUserService notificationSubscriberService, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock) : base(options, logger, encoder, clock)
         {
             NotificationSubscriberService = notificationSubscriberService;
         }
@@ -36,9 +37,10 @@ namespace Fluxify.Api.Hub.Auth
 
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, subscriber.Key),
-                new Claim("ApiKey", subscriber.ApiKey),
-                new Claim("NameSpace", subscriber.NameSpace.ToString()),
+                new Claim(FluxifyClaims.Key, subscriber.Key),
+                new Claim(ClaimTypes.NameIdentifier, subscriber.Id.ToString()),
+                new Claim(FluxifyClaims.ApiKey, subscriber.ApiKey),
+                new Claim(FluxifyClaims.NameSpace, subscriber.NameSpace.ToString()),
                 new Claim(ClaimTypes.Name, subscriber.Name)
             };
 

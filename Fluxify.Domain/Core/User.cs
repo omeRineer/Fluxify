@@ -1,22 +1,22 @@
-﻿using System;
+﻿using Fluxify.Domain;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Fluxify.Application.Models.Rest.Subscriber
+namespace Fluxify.Domain.Core
 {
-    public class SubscriberResponse
+    public class User : MongoEntity<Guid>
     {
-        public Guid Id { get; set; }
+        [BsonRepresentation(BsonType.String)]
         public Guid NameSpace { get; set; }
         public string Name { get; set; }
         public string Email { get; set; }
         public string Key { get; set; }
         public string ApiKey { get; set; }
-        public List<string>? Topics { get; set; }
         public DateTime? ExpireDate { get; set; }
-        public DateTime CreateDate { get; set; }
-        public DateTime EditDate { get; set; }
     }
 }

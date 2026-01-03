@@ -8,14 +8,12 @@ namespace Fluxify.Application.Models.Rest.Notification
 {
     public class CreateNotificationRequest
     {
-        public string? Sender { get; set; }
-        public string Level { get; set; }
+        public int? Level { get; set; }
         public string Title { get; set; }
-        public string ContentType { get; set; } = "text";
+        public int? ContentType { get; set; }
         public string? Content { get; set; }
-        public List<string>? Targets { get; set; }
-        public List<string>? Topics { get; set; }
+        public string[]? Topics { get; set; }
 
-        public Dictionary<string, object>? Custom { get; set; }
+        public Dictionary<string, object>? Properties { get; set; }
     }
 }

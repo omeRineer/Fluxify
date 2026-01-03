@@ -8,6 +8,7 @@ namespace Fluxify.Application.Models.Client
 {
     public class CurrentUser
     {
+        public Guid NameIdentifier { get; set; }
         public Guid NameSpace { get; set; }
         public string Key { get; set; }
         public string ApiKey { get; set; }

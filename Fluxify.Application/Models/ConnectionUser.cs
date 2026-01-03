@@ -8,7 +8,8 @@ namespace Fluxify.Application.Models
 {
     public class ConnectionUser
     {
-        public string Id { get; set; }
+        public Guid Id { get; set; }
+        public string Key { get; set; }
         public string NameSpace { get; set; }
         public string ConnectionId { get; set; }
         public DateTime ConnectedDate { get; set; }

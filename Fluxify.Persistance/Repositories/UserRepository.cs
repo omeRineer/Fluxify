@@ -5,9 +5,9 @@ using MongoDB.Driver;
 
 namespace Fluxify.Persistance.Repositories
 {
-    public class SubscriberRepository : MongoRepository<Subscriber, Guid>, ISubscriberRepository
+    public class UserRepository : MongoRepository<User, Guid>, IUserRepository
     {
-        public SubscriberRepository(IMongoDatabase dataBase) : base(dataBase, "Subscribers")
+        public UserRepository(IMongoDatabase dataBase) : base(dataBase, "Users")
         {
         }
     }

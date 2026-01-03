@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Fluxify.Application.Models.Rest.Subscriber
 {
-    public class CreateSubscriberRequest
+    public class CreateUserRequest
     {
         public Guid NameSpace { get; set; }
         public string Name { get; set; }

@@ -46,7 +46,6 @@ namespace Fluxify.Application.Services
 
             return new SuccessDataResult<CreateChannelResponse>(result, "Channel is created");
         }
-
         public async Task<IDataResult<UpdateChannelResponse>> UpdateAsync(UpdateChannelRequest model)
         {
             var channel = await channelRepository.GetSingleOrDefaultAsync(f => f.Id == model.Id);
@@ -65,7 +64,6 @@ namespace Fluxify.Application.Services
 
             return new SuccessDataResult<UpdateChannelResponse>(result, "Channel is updated.");
         }
-
         public async Task<IDataResult<GetChannelDetailResponse>> GetDetailAsync(Guid id)
         {
             var channel = await channelRepository.GetSingleOrDefaultAsync(f => f.Id == id);
@@ -80,5 +78,6 @@ namespace Fluxify.Application.Services
             return new SuccessDataResult<GetChannelDetailResponse>(result);
         }
 
+        
     }
 }

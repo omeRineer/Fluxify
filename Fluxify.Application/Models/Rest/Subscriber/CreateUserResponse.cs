@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Fluxify.Application.Models.Rest.Subscriber
 {
-    public class CreateSubscriberResponse : SubscriberResponse
+    public class CreateUserResponse : UserResponse
     {
     }
 }

@@ -12,9 +12,9 @@ namespace Fluxify.Application.Utilities.Helpers
     {
         readonly IChannel Channel;
 
-        public RabbitMqClientService()
+        public RabbitMqClientService(IChannel channel)
         {
-            //Channel = channel;
+            Channel = channel;
         }
 
 

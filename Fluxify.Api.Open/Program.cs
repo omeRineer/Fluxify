@@ -2,7 +2,7 @@ using Fluxify.Application;
 using Fluxify.Persistance;
 
 var builder = WebApplication.CreateBuilder(args);
-//await builder.Services.AddRabbitMqAsync();
+await builder.Services.AddRabbitMqAsync();
 builder.Services.AddControllers();
 builder.Services.AddApplication();
 builder.Services.AddPersistance();

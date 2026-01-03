@@ -1,6 +1,6 @@
 ﻿namespace Fluxify.Application.Models.Rest.Subscriber
 {
-    public class GetSubscriberDetailResponse : SubscriberResponse
+    public class UpdateUserResponse : UserResponse
     {
     }
 }

@@ -17,8 +17,11 @@ namespace Fluxify.Persistance
         {
             services.AddScoped<INotificationRepository, NotificationRepository>();
             services.AddScoped<INameSpaceRepository, NameSpaceRepository>();
-            services.AddScoped<ISubscriberRepository, SubscriberRepository>();
+            services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IChannelRepository, ChannelRepository>();
+            services.AddScoped<ITopicRepository, TopicRepository>();
+            services.AddScoped<IUserTopicRepository, UserTopicRepository>();
+            services.AddScoped<IUserNotificationRepository, UserNotificationRepository>();
 
             services.AddSingleton<IMongoClient>(opt => new MongoClient(AppConfiguration.MongoDbOptions.ConnectionString));
             services.AddScoped(opt =>

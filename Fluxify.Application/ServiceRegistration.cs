@@ -25,8 +25,9 @@ namespace Fluxify.Application
         {
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<INameSpaceService, NameSpaceService>();
-            services.AddScoped<ISubscriberService, SubscriberService>();
+            services.AddScoped<IUserService, UserService>();
             services.AddScoped<IChannelService, ChannelService>();
+            services.AddScoped<ITopicService, TopicService>();
 
             services.AddHttpContextAccessor();
             services.AddScoped<RabbitMqClientService>();
@@ -42,8 +43,9 @@ namespace Fluxify.Application
                 if (user != null && user.Identity.IsAuthenticated)
                     return new CurrentUser
                     {
+                        NameIdentifier = Guid.Parse(user.Claims.FirstOrDefault(f => f.Type == ClaimTypes.NameIdentifier)?.Value),
                         ApiKey = user.Claims.FirstOrDefault(f => f.Type == "ApiKey")?.Value,
-                        Key = user.Claims.FirstOrDefault(f => f.Type == ClaimTypes.NameIdentifier)?.Value,
+                        Key = user.Claims.FirstOrDefault(f => f.Type == "Key")?.Value,
                         NameSpace = Guid.Parse(user.Claims.FirstOrDefault(f => f.Type == "NameSpace")?.Value),
                         Name = user.Claims.FirstOrDefault(f => f.Type == ClaimTypes.Name)?.Value
                     };

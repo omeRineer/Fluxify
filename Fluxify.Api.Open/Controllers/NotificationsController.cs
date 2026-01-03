@@ -28,7 +28,7 @@ namespace Fluxify.Api.Open.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetNotificationsAsync()
+        public async Task<IActionResult> GetListAsync()
         {
             var result = await NotificationService.GetListAsync();
 

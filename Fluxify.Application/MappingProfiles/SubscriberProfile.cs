@@ -8,13 +8,13 @@ namespace Fluxify.Application.MappingProfiles
     {
         public SubscriberProfile()
         {
-            CreateMap<Subscriber, SubscriberResponse>();
-            CreateMap<Subscriber, CreateSubscriberResponse>().IncludeBase<Subscriber, SubscriberResponse>();
-            CreateMap<Subscriber, UpdateSubscriberResponse>().IncludeBase<Subscriber, SubscriberResponse>();
-            CreateMap<Subscriber, GetSubscriberDetailResponse>().IncludeBase<Subscriber, SubscriberResponse>();
+            CreateMap<User, UserResponse>();
+            CreateMap<User, CreateUserResponse>().IncludeBase<User, UserResponse>();
+            CreateMap<User, UpdateUserResponse>().IncludeBase<User, UserResponse>();
+            CreateMap<User, GetUserDetailResponse>().IncludeBase<User, UserResponse>();
 
-            CreateMap<CreateSubscriberRequest, Subscriber>();
-            CreateMap<UpdateSubscriberRequest, Subscriber>();
+            CreateMap<CreateUserRequest, User>();
+            CreateMap<UpdateUserRequest, User>();
         }
     }
 }
