@@ -17,7 +17,7 @@ namespace Fluxify.Application.Services.Interfaces
         Task<IDataResult<List<UserNotification>>> GetTargetsAsync(Guid notificationId);
 
         Task<IDataResult<GetNotificationsResponse>> GetListAsync();
-        Task<IDataResult<GetNotificationsResponse>> GetListByStatusAsync(int status);
+        Task<IDataResult<GetNotificationsResponse>> GetAndMarkPendingAsync(Guid userId, Guid nameSpace);
         Task<IDataResult<GetNotificationDetailResponse>> GetDetailAsync(Guid id);
         Task<IResult> CreateAsync(CreateNotificationRequest req);
         Task<IResult> MarkAsStatusByNotificationAsync(NotificationStatus status, Guid? userId = null, params Guid[] notificationIds);

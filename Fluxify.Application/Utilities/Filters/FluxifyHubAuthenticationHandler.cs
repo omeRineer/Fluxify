@@ -15,9 +15,11 @@ namespace Fluxify.Api.Hub.Auth
     {
         const string ApiKeyHeaderName = "Fluxify-Api-Key";
         readonly IUserService NotificationSubscriberService;
-        public FluxifyHubAuthenticationHandler(IOptionsMonitor<FluxifyHubAuthenticationOptions> options, IUserService notificationSubscriberService, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock) : base(options, logger, encoder, clock)
+        readonly INameSpaceService NameSpaceService;
+        public FluxifyHubAuthenticationHandler(IOptionsMonitor<FluxifyHubAuthenticationOptions> options, IUserService notificationSubscriberService, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock, INameSpaceService nameSpaceService) : base(options, logger, encoder, clock)
         {
             NotificationSubscriberService = notificationSubscriberService;
+            NameSpaceService = nameSpaceService;
         }
 
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
@@ -35,12 +37,15 @@ namespace Fluxify.Api.Hub.Auth
             if (subscriber.ExpireDate != null && subscriber.ExpireDate < DateTime.Now)
                 return AuthenticateResult.Fail("API Key is expired.");
 
+            var nameSpace = await NameSpaceService.GetAsync(subscriber.NameSpace);
+
             var claims = new List<Claim>
             {
                 new Claim(FluxifyClaims.Key, subscriber.Key),
                 new Claim(ClaimTypes.NameIdentifier, subscriber.Id.ToString()),
                 new Claim(FluxifyClaims.ApiKey, subscriber.ApiKey),
-                new Claim(FluxifyClaims.NameSpace, subscriber.NameSpace.ToString()),
+                new Claim(FluxifyClaims.NameSpaceId, subscriber.NameSpace.ToString()),
+                new Claim(FluxifyClaims.NameSpace, nameSpace.Data.Signature),
                 new Claim(ClaimTypes.Name, subscriber.Name)
             };
 

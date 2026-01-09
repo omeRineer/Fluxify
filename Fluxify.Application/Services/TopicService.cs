@@ -30,9 +30,16 @@ namespace Fluxify.Application.Services
 
         public async Task<IResult> CreateAsync(CreateTopicRequest req)
         {
-            var entity = _mapper.Map<Topic>(req);
+            var channel = await channelService.GetAsync(req.ChannelId);
 
-            await topicRepository.AddAsync(entity);
+            var newTopic = new Topic
+            {
+                ChannelId = req.ChannelId,
+                Key = $"{channel.Data.Prefix}:{req.Key}",
+                Name = req.Name
+            };
+
+            await topicRepository.AddAsync(newTopic);
 
             return new SuccessResult("Topic is created");
         }

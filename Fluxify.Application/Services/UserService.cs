@@ -41,18 +41,6 @@ namespace Fluxify.Application.Services
             if (!businessResult.IsSuccess)
                 return new ErrorDataResult<CreateUserResponse>(message: businessResult.Message);
 
-            if (model.Topics != null && model.Topics.Count > 0)
-            {
-                var topics = (await ChannelRepository.GetListAsync()).SelectMany(s => s.Topics);
-                var topicNotAvaible = model.Topics.FirstOrDefault(x => !topics.Contains(x));
-
-                businessResult = await BusinessRuleEngine.Run(
-                    new DataMustBeAvaibleRule(topicNotAvaible, $"{topicNotAvaible} is not found")
-                );
-                if (!businessResult.IsSuccess)
-                    return new ErrorDataResult<CreateUserResponse>(message: businessResult.Message);
-            }
-
             string apiKey = CryptoHelper.Encrypt(model.Key, nameSpace.Signature);
             var subscriber = new User
             {
@@ -79,18 +67,6 @@ namespace Fluxify.Application.Services
             );
             if (!businessResult.IsSuccess)
                 return new ErrorDataResult<UpdateUserResponse>(message: businessResult.Message);
-
-            if (model.Topics != null && model.Topics.Count > 0)
-            {
-                var topics = (await ChannelRepository.GetListAsync()).SelectMany(s => s.Topics);
-                var isNotAvaibleTopic = model.Topics.FirstOrDefault(x => !topics.Contains(x));
-
-                businessResult = await BusinessRuleEngine.Run(
-                    new DataMustBeFoundRule(isNotAvaibleTopic, $"{isNotAvaibleTopic} is not found")
-                );
-                if (!businessResult.IsSuccess)
-                    return new ErrorDataResult<UpdateUserResponse>(message: businessResult.Message);
-            }
 
             subscriber = Mapper.Map(model, subscriber);
 

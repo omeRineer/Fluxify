@@ -8,6 +8,7 @@ namespace Fluxify.Application.Models.Enums
 {
     public static class FluxifyClaims
     {
+        public const string NameSpaceId = "NameSpaceId";
         public const string NameSpace = "NameSpace";
         public const string Key = "Key";
         public const string ApiKey = "ApiKey";

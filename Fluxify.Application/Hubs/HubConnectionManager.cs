@@ -18,11 +18,11 @@ namespace Fluxify.Application.Hubs
             Connections = new();
         }
 
-        public ConnectionUser? GetConnection(string userKey)
+        public ConnectionUser GetConnection(string userId)
         {
             lock (Connections)
             {
-                return Connections.Values.SingleOrDefault(f => f.Key == userKey);
+                return Connections.Values.Single(f => f.Id == Guid.Parse(userId));
             }
         }
         public List<ConnectionUser> GetAllConnections(string nameSpace)
@@ -33,31 +33,51 @@ namespace Fluxify.Application.Hubs
             }
         }
 
-        public void AddConnection(HubCallerContext context)
+        public int AddConnection(HubCallerContext context)
         {
             lock (Connections)
             {
-                if (!Connections.ContainsKey(context.UserIdentifier))
-                    Connections[context.UserIdentifier] = new ConnectionUser
+                if (!Connections.TryGetValue(context.UserIdentifier, out ConnectionUser user))
+                {
+                    user = new ConnectionUser
                     {
-                        ConnectionId = context.ConnectionId,
                         Id = Guid.Parse(context.User.Claims.Single(f => f.Type == ClaimTypes.NameIdentifier).Value),
                         Key = context.User.Claims.Single(f => f.Type == FluxifyClaims.Key).Value,
-                        ConnectedDate = DateTime.Now,
+                        NameSpaceId = Guid.Parse(context.User.Claims.Single(f => f.Type == FluxifyClaims.NameSpaceId).Value),
                         NameSpace = context.User.Claims.Single(f => f.Type == FluxifyClaims.NameSpace).Value,
-                        Topics = context.User.Claims.Where(f => f.Type == "Topic")
-                                                    .Select(s => s.Value)
-                                                    .ToList()
+                        ConnectedDate = DateTime.UtcNow,
+                        Topics = context.User.Claims
+                            .Where(f => f.Type == "Topic")
+                            .Select(s => s.Value)
+                            .ToList(),
+                        AvailabilityStatus = (int) UserAvailabilityStatus.Online
                     };
+
+                    Connections[context.UserIdentifier] = user;
+                }
+
+                user.Connections.Add(context.ConnectionId);
+
+                return user.Connections.Count;
             }
         }
 
-        public void RemoveConnection(HubCallerContext context)
+        public int RemoveConnection(HubCallerContext context)
         {
             lock (Connections)
             {
-                if (Connections.ContainsKey(context.UserIdentifier))
+                if (!Connections.TryGetValue(context.UserIdentifier, out var user))
+                    return 0;
+
+                user.Connections.Remove(context.ConnectionId);
+
+                if (user.Connections.Count == 0)
+                {
                     Connections.Remove(context.UserIdentifier);
+                    return 0;
+                }
+
+                return user.Connections.Count;
             }
         }
 

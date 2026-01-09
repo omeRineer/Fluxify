@@ -1,9 +1,12 @@
-﻿using Fluxify.Application.Models.SignalR;
+﻿using Fluxify.Application.Models;
+using Fluxify.Application.Models.Enums;
+using Fluxify.Application.Models.SignalR;
 using Fluxify.Application.Services;
 using Fluxify.Application.Services.Interfaces;
 using Fluxify.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using System.Security.Claims;
 
 namespace Fluxify.Application.Hubs
 {
@@ -22,9 +25,10 @@ namespace Fluxify.Application.Hubs
         public override async Task OnConnectedAsync()
         {
             HubConnectionManager.AddConnection(Context);
+            ConnectionUser connectionUser = HubConnectionManager.GetConnection(Context.User.Claims.Single(f => f.Type == ClaimTypes.NameIdentifier).Value);
 
             foreach (var claim in Context.User.Claims.Where(f => f.Type == "Topic"))
-                await Groups.AddToGroupAsync(Context.ConnectionId, claim.Value);
+                await Groups.AddToGroupAsync(Context.ConnectionId, $"{connectionUser.NameSpace}:{claim.Value}");
 
             await base.OnConnectedAsync();
         }
@@ -39,13 +43,8 @@ namespace Fluxify.Application.Hubs
 
         public async Task GetPendingNotifications()
         {
-            var userId = Context.UserIdentifier;
-            var pendingNotifications = await NotificationService.GetListByStatusAsync((int)NotificationStatus.Pending);
-
-            if (pendingNotifications.Data == null || pendingNotifications.Data.Notifications?.Any() != true)
-                return;
-
-            await NotificationService.MarkAsStatusByNotificationAsync(NotificationStatus.Delivered, Guid.Parse(userId), pendingNotifications.Data.Notifications.Select(s => s.Id).ToArray());
+            ConnectionUser connectionUser = HubConnectionManager.GetConnection(Context.User.Claims.Single(f => f.Type == ClaimTypes.NameIdentifier).Value);
+            var pendingNotifications = await NotificationService.GetAndMarkPendingAsync(connectionUser.Id, connectionUser.NameSpaceId);
 
             var sendingNotifications = pendingNotifications.Data?.Notifications?.Select(s => new PushToClientNotificationModel
             {
@@ -53,7 +52,7 @@ namespace Fluxify.Application.Hubs
                 ContentType = s.ContentType,
                 CreateDate = s.CreateDate,
                 Custom = s.Properties,
-                Status = (int)NotificationStatus.Delivered,
+                Status = s.Status,
                 Level = s.Level,
                 Sender = s.Sender,
                 Title = s.Title

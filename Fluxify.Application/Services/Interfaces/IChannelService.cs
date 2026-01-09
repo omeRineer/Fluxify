@@ -7,6 +7,8 @@ namespace Fluxify.Application.Services.Interfaces
 {
     public interface IChannelService
     {
+        Task<IDataResult<Channel>> GetAsync(Guid id);
+
         Task<IDataResult<CreateChannelResponse>> CreateAsync(CreateChannelRequest model);
         Task<IDataResult<UpdateChannelResponse>> UpdateAsync(UpdateChannelRequest model);
         Task<IDataResult<GetChannelDetailResponse>> GetDetailAsync(Guid id);

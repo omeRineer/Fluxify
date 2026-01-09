@@ -11,6 +11,5 @@ namespace Fluxify.Domain.Core
     {
         public string Prefix { get; set; }
         public string Name { get; set; }
-        public List<string>? Topics { get; set; }
     }
 }

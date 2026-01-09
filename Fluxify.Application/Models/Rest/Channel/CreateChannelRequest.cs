@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using Fluxify.Application.Models.Inputs;
+using System.Globalization;
 
 namespace Fluxify.Application.Models.Rest.Channel
 {
@@ -10,7 +11,7 @@ namespace Fluxify.Application.Models.Rest.Channel
             set => _Prefix = value.ToLower(new CultureInfo("en-EN"));
         }
         public string Name { get; set; }
-        public List<string>? Topics { get; set; }
+        public List<CreateTopicInput>? Topics { get; set; }
 
 
 

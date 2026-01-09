@@ -10,9 +10,12 @@ namespace Fluxify.Application.Models
     {
         public Guid Id { get; set; }
         public string Key { get; set; }
+        public Guid NameSpaceId { get; set; }
         public string NameSpace { get; set; }
-        public string ConnectionId { get; set; }
+        public int AvailabilityStatus { get; set; }
         public DateTime ConnectedDate { get; set; }
         public List<string>? Topics { get; set; }
+
+        public HashSet<string> Connections { get; } = new();
     }
 }

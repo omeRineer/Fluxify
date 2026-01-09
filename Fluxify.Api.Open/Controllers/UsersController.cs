@@ -19,7 +19,7 @@ namespace Fluxify.Api.Open.Controllers
         [HttpGet]
         public async Task<IActionResult> GetListAsync()
         {
-            var result = await UserService.GetListByNameSpaceAsync(CurrentUser.NameSpace);
+            var result = await UserService.GetListByNameSpaceAsync(CurrentUser.NameSpaceId);
 
             return Ok(result);
         }

@@ -1,4 +1,5 @@
-﻿using Fluxify.Application.Models.Enums;
+﻿using Fluxify.Application.Models;
+using Fluxify.Application.Models.Enums;
 using Fluxify.Application.Models.SignalR;
 using Fluxify.Application.Services.Interfaces;
 using Fluxify.Domain.Enums;
@@ -25,46 +26,57 @@ namespace Fluxify.Application.Hubs
 
         public override async Task OnConnectedAsync()
         {
-            HubConnectionManager.AddConnection(Context);
+            int connectionCount = HubConnectionManager.AddConnection(Context);
+            ConnectionUser connectionUser = HubConnectionManager.GetConnection(Context.User.Claims.Single(f => f.Type == ClaimTypes.NameIdentifier).Value);
 
-            await Clients.All.SendAsync("ReceiveUserState", new PushToClientUserStateInfoModel
+            await Groups.AddToGroupAsync(Context.ConnectionId, connectionUser.NameSpace);
+
+            if (connectionCount == 1)
             {
-                UserId = Context.User.Claims.Single(f => f.Type == FluxifyClaims.Key).Value,
-                Date = DateTime.Now,
-                IsConnected = true
-            });
+                await Clients.Group(connectionUser.NameSpace).SendAsync("ReceiveUserState", new PushToClientUserStateInfoModel
+                {
+                    UserId = Context.User.Claims.Single(f => f.Type == FluxifyClaims.Key).Value,
+                    Date = DateTime.UtcNow,
+                    AvailabilityStatus = (int) UserAvailabilityStatus.Online
+                });
+                
+            }
 
             await base.OnConnectedAsync();
         }
 
         public override async Task OnDisconnectedAsync(Exception exception)
         {
-            HubConnectionManager.RemoveConnection(Context);
+            ConnectionUser connectionUser = HubConnectionManager.GetConnection(Context.User.Claims.Single(f => f.Type == ClaimTypes.NameIdentifier).Value);
+            int connectionCount = HubConnectionManager.RemoveConnection(Context);
 
-            await Clients.All.SendAsync("ReceiveUserState", new PushToClientUserStateInfoModel
+            if(connectionCount == 0)
             {
-                UserId = Context.User.Claims.Single(f => f.Type == FluxifyClaims.Key).Value,
-                Date = DateTime.Now,
-                IsConnected = false
-            });
+                await Clients.Group(connectionUser.NameSpace).SendAsync("ReceiveUserState", new PushToClientUserStateInfoModel
+                {
+                    UserId = Context.User.Claims.Single(f => f.Type == FluxifyClaims.Key).Value,
+                    Date = DateTime.UtcNow,
+                    AvailabilityStatus = (int) UserAvailabilityStatus.Offline
+                });
+            }
 
             await base.OnDisconnectedAsync(exception);
         }
 
         public async Task GetOnlineUsers()
         {
-            var nameSpace = Context.User.Claims.Single(f => f.Type == FluxifyClaims.NameSpace).Value;
+            ConnectionUser connectionUser = HubConnectionManager.GetConnection(Context.User.Claims.Single(f => f.Type == ClaimTypes.NameIdentifier).Value);
 
-            var onlineSubscribers = HubConnectionManager.GetAllConnections(nameSpace).Select(s => new PushToClientUserStateInfoModel
+            var onlineSubscribers = HubConnectionManager.GetAllConnections(connectionUser.NameSpace).Select(s => new PushToClientUserStateInfoModel
             {
                 UserId = s.Key,
                 Date = s.ConnectedDate,
-                IsConnected = true
+                AvailabilityStatus = s.AvailabilityStatus
             }).ToList();
 
             await Clients.Caller.SendAsync("ReceiveOnlineUsers", onlineSubscribers);
         }
 
-        
+
     }
 }

@@ -50,7 +50,7 @@ namespace Fluxify.Application.Services
             var newNotification = new Notification
             {
                 Id = ticketId,
-                NameSpace = CurrentUser.NameSpace,
+                NameSpace = CurrentUser.NameSpaceId,
                 Level = req.Level ?? (int)NotificationLevelType.Info,
                 Sender = CurrentUser.Key,
                 Title = req.Title,
@@ -92,7 +92,7 @@ namespace Fluxify.Application.Services
         public async Task<IDataResult<GetNotificationDetailResponse>> GetDetailAsync(Guid id)
         {
             #region Notification
-            var notification = await NotificationRepository.GetSingleAsync(f => f.Id == id && f.NameSpace == CurrentUser.NameSpace);
+            var notification = await NotificationRepository.GetSingleAsync(f => f.Id == id && f.NameSpace == CurrentUser.NameSpaceId);
             var businessResult = await BusinessRuleEngine.Run(
                     new DataMustBeFoundRule(notification, "Notification is not found")
             );
@@ -131,7 +131,7 @@ namespace Fluxify.Application.Services
         {
             var userNotifications = await UserNotificationRepository.GetListAsync(f => f.UserId == CurrentUser.NameIdentifier &&
                                                                                        (f.Status == (int)NotificationStatus.Delivered || f.Status == (int)NotificationStatus.Read));
-            var notifications = await NotificationRepository.GetListAsync(f => f.NameSpace == CurrentUser.NameSpace &&
+            var notifications = await NotificationRepository.GetListAsync(f => f.NameSpace == CurrentUser.NameSpaceId &&
                                                                                userNotifications.Select(s => s.NotificationId).Contains(f.Id));
 
             var result = new GetNotificationsResponse
@@ -151,25 +151,46 @@ namespace Fluxify.Application.Services
 
             return new SuccessDataResult<GetNotificationsResponse>(result);
         }
-        public async Task<IDataResult<GetNotificationsResponse>> GetListByStatusAsync(int status)
+        public async Task<IDataResult<GetNotificationsResponse>> GetAndMarkPendingAsync(Guid userId, Guid nameSpace)
         {
-            var userNotifications = await UserNotificationRepository.GetListAsync(f => f.UserId == CurrentUser.NameIdentifier &&
-                                                                                       f.Status == status);
-            var notifications = await NotificationRepository.GetListAsync(f => f.NameSpace == CurrentUser.NameSpace &&
-                                                                               userNotifications.Select(s => s.NotificationId).Contains(f.Id));
+            var userNotifications = await UserNotificationRepository.GetListAsync(
+                f => f.UserId == userId &&
+                     f.Status == (int)NotificationStatus.Pending
+            );
+
+            if (!userNotifications.Any())
+                return new ErrorDataResult<GetNotificationsResponse>();
+
+            var notificationIds = userNotifications
+                .Select(s => s.NotificationId)
+                .ToList();
+
+            var notifications = await NotificationRepository.GetListAsync(
+                f => f.NameSpace == nameSpace &&
+                     notificationIds.Contains(f.Id)
+            );
+
+            await UserNotificationRepository.MarkAsStatusByNotificationAsync(
+                NotificationStatus.Delivered,
+                userId,
+                notificationIds.ToArray()
+            );
 
             var result = new GetNotificationsResponse
             {
-                Notifications = notifications.Select(s => new NotificationResponse
+                Notifications = notifications.Select(n =>
                 {
-                    Id = s.Id,
-                    Level = s.Level,
-                    ContentType = s.ContentType,
-                    Sender = s.Sender,
-                    Title = s.Title,
-                    CreateDate = s.CreateDate,
-                    Status = userNotifications.First(f => f.NotificationId == s.Id).Status,
-                    Properties = s.Properties
+                    return new NotificationResponse
+                    {
+                        Id = n.Id,
+                        Level = n.Level,
+                        ContentType = n.ContentType,
+                        Sender = n.Sender,
+                        Title = n.Title,
+                        CreateDate = n.CreateDate,
+                        Status = (int)NotificationStatus.Delivered,
+                        Properties = n.Properties
+                    };
                 }).ToList()
             };
 

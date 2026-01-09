@@ -1,5 +1,6 @@
 ﻿using Fluxify.Api.Hub.Auth;
 using Fluxify.Application.Models.Client;
+using Fluxify.Application.Models.Enums;
 using Fluxify.Application.Repositories;
 using Fluxify.Application.Services;
 using Fluxify.Application.Services.Interfaces;
@@ -44,9 +45,10 @@ namespace Fluxify.Application
                     return new CurrentUser
                     {
                         NameIdentifier = Guid.Parse(user.Claims.FirstOrDefault(f => f.Type == ClaimTypes.NameIdentifier)?.Value),
-                        ApiKey = user.Claims.FirstOrDefault(f => f.Type == "ApiKey")?.Value,
-                        Key = user.Claims.FirstOrDefault(f => f.Type == "Key")?.Value,
-                        NameSpace = Guid.Parse(user.Claims.FirstOrDefault(f => f.Type == "NameSpace")?.Value),
+                        ApiKey = user.Claims.FirstOrDefault(f => f.Type == FluxifyClaims.ApiKey)?.Value,
+                        Key = user.Claims.FirstOrDefault(f => f.Type == FluxifyClaims.Key)?.Value,
+                        NameSpaceId = Guid.Parse(user.Claims.FirstOrDefault(f => f.Type == FluxifyClaims.NameSpaceId)?.Value),
+                        NameSpace = user.Claims.FirstOrDefault(f => f.Type == FluxifyClaims.NameSpace)?.Value,
                         Name = user.Claims.FirstOrDefault(f => f.Type == ClaimTypes.Name)?.Value
                     };
 

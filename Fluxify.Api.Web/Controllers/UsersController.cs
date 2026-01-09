@@ -1,6 +1,7 @@
 ﻿using Fluxify.Application.Models.Client;
 using Fluxify.Application.Models.Rest.Subscriber;
 using Fluxify.Application.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Fluxify.Api.Web.Controllers

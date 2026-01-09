@@ -78,5 +78,8 @@ namespace Fluxify.Application.Services
 
             return new SuccessDataResult<GetNameSpaceDetailResponse>(result);
         }
+
+        public async Task<IDataResult<NameSpace>> GetAsync(Guid id)
+            => new SuccessDataResult<NameSpace>(await NameSpaceRepository.GetSingleAsync(f => f.Id == id));
     }
 }

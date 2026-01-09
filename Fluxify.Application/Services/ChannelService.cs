@@ -38,7 +38,6 @@ namespace Fluxify.Application.Services
                 return new ErrorDataResult<CreateChannelResponse>(message: businessResult.Message);
 
             var newChannel = Mapper.Map<Channel>(model);
-            newChannel.Topics = newChannel.Topics?.Select(s => $"{model.Prefix}_{s}").ToList();
 
             await channelRepository.AddAsync(newChannel);
 
@@ -56,7 +55,6 @@ namespace Fluxify.Application.Services
                 return new ErrorDataResult<UpdateChannelResponse>(message: businessResult.Message);
 
             channel = Mapper.Map(model, channel);
-            channel.Topics = channel.Topics?.Select(s => $"{channel.Prefix}{s}").ToList();
 
             await channelRepository.UpdateAsync(channel);
 
@@ -78,6 +76,7 @@ namespace Fluxify.Application.Services
             return new SuccessDataResult<GetChannelDetailResponse>(result);
         }
 
-        
+        public async Task<IDataResult<Channel>> GetAsync(Guid id)
+            => new SuccessDataResult<Channel>(await channelRepository.GetSingleAsync(f => f.Id == id));
     }
 }
