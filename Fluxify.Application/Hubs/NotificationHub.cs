@@ -1,5 +1,5 @@
-﻿using Fluxify.Application.Models;
-using Fluxify.Application.Models.Enums;
+﻿using Fluxify.Application.Models.Enums;
+using Fluxify.Application.Models.Hub;
 using Fluxify.Application.Models.SignalR;
 using Fluxify.Application.Services;
 using Fluxify.Application.Services.Interfaces;
@@ -14,21 +14,22 @@ namespace Fluxify.Application.Hubs
     public class NotificationHub : Hub
     {
         readonly INotificationService NotificationService;
+        readonly IUserNotificationService UserNotificationService;
         readonly HubConnectionManager<NotificationHub> HubConnectionManager;
 
-        public NotificationHub(HubConnectionManager<NotificationHub> hubConnectionManager, INotificationService notificationService)
+        public NotificationHub(HubConnectionManager<NotificationHub> hubConnectionManager, INotificationService notificationService, IUserNotificationService userNotificationService)
         {
             HubConnectionManager = hubConnectionManager;
-            this.NotificationService = notificationService;
+            NotificationService = notificationService;
+            UserNotificationService = userNotificationService;
         }
 
         public override async Task OnConnectedAsync()
         {
-            HubConnectionManager.AddConnection(Context);
-            ConnectionUser connectionUser = HubConnectionManager.GetConnection(Context.User.Claims.Single(f => f.Type == ClaimTypes.NameIdentifier).Value);
+            ConnectionUser connectionUser = HubConnectionManager.AddConnection(Context);
 
-            foreach (var claim in Context.User.Claims.Where(f => f.Type == "Topic"))
-                await Groups.AddToGroupAsync(Context.ConnectionId, $"{connectionUser.NameSpace}:{claim.Value}");
+            foreach (var topic in Context.User.Claims.Where(f => f.Type == FluxifyClaims.Topic))
+                await Groups.AddToGroupAsync(Context.ConnectionId, $"{connectionUser.NameSpace.Name}:{topic.Value}");
 
             await base.OnConnectedAsync();
         }
@@ -44,21 +45,35 @@ namespace Fluxify.Application.Hubs
         public async Task GetPendingNotifications()
         {
             ConnectionUser connectionUser = HubConnectionManager.GetConnection(Context.User.Claims.Single(f => f.Type == ClaimTypes.NameIdentifier).Value);
-            var pendingNotifications = await NotificationService.GetAndMarkPendingAsync(connectionUser.Id, connectionUser.NameSpaceId);
-
-            var sendingNotifications = pendingNotifications.Data?.Notifications?.Select(s => new PushToClientNotificationModel
+            var pendingNotifications = await UserNotificationService.GetListAsync(connectionUser.Id, new[]
             {
-                Id = s.Id,
-                ContentType = s.ContentType,
-                CreateDate = s.CreateDate,
-                Custom = s.Properties,
-                Status = s.Status,
-                Level = s.Level,
-                Sender = s.Sender,
-                Title = s.Title
-            }).ToList();
+                NotificationStatus.Pending
+            });
 
-            await Clients.Caller.SendAsync("ReceivePendingNotifications", sendingNotifications);
+            if(pendingNotifications.Data.Count > 0)
+            {
+                var sendingNotifications = pendingNotifications.Data.Items.Select(s => new PushToClientNotificationModel
+                {
+                    Id = s.Id,
+                    ContentType = s.ContentType,
+                    CreateDate = s.CreateDate,
+                    Properties = s.Properties,
+                    Status = s.Status,
+                    Level = s.Level,
+                    Sender = s.Sender,
+                    Title = s.Title
+                }).ToList();
+
+                await Clients.Caller.SendAsync(HubEvents.NotificationHub.ReceivePendingNotifications, sendingNotifications);
+
+                await UserNotificationService.MarkAsStatusAsync(NotificationStatus.Delivered, 
+                                                                pendingNotifications.Data.Items.Select(s => s.Id).ToArray(), 
+                                                                new[] { connectionUser.Id });
+
+            }
+
         }
+
+
     }
 }

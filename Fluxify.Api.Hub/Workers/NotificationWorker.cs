@@ -1,5 +1,6 @@
 ﻿using Fluxify.Api.Hub.Workers.Main;
 using Fluxify.Application.Hubs;
+using Fluxify.Application.Models.Enums;
 using Fluxify.Application.Models.Queue;
 using Fluxify.Application.Models.SignalR;
 using Fluxify.Application.Services.Interfaces;
@@ -31,30 +32,31 @@ namespace Fluxify.Api.Hub.Workers
         {
             using var scope = _scopeFactory.CreateScope();
             var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
+            var userNotificationService = scope.ServiceProvider.GetRequiredService<IUserNotificationService>();
             var notificationId = GetMessage<Guid>(args);
 
             var notificationResult = await notificationService.GetAsync(notificationId);
-            var nameSpaceUsers = _connectionManager.GetAllConnections(notificationResult.Data.NameSpace.ToString());
+            var nameSpaceUsers = _connectionManager.GetAllConnections(notificationResult.Data.NameSpace);
 
             if (nameSpaceUsers != null && nameSpaceUsers.Count > 0)
             {
-                var notificationUsersResult = await notificationService.GetTargetsAsync(notificationId);
-                var destinationUsers = nameSpaceUsers.Where(f => notificationUsersResult.Data.Any(x => x.UserId == f.Id));
+                var userNotificationsResult = await userNotificationService.GetTargetsAsync(notificationId);
+                var destinationUsers = nameSpaceUsers.Where(f => userNotificationsResult.Data.Any(x => x.UserId == f.Id));
 
-                //await _hubContext.Clients.Clients(destinationUsers.Select(s => s.ConnectionId)).SendAsync("ReceiveNotification", new PushToClientNotificationModel
-                //{
-                //    Id = notificationResult.Data.Id,
-                //    ContentType = notificationResult.Data.ContentType,
-                //    CreateDate = notificationResult.Data.CreateDate,
-                //    Custom = notificationResult.Data.Properties,
-                //    Level = notificationResult.Data.Level,
-                //    Status = (int)NotificationStatus.Delivered,
-                //    Sender = notificationResult.Data.Sender,
-                //    Title = notificationResult.Data.Title
-                //});
+                await _hubContext.Clients.Clients(destinationUsers.SelectMany(s => s.Connections)).SendAsync(HubEvents.NotificationHub.ReceiveNotification, new PushToClientNotificationModel
+                {
+                    Id = notificationResult.Data.Id,
+                    ContentType = notificationResult.Data.ContentType,
+                    CreateDate = notificationResult.Data.CreateDate,
+                    Properties = notificationResult.Data.Properties,
+                    Level = notificationResult.Data.Level,
+                    Status = (int)NotificationStatus.Delivered,
+                    Sender = notificationResult.Data.Sender,
+                    Title = notificationResult.Data.Title
+                });
 
-                var destinationNotifications = notificationUsersResult.Data.Where(f => destinationUsers.Any(x => x.Id == f.UserId));
-                await notificationService.MarkAsStatusAsync(NotificationStatus.Delivered, destinationNotifications.Select(s => s.Id).ToArray());
+                var destinationNotifications = userNotificationsResult.Data.Where(f => destinationUsers.Any(x => x.Id == f.UserId));
+                await userNotificationService.MarkAsStatusAsync(NotificationStatus.Delivered, destinationNotifications.Select(s => s.NotificationId).ToArray());
             }
         }
     }

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Fluxify.Application.Models.Client
+namespace Fluxify.Application.Models.Common
 {
     public class CurrentUser
     {

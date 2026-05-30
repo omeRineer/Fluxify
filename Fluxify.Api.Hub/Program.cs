@@ -1,7 +1,6 @@
 using Fluxify.Application;
 using Fluxify.Persistance;
 using Fluxify.Application.Hubs;
-using Fluxify.Application.Models.Client;
 using System.Security.Claims;
 using Fluxify.Api.Hub.Workers;
 

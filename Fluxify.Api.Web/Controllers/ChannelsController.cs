@@ -1,4 +1,4 @@
-﻿using Fluxify.Application.Models.Client;
+﻿using Fluxify.Application.Models.Common;
 using Fluxify.Application.Models.Rest.Channel;
 using Fluxify.Application.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
@@ -24,17 +24,18 @@ namespace Fluxify.Api.Web.Controllers
         }
 
         [HttpPost("Create")]
-        public async Task<IActionResult> CreateAsync([FromBody] CreateChannelRequest model)
+        public async Task<IActionResult> CreateAsync([FromBody] CreateChannel.Request model)
         {
             var result = await channelService.CreateAsync(model);
 
             return Ok(result);
         }
 
-        [HttpPost("Update")]
-        public async Task<IActionResult> UpdateAsync([FromBody] UpdateChannelRequest model)
+        [HttpPost("Update/{id}")]
+        public async Task<IActionResult> UpdateAsync([FromRoute] Guid id,
+                                                     [FromBody] UpdateChannel.Request model)
         {
-            var result = await channelService.UpdateAsync(model);
+            var result = await channelService.UpdateAsync(id, model);
 
             return Ok(result);
         }

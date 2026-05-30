@@ -20,4 +20,8 @@
 		<ProjectReference Include="..\Fluxify.Domain\Fluxify.Domain.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="Models\Dto\Topic\" />
+	</ItemGroup>
+
 </Project>

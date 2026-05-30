@@ -11,9 +11,7 @@ namespace Fluxify.Application.Services.Interfaces
 {
     public interface ITopicService
     {
-        Task<IDataResult<List<Topic>>> GetListByChannelAsync(Guid channelId);
-        Task<IDataResult<List<Topic>>> GetListByKey(params string[] topics);
+        Task<IResult> CreateAsync(CreateTopic.Request req);
 
-        Task<IResult> CreateAsync(CreateTopicRequest req);
     }
 }

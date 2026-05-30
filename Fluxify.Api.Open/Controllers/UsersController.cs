@@ -1,4 +1,4 @@
-﻿using Fluxify.Application.Models.Client;
+﻿using Fluxify.Application.Models.Common;
 using Fluxify.Application.Models.Rest.Subscriber;
 using Fluxify.Application.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -16,13 +16,6 @@ namespace Fluxify.Api.Open.Controllers
             UserService = userService;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetListAsync()
-        {
-            var result = await UserService.GetListByNameSpaceAsync(CurrentUser.NameSpaceId);
-
-            return Ok(result);
-        }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetDetailAsync([FromRoute] Guid id)
@@ -33,17 +26,17 @@ namespace Fluxify.Api.Open.Controllers
         }
 
         [HttpPost("Create")]
-        public async Task<IActionResult> CreateAsync([FromBody] CreateUserRequest model)
+        public async Task<IActionResult> CreateAsync([FromBody] CreateUser.Request model)
         {
-            var result = await UserService.CreateAsync(model);
+            var result = await UserService.CreateAsync(CurrentUser.NameSpaceId, model);
 
             return Ok(result);
         }
 
-        [HttpPost("Update")]
-        public async Task<IActionResult> UpdateAsync([FromBody] UpdateUserRequest model)
+        [HttpPost("Update/{id}")]
+        public async Task<IActionResult> UpdateAsync([FromRoute] Guid id, [FromBody] UpdateUser.Request model)
         {
-            var result = await UserService.UpdateAsync(model);
+            var result = await UserService.UpdateAsync(id, model);
 
             return Ok(result);
         }

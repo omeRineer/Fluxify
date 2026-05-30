@@ -1,5 +1,5 @@
-﻿using Fluxify.Application.Models;
-using Fluxify.Application.Models.Enums;
+﻿using Fluxify.Application.Models.Enums;
+using Fluxify.Application.Models.Hub;
 using Fluxify.Application.Models.SignalR;
 using Fluxify.Application.Services.Interfaces;
 using Fluxify.Domain.Enums;
@@ -26,18 +26,17 @@ namespace Fluxify.Application.Hubs
 
         public override async Task OnConnectedAsync()
         {
-            int connectionCount = HubConnectionManager.AddConnection(Context);
-            ConnectionUser connectionUser = HubConnectionManager.GetConnection(Context.User.Claims.Single(f => f.Type == ClaimTypes.NameIdentifier).Value);
+            ConnectionUser connectionUser = HubConnectionManager.AddConnection(Context);
 
-            await Groups.AddToGroupAsync(Context.ConnectionId, connectionUser.NameSpace);
+            await Groups.AddToGroupAsync(Context.ConnectionId, connectionUser.NameSpace.Name);
 
-            if (connectionCount == 1)
+            if (connectionUser.Connections.Count == 1)
             {
-                await Clients.Group(connectionUser.NameSpace).SendAsync("ReceiveUserState", new PushToClientUserStateInfoModel
+                await Clients.Group(connectionUser.NameSpace.Name).SendAsync(HubEvents.PresenceHub.ReceiveUserStates, new PushToClientUserStateInfoModel
                 {
                     UserId = Context.User.Claims.Single(f => f.Type == FluxifyClaims.Key).Value,
                     Date = DateTime.UtcNow,
-                    AvailabilityStatus = (int) UserAvailabilityStatus.Online
+                    Status = (int) UserAvailabilityStatus.Online
                 });
                 
             }
@@ -52,11 +51,11 @@ namespace Fluxify.Application.Hubs
 
             if(connectionCount == 0)
             {
-                await Clients.Group(connectionUser.NameSpace).SendAsync("ReceiveUserState", new PushToClientUserStateInfoModel
+                await Clients.Group(connectionUser.NameSpace.Name).SendAsync(HubEvents.PresenceHub.ReceiveUserStates, new PushToClientUserStateInfoModel
                 {
                     UserId = Context.User.Claims.Single(f => f.Type == FluxifyClaims.Key).Value,
                     Date = DateTime.UtcNow,
-                    AvailabilityStatus = (int) UserAvailabilityStatus.Offline
+                    Status = (int) UserAvailabilityStatus.Offline
                 });
             }
 
@@ -67,16 +66,29 @@ namespace Fluxify.Application.Hubs
         {
             ConnectionUser connectionUser = HubConnectionManager.GetConnection(Context.User.Claims.Single(f => f.Type == ClaimTypes.NameIdentifier).Value);
 
-            var onlineSubscribers = HubConnectionManager.GetAllConnections(connectionUser.NameSpace).Select(s => new PushToClientUserStateInfoModel
+            var onlineSubscribers = HubConnectionManager.GetAllConnections(connectionUser.NameSpace.Id).Select(s => new PushToClientUserStateInfoModel
             {
                 UserId = s.Key,
                 Date = s.ConnectedDate,
-                AvailabilityStatus = s.AvailabilityStatus
+                Status = s.Status.Id,
+                Title = s.Status.Name
             }).ToList();
 
-            await Clients.Caller.SendAsync("ReceiveOnlineUsers", onlineSubscribers);
+            await Clients.Caller.SendAsync(HubEvents.PresenceHub.ReceiveOnlineUsers, onlineSubscribers);
         }
 
+        public async Task SetAvailabilityStatus(int status)
+        {
+            ConnectionUser connectionUser = HubConnectionManager.GetConnection(Context.User.Claims.Single(f => f.Type == ClaimTypes.NameIdentifier).Value);
 
+            connectionUser.Status.Id = status;
+            await Clients.Group(connectionUser.NameSpace.Name).SendAsync(HubEvents.PresenceHub.ReceiveUserStates, new PushToClientUserStateInfoModel
+            {
+                UserId = Context.User.Claims.Single(f => f.Type == FluxifyClaims.Key).Value,
+                Status = status,
+                Title = connectionUser.Status.Name,
+                Date = DateTime.UtcNow
+            });
+        }
     }
 }

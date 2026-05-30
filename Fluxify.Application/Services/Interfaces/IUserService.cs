@@ -1,4 +1,6 @@
-﻿using Fluxify.Application.Models.Rest.Channel;
+﻿using Fluxify.Application.Models.Dto.User;
+using Fluxify.Application.Models.Rest.Channel;
+using Fluxify.Application.Models.Rest.Common;
 using Fluxify.Application.Models.Rest.Subscriber;
 using Fluxify.Application.Utilities.ApiResponse;
 using Fluxify.Application.Utilities.Result;
@@ -12,12 +14,11 @@ namespace Fluxify.Application.Services.Interfaces
 {
     public interface IUserService
     {
-        Task<IDataResult<CreateUserResponse>> CreateAsync(CreateUserRequest model);
-        Task<IDataResult<UpdateUserResponse>> UpdateAsync(UpdateUserRequest model);
-        Task<IDataResult<GetUserDetailResponse>> GetDetailAsync(Guid id);
-        Task<IDataResult<GetUserDetailResponse?>> GetDetailAsync(string apiKey);
-        Task<IDataResult<List<UserResponse>>> GetListByNameSpaceAsync(Guid nameSpace);
-        Task<IDataResult<List<UserResponse>>> GetListByTopicsAsync(Guid nameSpace, params Guid[] topics);
+        Task<IDataResult<CreateUser.Response>> CreateAsync(Guid nameSpace, CreateUser.Request model);
+        Task<IDataResult<UpdateUser.Response>> UpdateAsync(Guid id, UpdateUser.Request model);
+        Task<IDataResult<UserDto.Detail>> GetDetailAsync(Guid id);
+        Task<IDataResult<UserDto.Detail>> GetDetailAsync(string apiKey);
+        Task<IDataResult<DataListResponse<UserDto.Detail>>> GetListByTopicsAsync(Guid nameSpace, params Guid[] topics);
 
     }
 }

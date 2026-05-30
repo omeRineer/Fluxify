@@ -13,7 +13,7 @@ namespace Fluxify.Application.MappingProfiles
     {
         public TopicProfile()
         {
-            CreateMap<CreateTopicRequest, Topic>();
+            CreateMap<CreateTopic.Request, Topic>();
         }
     }
 }

@@ -9,7 +9,7 @@ namespace Fluxify.Domain.Core
 {
     public class Channel : MongoEntity<Guid>
     {
-        public string Prefix { get; set; }
+        public string Key { get; set; }
         public string Name { get; set; }
     }
 }

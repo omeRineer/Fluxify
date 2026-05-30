@@ -1,5 +1,5 @@
-﻿using Fluxify.Application.Models;
-using Fluxify.Application.Models.Enums;
+﻿using Fluxify.Application.Models.Enums;
+using Fluxify.Application.Models.Hub;
 using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Generic;
@@ -25,15 +25,15 @@ namespace Fluxify.Application.Hubs
                 return Connections.Values.Single(f => f.Id == Guid.Parse(userId));
             }
         }
-        public List<ConnectionUser> GetAllConnections(string nameSpace)
+        public List<ConnectionUser> GetAllConnections(Guid nameSpace)
         {
             lock (Connections)
             {
-                return Connections.Values.Where(f => f.NameSpace == nameSpace).ToList();
+                return Connections.Values.Where(f => f.NameSpace.Id == nameSpace).ToList();
             }
         }
 
-        public int AddConnection(HubCallerContext context)
+        public ConnectionUser AddConnection(HubCallerContext context)
         {
             lock (Connections)
             {
@@ -43,14 +43,20 @@ namespace Fluxify.Application.Hubs
                     {
                         Id = Guid.Parse(context.User.Claims.Single(f => f.Type == ClaimTypes.NameIdentifier).Value),
                         Key = context.User.Claims.Single(f => f.Type == FluxifyClaims.Key).Value,
-                        NameSpaceId = Guid.Parse(context.User.Claims.Single(f => f.Type == FluxifyClaims.NameSpaceId).Value),
-                        NameSpace = context.User.Claims.Single(f => f.Type == FluxifyClaims.NameSpace).Value,
+                        NameSpace = new ConnectionUserNameSpace
+                        {
+                            Id = Guid.Parse(context.User.Claims.Single(f => f.Type == FluxifyClaims.NameSpaceId).Value),
+                            Name = context.User.Claims.Single(f => f.Type == FluxifyClaims.NameSpace).Value
+                        },
+                        Status = new ConnectionUserStatus
+                        {
+                            Id = (int)UserAvailabilityStatus.Online
+                        },
                         ConnectedDate = DateTime.UtcNow,
                         Topics = context.User.Claims
-                            .Where(f => f.Type == "Topic")
+                            .Where(f => f.Type == FluxifyClaims.Topic)
                             .Select(s => s.Value)
-                            .ToList(),
-                        AvailabilityStatus = (int) UserAvailabilityStatus.Online
+                            .ToList()
                     };
 
                     Connections[context.UserIdentifier] = user;
@@ -58,7 +64,7 @@ namespace Fluxify.Application.Hubs
 
                 user.Connections.Add(context.ConnectionId);
 
-                return user.Connections.Count;
+                return user;
             }
         }
 

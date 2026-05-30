@@ -16,6 +16,6 @@ namespace Fluxify.Application.Models.SignalR
         public string? Content { get; set; }
         public int Status { get; set; }
         public DateTime CreateDate { get; set; }
-        public Dictionary<string, object>? Custom { get; set; }
+        public Dictionary<string, object>? Properties { get; set; }
     }
 }

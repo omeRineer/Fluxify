@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Fluxify.Application.Models.Dto.User;
 using Fluxify.Application.Models.Rest.Subscriber;
 using Fluxify.Domain.Core;
 
@@ -8,13 +9,12 @@ namespace Fluxify.Application.MappingProfiles
     {
         public SubscriberProfile()
         {
-            CreateMap<User, UserResponse>();
-            CreateMap<User, CreateUserResponse>().IncludeBase<User, UserResponse>();
-            CreateMap<User, UpdateUserResponse>().IncludeBase<User, UserResponse>();
-            CreateMap<User, GetUserDetailResponse>().IncludeBase<User, UserResponse>();
+            CreateMap<User, UserDto.Detail>();
+            CreateMap<User, CreateUser.Response>().IncludeBase<User, UserDto.Detail>();
+            CreateMap<User, UpdateUser.Response>().IncludeBase<User, UserDto.Detail>();
 
-            CreateMap<CreateUserRequest, User>();
-            CreateMap<UpdateUserRequest, User>();
+            CreateMap<CreateUser.Request, User>();
+            CreateMap<UpdateUser, User>();
         }
     }
 }

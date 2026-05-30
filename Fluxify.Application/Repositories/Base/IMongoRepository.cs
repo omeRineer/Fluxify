@@ -24,6 +24,7 @@ namespace Fluxify.Application.Repositories.Base
         Task<TEntity> GetFirstAsync(Expression<Func<TEntity, bool>> filter);
 
         Task<TEntity> GetSingleAsync(Expression<Func<TEntity, bool>> filter);
+        Task<TEntity> FindAsync(TKey id);
         Task<bool> IsExistAsync(Expression<Func<TEntity, bool>> expression);
 
         Task AddAsync(TEntity entity);

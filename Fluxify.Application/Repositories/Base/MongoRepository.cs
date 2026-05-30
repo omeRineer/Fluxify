@@ -53,6 +53,10 @@ where TEntity : MongoEntity<TKey>, new()
             await Collection.DeleteManyAsync(x => ids.Contains(x.Id));
         }
 
+        public Task<TEntity> FindAsync(TKey id)
+        {
+            throw new NotImplementedException();
+        }
 
         public async Task<Dictionary<TK, TV>> GetDictionariesAsync<TK, TV>(Func<TEntity, TK> key, Func<TEntity, TV> value, Expression<Func<TEntity, bool>> filter = null)
         {

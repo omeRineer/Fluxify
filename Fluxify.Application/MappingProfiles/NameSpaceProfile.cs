@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Fluxify.Application.Models.Dto.NameSpace;
 using Fluxify.Application.Models.Rest.NameSpace;
 using Fluxify.Domain.Core;
 
@@ -8,13 +9,12 @@ namespace Fluxify.Application.MappingProfiles
     {
         public NameSpaceProfile()
         {
-            CreateMap<NameSpace, NameSpaceResponse>();
-            CreateMap<NameSpace, CreateNameSpaceResponse>().IncludeBase<NameSpace, NameSpaceResponse>();
-            CreateMap<NameSpace, UpdateNameSpaceResponse>().IncludeBase<NameSpace, NameSpaceResponse>();
-            CreateMap<NameSpace, GetNameSpaceDetailResponse>().IncludeBase<NameSpace, NameSpaceResponse>();
+            CreateMap<NameSpace, NameSpaceDto.Detail>();
+            CreateMap<NameSpace, CreateNameSpace.Response>().IncludeBase<NameSpace, NameSpaceDto.Detail>();
+            CreateMap<NameSpace, UpdateNameSpace.Response>().IncludeBase<NameSpace, NameSpaceDto.Detail>();
 
-            CreateMap<CreateNameSpaceRequest, NameSpace>();
-            CreateMap<UpdateNameSpaceRequest, NameSpace>();
+            CreateMap<CreateNameSpace.Request, NameSpace>();
+            CreateMap<UpdateNameSpace.Request, NameSpace>();
         }
     }
 }

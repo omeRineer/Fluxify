@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Fluxify.Application.Models.Enums
 {
-    public static class Queue
+    public static class Queues
     {
         public const string NotificationQueue = "Notification_Queue";
     }

@@ -17,45 +17,31 @@ namespace Fluxify.Application.Services
 {
     public class TopicService : ITopicService
     {
-        readonly IChannelService channelService;
+        readonly IChannelRepository channelRepository;
         readonly ITopicRepository topicRepository;
         readonly IMapper _mapper;
 
-        public TopicService(ITopicRepository topicRepository, IMapper mapper, IChannelService channelService)
+        public TopicService(ITopicRepository topicRepository, IMapper mapper, IChannelRepository channelRepository)
         {
             this.topicRepository = topicRepository;
             _mapper = mapper;
-            this.channelService = channelService;
+            this.channelRepository = channelRepository;
         }
 
-        public async Task<IResult> CreateAsync(CreateTopicRequest req)
+        public async Task<IResult> CreateAsync(CreateTopic.Request req)
         {
-            var channel = await channelService.GetAsync(req.ChannelId);
+            var channel = await channelRepository.GetSingleAsync(f => f.Key == req.Channel);
 
             var newTopic = new Topic
             {
-                ChannelId = req.ChannelId,
-                Key = $"{channel.Data.Prefix}:{req.Key}",
+                ChannelId = channel.Id,
+                Key = $"{channel.Key}:{req.Key}",
                 Name = req.Name
             };
 
             await topicRepository.AddAsync(newTopic);
 
             return new SuccessResult("Topic is created");
-        }
-
-        public async Task<IDataResult<List<Topic>>> GetListByChannelAsync(Guid channelId)
-        {
-            var topics = await topicRepository.GetListAsync(f => f.ChannelId == channelId);
-
-            return new SuccessDataResult<List<Topic>>(topics);
-        }
-
-        public async Task<IDataResult<List<Topic>>> GetListByKey(params string[] topics)
-        {
-            var topicList = await topicRepository.GetListAsync(f => topics.Contains(f.Key));
-
-            return new SuccessDataResult<List<Topic>>(topicList);
         }
     }
 }

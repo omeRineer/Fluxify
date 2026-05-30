@@ -1,5 +1,5 @@
 ﻿using Fluxify.Api.Hub.Auth;
-using Fluxify.Application.Models.Client;
+using Fluxify.Application.Models.Common;
 using Fluxify.Application.Models.Enums;
 using Fluxify.Application.Repositories;
 using Fluxify.Application.Services;
@@ -27,6 +27,7 @@ namespace Fluxify.Application
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<INameSpaceService, NameSpaceService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IUserNotificationService, UserNotificationService>();
             services.AddScoped<IChannelService, ChannelService>();
             services.AddScoped<ITopicService, TopicService>();
 
