@@ -34,12 +34,10 @@ namespace Fluxify.Application.Services
         readonly ITopicRepository TopicRepository;
         readonly IUserNotificationRepository UserNotificationRepository;
         readonly RabbitMqClientService RabbitMqClient;
-        readonly CurrentUser CurrentUser;
         readonly IMapper _mapper;
-        public NotificationService(INotificationRepository notifications, CurrentUser currentUser, RabbitMqClientService rabbitMqClientService, IUserNotificationRepository userNotificationRepository, IUserService userService, ITopicRepository topicRepository, IMapper mapper)
+        public NotificationService(INotificationRepository notifications, RabbitMqClientService rabbitMqClientService, IUserNotificationRepository userNotificationRepository, IUserService userService, ITopicRepository topicRepository, IMapper mapper)
         {
             NotificationRepository = notifications;
-            CurrentUser = currentUser;
             RabbitMqClient = rabbitMqClientService;
             UserNotificationRepository = userNotificationRepository;
             UserService = userService;
@@ -47,18 +45,20 @@ namespace Fluxify.Application.Services
             _mapper = mapper;
         }
 
-        public async Task<IResult> CreateAsync(CreateNotification.Request req)
+        public async Task<IResult> CreateAsync(Guid nameSpaceId, Guid userId, CreateNotification.Request req)
         {
             var ticketId = Guid.NewGuid();
             var newNotification = new Notification
             {
                 Id = ticketId,
-                NameSpace = CurrentUser.NameSpaceId,
-                Level = req.Level ?? (int)NotificationLevelType.Info,
-                Sender = CurrentUser.Key,
+                NameSpace = nameSpaceId,
+                Sender = userId,
+                Level = Enum.TryParse<NotificationLevelType>(req.Level, true, out var level) ? (int)level
+                                                                                             : (int)NotificationLevelType.Info,
                 Title = req.Title,
                 Content = req.Content,
-                ContentType = req.ContentType ?? (int)NotificationContentType.Text,
+                ContentType = Enum.TryParse<NotificationContentType>(req.ContentType, true, out var contentType) ? (int)contentType
+                                                                                                                 : (int)NotificationContentType.Text,
                 CreateDate = DateTime.Now,
                 Properties = req.Properties
             };
@@ -144,12 +144,13 @@ namespace Fluxify.Application.Services
             #endregion
 
             var notification = await NotificationRepository.GetSingleAsync(f => f.Id == id);
+            var user = await UserService.GetAsync(notification.Sender);
             var result = new NotificationDto.Detail
             {
                 Id = notification.Id,
                 Level = notification.Level,
                 ContentType = notification.ContentType,
-                Sender = notification.Sender,
+                Sender = user.Data.Key,
                 Title = notification.Title,
                 Content = notification.Content,
                 Status = userNotification.Status,
@@ -159,6 +160,13 @@ namespace Fluxify.Application.Services
             };
 
             return new SuccessDataResult<NotificationDto.Detail>(result);
+        }
+
+        public async Task<IDataResult<Notification>> GetAsync(Guid id)
+        {
+            var notification = await NotificationRepository.GetSingleAsync(f => f.Id == id);
+
+            return new SuccessDataResult<Notification>(notification);
         }
     }
 }

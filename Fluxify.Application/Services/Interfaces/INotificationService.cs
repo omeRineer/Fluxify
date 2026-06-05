@@ -17,6 +17,10 @@ namespace Fluxify.Application.Services.Interfaces
     {
         Task<IDataResult<NotificationDto.Detail>> GetDetailAsync(Guid id, Guid userId);
         Task<IDataResult<DataListResponse<NotificationDto.Detail>>> GetListAsync(Guid userId, NotificationStatus[]? statuses = null);
-        Task<IResult> CreateAsync(CreateNotification.Request req);
+        Task<IResult> CreateAsync(Guid nameSpaceId, Guid userId, CreateNotification.Request req);
+
+        #region Internal
+        Task<IDataResult<Notification>> GetAsync(Guid id);
+        #endregion
     }
 }

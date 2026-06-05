@@ -20,6 +20,7 @@ namespace Fluxify.Application.Models.Dto.Notification
             public DateTime CreateDate { get; set; }
             public List<string>? Topics { get; set; }
             public Dictionary<string, object>? Properties { get; set; }
+
         }
     }
 }

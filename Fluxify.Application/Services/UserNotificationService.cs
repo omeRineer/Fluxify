@@ -1,5 +1,4 @@
-﻿using Fluxify.Application.Models.Dto.UserNotification;
-using Fluxify.Application.Models.Rest.Notification;
+﻿using Fluxify.Application.Models.Rest.Notification;
 using Fluxify.Application.Repositories;
 using Fluxify.Application.Rules.Common;
 using Fluxify.Application.Rules;

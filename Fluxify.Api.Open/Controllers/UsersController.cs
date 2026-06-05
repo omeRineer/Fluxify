@@ -16,6 +16,14 @@ namespace Fluxify.Api.Open.Controllers
             UserService = userService;
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetListAsync()
+        {
+            var result = await UserService.GetListAsync(CurrentUser.NameSpaceId);
+
+            return Ok(result);
+        }
+
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetDetailAsync([FromRoute] Guid id)
@@ -33,7 +41,7 @@ namespace Fluxify.Api.Open.Controllers
             return Ok(result);
         }
 
-        [HttpPost("Update/{id}")]
+        [HttpPost("{id}/Update")]
         public async Task<IActionResult> UpdateAsync([FromRoute] Guid id, [FromBody] UpdateUser.Request model)
         {
             var result = await UserService.UpdateAsync(id, model);

@@ -10,9 +10,9 @@ namespace Fluxify.Application.Models.Rest.Notification
     {
         public class Request
         {
-            public int? Level { get; set; }
+            public string? Level { get; set; }
             public string Title { get; set; }
-            public int? ContentType { get; set; }
+            public string? ContentType { get; set; }
             public string? Content { get; set; }
             public string[]? Topics { get; set; }
 

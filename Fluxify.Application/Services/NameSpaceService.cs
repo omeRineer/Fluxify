@@ -33,12 +33,7 @@ namespace Fluxify.Application.Services
             if (!businessResult.IsSuccess)
                 return new ErrorDataResult<CreateNameSpace.Response>(message: businessResult.Message);
 
-            var newNameSpace = new NameSpace
-            {
-                Signature = model.Signature,
-                Name = model.Name,
-                ExpireDate = model.ExpireDate,
-            };
+            var newNameSpace = Mapper.Map<NameSpace>(model);
 
             await NameSpaceRepository.AddAsync(newNameSpace);
 

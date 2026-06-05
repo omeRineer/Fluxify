@@ -32,9 +32,9 @@ namespace Fluxify.Application.Services
             UserTopicRepository = userTopicRepository;
         }
 
-        public async Task<IDataResult<CreateUser.Response>> CreateAsync(Guid nameSpace, CreateUser.Request model)
+        public async Task<IDataResult<CreateUser.Response>> CreateAsync(Guid nameSpaceId, CreateUser.Request model)
         {
-            var nameSpaceE = await NameSpaceRepository.GetSingleAsync(f => f.Id == nameSpace);
+            var nameSpaceE = await NameSpaceRepository.GetSingleAsync(f => f.Id == nameSpaceId);
             var avaibleSubscriber = await UserRepository.GetSingleOrDefaultAsync(f => f.Key == model.Key && f.NameSpace == nameSpaceE.Id);
             var businessResult = await BusinessRuleEngine.Run(
                     new DataMustBeAvaibleRule(avaibleSubscriber, "Subscriber is avaible. Please, set a different key")
@@ -106,15 +106,33 @@ namespace Fluxify.Application.Services
             return new SuccessDataResult<UserDto.Detail>(result);
         }
 
-        public async Task<IDataResult<DataListResponse<UserDto.Detail>>> GetListByTopicsAsync(Guid nameSpace, params Guid[] topics)
+        public async Task<IDataResult<DataListResponse<UserDto.Detail>>> GetListByTopicsAsync(Guid nameSpaceId, params Guid[] topics)
         {
             var userTopics = await UserTopicRepository.GetListAsync(f => topics.Contains(f.TopicId));
-            var users = await UserRepository.GetListAsync(f => f.NameSpace == nameSpace && userTopics.Select(ut => ut.UserId).Contains(f.Id));
+            var users = await UserRepository.GetListAsync(f => f.NameSpace == nameSpaceId && userTopics.Select(ut => ut.UserId).Contains(f.Id));
 
             var mappedList = Mapper.Map<List<UserDto.Detail>>(users);
 
             var result = DataListResponse<UserDto.Detail>.Load(mappedList);
             return new SuccessDataResult<DataListResponse<UserDto.Detail>>(result);
+        }
+
+        public async Task<IDataResult<DataListResponse<UserDto.Detail>>> GetListAsync(Guid nameSpaceId)
+        {
+            var users = await UserRepository.GetListAsync(f => f.NameSpace == nameSpaceId);
+
+            var mappedList = Mapper.Map<List<UserDto.Detail>>(users);
+
+            var result = DataListResponse<UserDto.Detail>.Load(mappedList);
+            return new SuccessDataResult<DataListResponse<UserDto.Detail>>(result);
+
+        }
+
+        public async Task<IDataResult<User>> GetAsync(Guid id)
+        {
+            var subscriber = await UserRepository.GetSingleAsync(f => f.Id == id);
+
+            return new SuccessDataResult<User>(subscriber);
         }
     }
 }

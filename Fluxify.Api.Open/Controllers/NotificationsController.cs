@@ -25,20 +25,9 @@ namespace Fluxify.Api.Open.Controllers
         [HttpPost("Send")]
         public async Task<IActionResult> SendAsync([FromBody] CreateNotification.Request request)
         {
-            var result = await NotificationService.CreateAsync(request);
-
-            return Ok(result);
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GetListAsync()
-        {
-            var result = await NotificationService.GetListAsync(CurrentUser.NameIdentifier,
-                                                                new[]
-                                                                {
-                                                                    NotificationStatus.Delivered,
-                                                                    NotificationStatus.Read
-                                                                });
+            var result = await NotificationService.CreateAsync(CurrentUser.NameSpaceId,
+                                                               CurrentUser.NameIdentifier,                                     
+                                                               request);
 
             return Ok(result);
         }

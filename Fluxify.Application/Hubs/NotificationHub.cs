@@ -45,7 +45,7 @@ namespace Fluxify.Application.Hubs
         public async Task GetPendingNotifications()
         {
             ConnectionUser connectionUser = HubConnectionManager.GetConnection(Context.User.Claims.Single(f => f.Type == ClaimTypes.NameIdentifier).Value);
-            var pendingNotifications = await UserNotificationService.GetListAsync(connectionUser.Id, new[]
+            var pendingNotifications = await NotificationService.GetListAsync(connectionUser.Id, new[]
             {
                 NotificationStatus.Pending
             });

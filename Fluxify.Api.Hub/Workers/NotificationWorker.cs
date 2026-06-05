@@ -51,7 +51,7 @@ namespace Fluxify.Api.Hub.Workers
                     Properties = notificationResult.Data.Properties,
                     Level = notificationResult.Data.Level,
                     Status = (int)NotificationStatus.Delivered,
-                    Sender = notificationResult.Data.Sender,
+                    Sender = nameSpaceUsers.Single(f => f.Id == notificationResult.Data.Sender).Key,
                     Title = notificationResult.Data.Title
                 });
 

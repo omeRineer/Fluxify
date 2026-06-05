@@ -14,8 +14,10 @@ namespace Fluxify.Domain.Core
         [BsonRepresentation(BsonType.String)]
         public Guid NameSpace { get; set; }
 
+        [BsonRepresentation(BsonType.String)]
+        public Guid Sender { get; set; }
+
         public int Level { get; set; }
-        public string Sender { get; set; }
         public string Title { get; set; }
         public int ContentType { get; set; }
         public string? Content { get; set; }
