@@ -92,18 +92,11 @@ namespace Fluxify.Application.Services
             return new SuccessDataResult<UserDto.Detail>(data: result);
         }
 
-        public async Task<IDataResult<UserDto.Detail>> GetDetailAsync(string apiKey)
+        public async Task<IDataResult<User>> GetAsync(string apiKey)
         {
-            var subscriber = await UserRepository.GetSingleOrDefaultAsync(f => f.ApiKey == apiKey);
-            var businessResult = await BusinessRuleEngine.Run(
-                    new DataMustBeFoundRule(subscriber, "Subscriber is not found.")
-            );
-            if (!businessResult.IsSuccess)
-                return new ErrorDataResult<UserDto.Detail>(message: businessResult.Message);
+            var subscriber = await UserRepository.GetSingleAsync(f => f.ApiKey == apiKey);
 
-            var result = Mapper.Map<UserDto.Detail>(subscriber);
-
-            return new SuccessDataResult<UserDto.Detail>(result);
+            return new SuccessDataResult<User>(subscriber);
         }
 
         public async Task<IDataResult<DataListResponse<UserDto.Detail>>> GetListByTopicsAsync(Guid nameSpaceId, params Guid[] topics)

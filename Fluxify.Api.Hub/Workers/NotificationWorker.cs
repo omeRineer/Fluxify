@@ -4,6 +4,7 @@ using Fluxify.Application.Models.Enums;
 using Fluxify.Application.Models.Queue;
 using Fluxify.Application.Models.SignalR;
 using Fluxify.Application.Services.Interfaces;
+using Fluxify.Application.Utilities.Helpers;
 using Fluxify.Domain.Enums;
 using Microsoft.AspNetCore.SignalR;
 using RabbitMQ.Client;
@@ -46,11 +47,11 @@ namespace Fluxify.Api.Hub.Workers
                 await _hubContext.Clients.Clients(destinationUsers.SelectMany(s => s.Connections)).SendAsync(HubEvents.NotificationHub.ReceiveNotification, new PushToClientNotificationModel
                 {
                     Id = notificationResult.Data.Id,
-                    ContentType = notificationResult.Data.ContentType,
+                    ContentType = EnumHelper.ToEnumString<NotificationContentType>(notificationResult.Data.ContentType),
                     CreateDate = notificationResult.Data.CreateDate,
                     Properties = notificationResult.Data.Properties,
-                    Level = notificationResult.Data.Level,
-                    Status = (int)NotificationStatus.Delivered,
+                    Level = EnumHelper.ToEnumString<NotificationLevelType>(notificationResult.Data.Level),
+                    Status = EnumHelper.ToEnumString<NotificationStatus>((int)NotificationStatus.Delivered),
                     Sender = nameSpaceUsers.Single(f => f.Id == notificationResult.Data.Sender).Key,
                     Title = notificationResult.Data.Title
                 });

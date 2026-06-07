@@ -17,10 +17,12 @@ namespace Fluxify.Api.Hub.Auth
         const string ApiKeyHeaderName = "Fluxify-Api-Key";
         readonly IUserService NotificationSubscriberService;
         readonly INameSpaceRepository NameSpaceRepository;
-        public FluxifyHubAuthenticationHandler(IOptionsMonitor<FluxifyHubAuthenticationOptions> options, IUserService notificationSubscriberService, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock, INameSpaceRepository nameSpaceRepository) : base(options, logger, encoder, clock)
+        readonly ITopicService topicService;
+        public FluxifyHubAuthenticationHandler(IOptionsMonitor<FluxifyHubAuthenticationOptions> options, IUserService notificationSubscriberService, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock, INameSpaceRepository nameSpaceRepository, ITopicService topicService) : base(options, logger, encoder, clock)
         {
             NotificationSubscriberService = notificationSubscriberService;
             NameSpaceRepository = nameSpaceRepository;
+            this.topicService = topicService;
         }
 
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
@@ -30,7 +32,7 @@ namespace Fluxify.Api.Hub.Auth
                 return AuthenticateResult.Fail("API Key is not provided.");
 
             var providedApiKey = headers.FirstOrDefault() ?? queries.FirstOrDefault();
-            var subscriber = (await NotificationSubscriberService.GetDetailAsync(providedApiKey)).Data;
+            var subscriber = (await NotificationSubscriberService.GetAsync(providedApiKey)).Data;
 
             if (subscriber == null)
                 return AuthenticateResult.Fail("Invalid API Key.");
@@ -50,9 +52,10 @@ namespace Fluxify.Api.Hub.Auth
                 new Claim(ClaimTypes.Name, subscriber.Name)
             };
 
-            if (subscriber.Topics != null && subscriber.Topics.Count > 0)
-                foreach (var topic in subscriber.Topics)
-                    claims.Add(new Claim(FluxifyClaims.Topic, topic));
+            var userTopicsResult = await topicService.GetListAsync(subscriber.Id);
+            if (userTopicsResult.Data != null && userTopicsResult.Data.Count > 0)
+                foreach (var topic in userTopicsResult.Data)
+                    claims.Add(new Claim(FluxifyClaims.Topic, topic.Key));
 
             var identity = new ClaimsIdentity(claims, Scheme.Name);
             var principal = new ClaimsPrincipal(identity);

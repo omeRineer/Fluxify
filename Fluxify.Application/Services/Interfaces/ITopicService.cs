@@ -13,5 +13,11 @@ namespace Fluxify.Application.Services.Interfaces
     {
         Task<IResult> CreateAsync(CreateTopic.Request req);
 
+
+        #region Internal
+
+        Task<IDataResult<List<Topic>>> GetListAsync(Guid userId);
+        #endregion
+
     }
 }

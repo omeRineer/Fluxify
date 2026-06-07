@@ -28,6 +28,7 @@ namespace Fluxify.Application
             services.AddScoped<INameSpaceService, NameSpaceService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IUserNotificationService, UserNotificationService>();
+            services.AddScoped<IUserDeviceService, UserDeviceService>();
             services.AddScoped<IChannelService, ChannelService>();
             services.AddScoped<ITopicService, TopicService>();
 

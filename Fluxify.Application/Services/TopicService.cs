@@ -19,13 +19,15 @@ namespace Fluxify.Application.Services
     {
         readonly IChannelRepository channelRepository;
         readonly ITopicRepository topicRepository;
+        readonly IUserTopicRepository userTopicRepository;
         readonly IMapper _mapper;
 
-        public TopicService(ITopicRepository topicRepository, IMapper mapper, IChannelRepository channelRepository)
+        public TopicService(ITopicRepository topicRepository, IMapper mapper, IChannelRepository channelRepository, IUserTopicRepository userTopicRepository)
         {
             this.topicRepository = topicRepository;
             _mapper = mapper;
             this.channelRepository = channelRepository;
+            this.userTopicRepository = userTopicRepository;
         }
 
         public async Task<IResult> CreateAsync(CreateTopic.Request req)
@@ -42,6 +44,14 @@ namespace Fluxify.Application.Services
             await topicRepository.AddAsync(newTopic);
 
             return new SuccessResult("Topic is created");
+        }
+
+        public async Task<IDataResult<List<Topic>>> GetListAsync(Guid userId)
+        {
+            var userTopics = await userTopicRepository.GetListAsync(f => f.UserId == userId);
+            var topicList = await topicRepository.GetListAsync(f => userTopics.Select(ut => ut.TopicId).Contains(f.Id));
+
+            return new SuccessDataResult<List<Topic>>(topicList);
         }
     }
 }

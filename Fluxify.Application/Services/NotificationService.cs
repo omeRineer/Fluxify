@@ -53,12 +53,10 @@ namespace Fluxify.Application.Services
                 Id = ticketId,
                 NameSpace = nameSpaceId,
                 Sender = userId,
-                Level = Enum.TryParse<NotificationLevelType>(req.Level, true, out var level) ? (int)level
-                                                                                             : (int)NotificationLevelType.Info,
+                Level = (int)EnumHelper.Parse<NotificationLevelType>(req.Level),
                 Title = req.Title,
                 Content = req.Content,
-                ContentType = Enum.TryParse<NotificationContentType>(req.ContentType, true, out var contentType) ? (int)contentType
-                                                                                                                 : (int)NotificationContentType.Text,
+                ContentType = (int)EnumHelper.Parse<NotificationContentType>(req.ContentType),
                 CreateDate = DateTime.Now,
                 Properties = req.Properties
             };
@@ -88,7 +86,7 @@ namespace Fluxify.Application.Services
 
             return new SuccessResult("Notification is created");
         }
-        public async Task<IDataResult<DataListResponse<NotificationDto.Detail>>> GetListAsync(Guid userId, NotificationStatus[]? statuses = null)
+        public async Task<IDataResult<DataListResponse<NotificationDto.List>>> GetListAsync(Guid userId, NotificationStatus[]? statuses = null)
         {
             var statusValues = statuses?
                 .Select(x => (int)x)
@@ -103,8 +101,8 @@ namespace Fluxify.Application.Services
 
             if (userNotifications.Count == 0)
             {
-                return new SuccessDataResult<DataListResponse<NotificationDto.Detail>>(
-                    DataListResponse<NotificationDto.Detail>.Load([]));
+                return new SuccessDataResult<DataListResponse<NotificationDto.List>>(
+                    DataListResponse<NotificationDto.List>.Load([]));
             }
 
             var notificationIds = userNotifications
@@ -119,16 +117,16 @@ namespace Fluxify.Application.Services
                 x => x.NotificationId,
                 x => x.Status);
 
-            var mappedList = _mapper.Map<List<NotificationDto.Detail>>(notifications);
+            var mappedList = _mapper.Map<List<NotificationDto.List>>(notifications);
             mappedList.ForEach(x =>
             {
                 if (statusLookup.TryGetValue(x.Id, out var status))
-                    x.Status = status;
+                    x.Status = EnumHelper.ToEnumString<NotificationStatus>(status);
             });
 
-            var result = DataListResponse<NotificationDto.Detail>.Load(mappedList);
+            var result = DataListResponse<NotificationDto.List>.Load(mappedList);
 
-            return new SuccessDataResult<DataListResponse<NotificationDto.Detail>>(result);
+            return new SuccessDataResult<DataListResponse<NotificationDto.List>>(result);
         }
         public async Task<IDataResult<NotificationDto.Detail>> GetDetailAsync(Guid id, Guid userId)
         {
@@ -148,12 +146,12 @@ namespace Fluxify.Application.Services
             var result = new NotificationDto.Detail
             {
                 Id = notification.Id,
-                Level = notification.Level,
-                ContentType = notification.ContentType,
+                Level = EnumHelper.ToEnumString<NotificationLevelType>(notification.Level),
+                ContentType = EnumHelper.ToEnumString<NotificationContentType>(notification.ContentType),
                 Sender = user.Data.Key,
                 Title = notification.Title,
                 Content = notification.Content,
-                Status = userNotification.Status,
+                Status = EnumHelper.ToEnumString<NotificationStatus>(userNotification.Status),
                 CreateDate = notification.CreateDate,
                 Topics = notification.Topics,
                 Properties = notification.Properties

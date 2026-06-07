@@ -1,4 +1,5 @@
 ﻿using Fluxify.Application.Models.Common;
+using Fluxify.Application.Models.Rest.UserDevice;
 using Fluxify.Application.Services;
 using Fluxify.Application.Services.Interfaces;
 using Fluxify.Domain.Enums;
@@ -11,10 +12,12 @@ namespace Fluxify.Api.Open.Controllers
     {
         readonly IUserService UserService;
         readonly INotificationService NotificationService;
-        public MeController(CurrentUser currentUser, IUserService UserService, INotificationService notificationService) : base(currentUser)
+        readonly IUserDeviceService UserDeviceService;
+        public MeController(CurrentUser currentUser, IUserService UserService, INotificationService notificationService, IUserDeviceService userDeviceService) : base(currentUser)
         {
             this.UserService = UserService;
             NotificationService = notificationService;
+            UserDeviceService = userDeviceService;
         }
 
         [HttpGet("Profile")]
@@ -29,5 +32,15 @@ namespace Fluxify.Api.Open.Controllers
                                                                     NotificationStatus.Delivered,
                                                                     NotificationStatus.Read
                                                                 }));
+
+        //[HttpGet("Devices")]
+        //public async Task<IActionResult> GetDevicesAsync()
+        //    => Ok(await UserDeviceService.SetAsync(CurrentUser.NameIdentifier,
+        //                                           req));
+
+        [HttpPost("Device/Set")]
+        public async Task<IActionResult> SetDeviceAsync(SetUserDevice.Request req)
+            => Ok(await UserDeviceService.SetAsync(CurrentUser.NameIdentifier,
+                                                   req));
     }
 }
