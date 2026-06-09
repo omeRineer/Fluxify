@@ -16,4 +16,8 @@
     <PackageReference Include="FirebaseAdmin" Version="3.5.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Fluxify.Application\Fluxify.Application.csproj" />
+  </ItemGroup>
+
 </Project>

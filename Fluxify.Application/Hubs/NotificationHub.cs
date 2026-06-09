@@ -61,7 +61,8 @@ namespace Fluxify.Application.Hubs
                     Status = s.Status,
                     Level = s.Level,
                     Sender = s.Sender,
-                    Title = s.Title
+                    Title = s.Title,
+                    Summary = s.Summary
                 }).ToList();
 
                 await Clients.Caller.SendAsync(HubEvents.NotificationHub.ReceivePendingNotifications, sendingNotifications);

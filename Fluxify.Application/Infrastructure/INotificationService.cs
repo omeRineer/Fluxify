@@ -1,0 +1,14 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Fluxify.Application.Infrastructure
+{
+    public interface INotificationService
+    {
+        Task<string> SendNotificationAsync(string deviceToken, string title, string summary, Dictionary<string, string>? data = null);
+        Task<string> SendToTopicAsync(string topic, string title, string summary, Dictionary<string, string>? data = null);
+    }
+}

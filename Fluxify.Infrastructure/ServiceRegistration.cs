@@ -1,4 +1,6 @@
 ﻿using FirebaseAdmin;
+using Fluxify.Application.Infrastructure;
+using Fluxify.Infrastructure.Services;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -13,6 +15,7 @@ namespace Fluxify.Infrastructure
     {
         public static void AddInfrastructure(this IServiceCollection services)
         {
+            services.AddScoped<INotificationService, FirebaseNotificationService>();
             FirebaseApp.Create(new AppOptions()
             {
                 Credential = CredentialFactory.FromFile<GoogleCredential>("Config/fluxify-adminsdk.json")

@@ -53,7 +53,8 @@ namespace Fluxify.Api.Hub.Workers
                     Level = EnumHelper.ToEnumString<NotificationLevelType>(notificationResult.Data.Level),
                     Status = EnumHelper.ToEnumString<NotificationStatus>((int)NotificationStatus.Delivered),
                     Sender = nameSpaceUsers.Single(f => f.Id == notificationResult.Data.Sender).Key,
-                    Title = notificationResult.Data.Title
+                    Title = notificationResult.Data.Title,
+                    Summary = notificationResult.Data.Summary
                 });
 
                 var destinationNotifications = userNotificationsResult.Data.Where(f => destinationUsers.Any(x => x.Id == f.UserId));
