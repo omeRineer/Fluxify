@@ -13,5 +13,7 @@ namespace Fluxify.Application.Models.Enums
         public const string Key = "Key";
         public const string ApiKey = "ApiKey";
         public const string Topic = "Topic";
+        public const string Device = "Device";
+        public const string Platform = "Platform";
     }
 }

@@ -11,24 +11,38 @@ namespace Fluxify.Application.Models.Hub
     {
         public Guid Id { get; set; }
         public string Key { get; set; }
-        public ConnectionUserNameSpace NameSpace { get; init; }
-        public ConnectionUserStatus Status { get; set; }
+        public NameSpaceInfo NameSpace { get; init; }
+        public StatusInfo Status { get; set; }
         public DateTime ConnectedDate { get; set; }
         public List<string>? Topics { get; set; }
 
-        public HashSet<string> Connections { get; } = new();
+        public Dictionary<string, DeviceInfo> Connections { get; } = new();
+
+
+        public class DeviceInfo
+        {
+            public DeviceInfo(string device, string platform)
+            {
+                Device = device;
+                Platform = platform;
+            }
+            public string Device { get; }
+            public string Platform { get; }
+
+        }
+
+        public class NameSpaceInfo
+        {
+            public Guid Id { get; init; }
+            public string Name { get; init; }
+        }
+
+        public class StatusInfo
+        {
+            public int Id { get; set; }
+            public string Name
+                => ((UserAvailabilityStatus)Id).ToString();
+        }
     }
 
-    public class ConnectionUserNameSpace
-    {
-        public Guid Id { get; init; }
-        public string Name { get; init; }
-    }
-
-    public class ConnectionUserStatus
-    {
-        public int Id { get; set; }
-        public string Name
-            => ((UserAvailabilityStatus)Id).ToString();
-    }
 }

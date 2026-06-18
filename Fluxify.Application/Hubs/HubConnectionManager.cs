@@ -43,12 +43,12 @@ namespace Fluxify.Application.Hubs
                     {
                         Id = Guid.Parse(context.User.Claims.Single(f => f.Type == ClaimTypes.NameIdentifier).Value),
                         Key = context.User.Claims.Single(f => f.Type == FluxifyClaims.Key).Value,
-                        NameSpace = new ConnectionUserNameSpace
+                        NameSpace = new ConnectionUser.NameSpaceInfo
                         {
                             Id = Guid.Parse(context.User.Claims.Single(f => f.Type == FluxifyClaims.NameSpaceId).Value),
                             Name = context.User.Claims.Single(f => f.Type == FluxifyClaims.NameSpace).Value
                         },
-                        Status = new ConnectionUserStatus
+                        Status = new ConnectionUser.StatusInfo
                         {
                             Id = (int)UserAvailabilityStatus.Online
                         },
@@ -62,7 +62,9 @@ namespace Fluxify.Application.Hubs
                     Connections[context.UserIdentifier] = user;
                 }
 
-                user.Connections.Add(context.ConnectionId);
+                user.Connections.Add(context.ConnectionId,
+                                     new ConnectionUser.DeviceInfo(context.User.Claims.Single(f => f.Type == FluxifyClaims.Device).Value,
+                                                                   context.User.Claims.Single(f => f.Type == FluxifyClaims.Platform).Value));
 
                 return user;
             }

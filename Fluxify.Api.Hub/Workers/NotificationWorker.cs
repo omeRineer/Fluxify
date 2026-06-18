@@ -44,7 +44,7 @@ namespace Fluxify.Api.Hub.Workers
                 var userNotificationsResult = await userNotificationService.GetTargetsAsync(notificationId);
                 var destinationUsers = nameSpaceUsers.Where(f => userNotificationsResult.Data.Any(x => x.UserId == f.Id));
 
-                await _hubContext.Clients.Clients(destinationUsers.SelectMany(s => s.Connections)).SendAsync(HubEvents.NotificationHub.ReceiveNotification, new PushToClientNotificationModel
+                await _hubContext.Clients.Clients(destinationUsers.SelectMany(s => s.Connections).Select(s => s.Key)).SendAsync(HubEvents.NotificationHub.ReceiveNotification, new PushToClientNotificationModel
                 {
                     Id = notificationResult.Data.Id,
                     ContentType = EnumHelper.ToEnumString<NotificationContentType>(notificationResult.Data.ContentType),

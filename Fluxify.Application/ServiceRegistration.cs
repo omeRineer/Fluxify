@@ -42,16 +42,18 @@ namespace Fluxify.Application
             {
                 var httpContextAccessor = i.GetService<IHttpContextAccessor>();
                 var user = httpContextAccessor?.HttpContext?.User;
+                var userClaims = user?.Claims.ToDictionary(k=> k.Type);
 
                 if (user != null && user.Identity.IsAuthenticated)
                     return new CurrentUser
                     {
-                        NameIdentifier = Guid.Parse(user.Claims.FirstOrDefault(f => f.Type == ClaimTypes.NameIdentifier)?.Value),
-                        ApiKey = user.Claims.FirstOrDefault(f => f.Type == FluxifyClaims.ApiKey)?.Value,
-                        Key = user.Claims.FirstOrDefault(f => f.Type == FluxifyClaims.Key)?.Value,
-                        NameSpaceId = Guid.Parse(user.Claims.FirstOrDefault(f => f.Type == FluxifyClaims.NameSpaceId)?.Value),
-                        NameSpace = user.Claims.FirstOrDefault(f => f.Type == FluxifyClaims.NameSpace)?.Value,
-                        Name = user.Claims.FirstOrDefault(f => f.Type == ClaimTypes.Name)?.Value
+                        NameIdentifier = Guid.Parse(userClaims[ClaimTypes.NameIdentifier].Value),
+                        ApiKey = userClaims[FluxifyClaims.ApiKey].Value,
+                        Key = userClaims[FluxifyClaims.Key].Value,
+                        NameSpace = new CurrentUser.NameSpaceInfo(Guid.Parse(userClaims[FluxifyClaims.NameSpaceId].Value),
+                                                                  userClaims[FluxifyClaims.NameSpace].Value),
+                        Name = userClaims[ClaimTypes.Name].Value,
+                        Device = new CurrentUser.DeviceInfo(userClaims[FluxifyClaims.Device].Value, userClaims[FluxifyClaims.Platform].Value)
                     };
 
                 return new CurrentUser();

@@ -49,6 +49,8 @@ namespace Fluxify.Api.Hub.Auth
                 new Claim(FluxifyClaims.ApiKey, subscriber.ApiKey),
                 new Claim(FluxifyClaims.NameSpaceId, subscriber.NameSpace.ToString()),
                 new Claim(FluxifyClaims.NameSpace, nameSpace.Signature),
+                new Claim(FluxifyClaims.Device, "undefined"),
+                new Claim(FluxifyClaims.Platform, "undefined"),
                 new Claim(ClaimTypes.Name, subscriber.Name)
             };
 

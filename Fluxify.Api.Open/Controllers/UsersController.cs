@@ -19,7 +19,7 @@ namespace Fluxify.Api.Open.Controllers
         [HttpGet]
         public async Task<IActionResult> GetListAsync()
         {
-            var result = await UserService.GetListAsync(CurrentUser.NameSpaceId);
+            var result = await UserService.GetListAsync(CurrentUser.NameSpace.Id);
 
             return Ok(result);
         }
@@ -36,7 +36,7 @@ namespace Fluxify.Api.Open.Controllers
         [HttpPost("Create")]
         public async Task<IActionResult> CreateAsync([FromBody] CreateUser.Request model)
         {
-            var result = await UserService.CreateAsync(CurrentUser.NameSpaceId, model);
+            var result = await UserService.CreateAsync(CurrentUser.NameSpace.Id, model);
 
             return Ok(result);
         }
