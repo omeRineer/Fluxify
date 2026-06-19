@@ -33,9 +33,10 @@ namespace Fluxify.Application.Services
         readonly IUserService UserService;
         readonly ITopicRepository TopicRepository;
         readonly IUserNotificationRepository UserNotificationRepository;
+        readonly IUserTopicRepository UserTopicRepository;
         readonly RabbitMqClientService RabbitMqClient;
         readonly IMapper _mapper;
-        public NotificationService(INotificationRepository notifications, RabbitMqClientService rabbitMqClientService, IUserNotificationRepository userNotificationRepository, IUserService userService, ITopicRepository topicRepository, IMapper mapper)
+        public NotificationService(INotificationRepository notifications, RabbitMqClientService rabbitMqClientService, IUserNotificationRepository userNotificationRepository, IUserService userService, ITopicRepository topicRepository, IMapper mapper, IUserTopicRepository userTopicRepository)
         {
             NotificationRepository = notifications;
             RabbitMqClient = rabbitMqClientService;
@@ -43,6 +44,7 @@ namespace Fluxify.Application.Services
             UserService = userService;
             TopicRepository = topicRepository;
             _mapper = mapper;
+            UserTopicRepository = userTopicRepository;
         }
 
         public async Task<IResult> CreateAsync(Guid nameSpaceId, Guid userId, CreateNotification.Request req)
@@ -62,49 +64,27 @@ namespace Fluxify.Application.Services
                 Properties = req.Properties
             };
 
-
-            List<UserNotification>? notificationUsers = null;
             if (req.Topics != null && req.Topics.Any())
             {
                 var topics = await TopicRepository.GetListAsync(req.Topics);
-                var targetUsers = await UserService.GetListByTopicsAsync(newNotification.NameSpace, topics.Select(s => s.Id).ToArray());
-
-                notificationUsers = targetUsers.Data.Items.Select(s => new UserNotification
-                {
-                    NotificationId = ticketId,
-                    UserId = s.Id,
-                    Status = (int)NotificationStatus.Pending,
-                    CreateDate = newNotification.CreateDate
-                }).ToList();
+                newNotification.Topics = topics.Select(x => x.Key)
+                                               .Where(f=> req.Topics.Contains(f))
+                                               .ToList();
             }
 
             await NotificationRepository.AddAsync(newNotification);
-
-            if (notificationUsers != null && notificationUsers.Any())
-                await UserNotificationRepository.AddRangeAsync(notificationUsers);
-
             await RabbitMqClient.PushAsync(Queues.NotificationQueue, ticketId);
 
             return new SuccessResult("Notification is created");
         }
         public async Task<IDataResult<DataListResponse<NotificationDto.List>>> GetListAsync(Guid userId, NotificationStatus[]? statuses = null)
         {
-            var statusValues = statuses?
-                .Select(x => (int)x)
-                .ToArray();
-
-            var userNotifications = await UserNotificationRepository.GetListAsync(x =>
-                x.UserId == userId &&
-                (
-                    statusValues == null ||
-                    statusValues.Contains(x.Status)
-                ));
+            var userTopics = await UserTopicRepository.GetListAsync(x => x.UserId == userId);
+            var userNotifications = await UserNotificationRepository.GetListAsync(x => x.UserId == userId);
 
             if (userNotifications.Count == 0)
-            {
                 return new SuccessDataResult<DataListResponse<NotificationDto.List>>(
                     DataListResponse<NotificationDto.List>.Load([]));
-            }
 
             var notificationIds = userNotifications
                 .Select(x => x.NotificationId)
@@ -113,10 +93,6 @@ namespace Fluxify.Application.Services
 
             var notifications = await NotificationRepository.GetListAsync(x =>
                 notificationIds.Contains(x.Id));
-
-            var statusLookup = userNotifications.ToDictionary(
-                x => x.NotificationId,
-                x => x.Status);
 
             var mappedList = _mapper.Map<List<NotificationDto.List>>(notifications);
             mappedList.ForEach(x =>

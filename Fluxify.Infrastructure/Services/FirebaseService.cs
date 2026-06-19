@@ -26,6 +26,24 @@ namespace Fluxify.Infrastructure.Services
             return await FirebaseMessaging.DefaultInstance.SendAsync(message);
         }
 
+        public async Task<IEnumerable<string>> SendNotificationAsync(IEnumerable<string> deviceTokens, string title, string summary, Dictionary<string, string>? data = null)
+        {
+            var message = new MulticastMessage()
+            {
+                Tokens = deviceTokens.ToList(),
+                Notification = new Notification()
+                {
+                    Title = title,
+                    Body = summary
+                },
+                Data = data
+            };
+
+            var response = await FirebaseMessaging.DefaultInstance.SendEachForMulticastAsync(message);
+
+            return response.Responses.Where(f => f.IsSuccess).Select(s => s.MessageId);
+        }
+
         public async Task<string> SendToTopicAsync(string topic, string title, string summary, Dictionary<string, string>? data = null)
         {
             var message = new Message()

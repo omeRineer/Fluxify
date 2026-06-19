@@ -33,7 +33,6 @@ namespace Fluxify.Api.Hub.Workers
         {
             using var scope = _scopeFactory.CreateScope();
             var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
-            var userNotificationService = scope.ServiceProvider.GetRequiredService<IUserNotificationService>();
             var notificationId = GetMessage<Guid>(args);
 
             var notificationResult = await notificationService.GetAsync(notificationId);
@@ -41,8 +40,7 @@ namespace Fluxify.Api.Hub.Workers
 
             if (nameSpaceUsers != null && nameSpaceUsers.Count > 0)
             {
-                var userNotificationsResult = await userNotificationService.GetTargetsAsync(notificationId);
-                var destinationUsers = nameSpaceUsers.Where(f => userNotificationsResult.Data.Any(x => x.UserId == f.Id));
+                var destinationUsers = nameSpaceUsers.Where(f => notificationResult.Data.Topics.Any(item => f.Topics.Contains(item)));
 
                 await _hubContext.Clients.Clients(destinationUsers.SelectMany(s => s.Connections).Select(s => s.Key)).SendAsync(HubEvents.NotificationHub.ReceiveNotification, new PushToClientNotificationModel
                 {
@@ -57,8 +55,6 @@ namespace Fluxify.Api.Hub.Workers
                     Summary = notificationResult.Data.Summary
                 });
 
-                var destinationNotifications = userNotificationsResult.Data.Where(f => destinationUsers.Any(x => x.Id == f.UserId));
-                await userNotificationService.MarkAsStatusAsync(NotificationStatus.Delivered, destinationNotifications.Select(s => s.NotificationId).ToArray());
             }
         }
     }

@@ -14,7 +14,7 @@ namespace Fluxify.Application.Models.Hub
         public NameSpaceInfo NameSpace { get; init; }
         public StatusInfo Status { get; set; }
         public DateTime ConnectedDate { get; set; }
-        public List<string>? Topics { get; set; }
+        public List<string> Topics { get; set; } = new();
 
         public Dictionary<string, DeviceInfo> Connections { get; } = new();
 

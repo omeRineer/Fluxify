@@ -23,6 +23,13 @@ namespace Fluxify.Application.Services
             _mapper = mapper;
         }
 
+        public async Task<IDataResult<List<UserDevice>>> GetListAsync(Guid[] userIds)
+        {
+            var devices = await UserDeviceRepository.GetListAsync(x => userIds.Contains(x.UserId) && x.IsActive);
+
+            return new SuccessDataResult<List<UserDevice>>(devices);
+        }
+
         public async Task<IResult> SetAsync(Guid userId, SetUserDevice.Request req)
         {
             var userDevice = await UserDeviceRepository.GetSingleOrDefaultAsync(x => x.UserId == userId && x.DeviceId == req.DeviceId);
