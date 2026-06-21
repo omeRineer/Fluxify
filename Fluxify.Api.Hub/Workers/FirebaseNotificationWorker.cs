@@ -1,10 +1,11 @@
 ﻿using Fluxify.Api.Hub.Workers.Main;
 using Fluxify.Application.Hubs;
 using Fluxify.Application.Services.Interfaces;
-using INF =Fluxify.Application.Infrastructure;
+using INF = Fluxify.Application.Infrastructure;
 using Microsoft.AspNetCore.SignalR;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using Fluxify.Application.Repositories;
 
 namespace Fluxify.Api.Hub.Workers
 {
@@ -25,19 +26,20 @@ namespace Fluxify.Api.Hub.Workers
         protected async override Task HandleAsync(object model, BasicDeliverEventArgs args)
         {
             using var scope = _scopeFactory.CreateScope();
-            var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
+            var notificationRepository = scope.ServiceProvider.GetRequiredService<INotificationRepository>();
             var fireBaseNotificationService = scope.ServiceProvider.GetRequiredService<INF.INotificationService>();
-            var userNotificationService = scope.ServiceProvider.GetRequiredService<IUserNotificationService>();
-            var userDeviceService = scope.ServiceProvider.GetRequiredService<IUserDeviceService>();
+            var userDeviceRepository = scope.ServiceProvider.GetRequiredService<IUserDeviceRepository>();
+            var userTopicRepository = scope.ServiceProvider.GetRequiredService<IUserTopicRepository>();
+            var userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
             var notificationId = GetMessage<Guid>(args);
 
-            var notificationResult = await notificationService.GetAsync(notificationId);
-            var nameSpaceUsers = _connectionManager.GetAllConnections(notificationResult.Data.NameSpace);
-            var userNotificationsResult = await userNotificationService.GetTargetsAsync(notificationId);
-            var userDevices = await userDeviceService.GetListAsync(userNotificationsResult.Data.Select(s => s.UserId).ToArray());
-            var targetDevices = userDevices.Data.Where(f => !nameSpaceUsers.SelectMany(s => s.Connections).Select(s => s.Value).Select(s => s.Device).Contains(f.DeviceId));
+            var notification = await notificationRepository.GetSingleAsync(f => f.Id == notificationId);
+            var connectedUsers = _connectionManager.GetAllConnections(notification.NameSpace);
+            var targetUsers = await userTopicRepository.GetListAsync(f => notification.Topics.Contains(f.TopicId));
+            var userDevices = await userDeviceRepository.GetListAsync(f => targetUsers.Select(s => s.UserId).Contains(f.UserId));
+            var targetDevices = userDevices.Where(f => !connectedUsers.SelectMany(s => s.Connections).Select(s => s.Value).Select(s => s.Device).Contains(f.DeviceId));
 
-            await fireBaseNotificationService.SendNotificationAsync(targetDevices.Select(s => s.DeviceId), notificationResult.Data.Title, notificationResult.Data.Summary);
+            await fireBaseNotificationService.SendNotificationAsync(targetDevices.Select(s => s.Token), notification.Title, notification.Summary);
         }
     }
 }

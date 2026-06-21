@@ -13,10 +13,8 @@ namespace Fluxify.Application.Services.Interfaces
 {
     public interface IUserNotificationService
     {
+        Task<IResult> AddAsync(Guid userId, Guid notificationId);
         Task<IResult> MarkAsStatusAsync(NotificationStatus status, Guid[] notificationIds, Guid[]? userIds = null);
 
-        #region Internal
-        Task<IDataResult<List<UserNotification>>> GetTargetsAsync(Guid notificationId);
-        #endregion
     }
 }

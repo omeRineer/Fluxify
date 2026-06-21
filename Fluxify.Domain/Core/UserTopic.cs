@@ -15,7 +15,7 @@ namespace Fluxify.Domain.Core
         public Guid UserId { get; set; }
 
         [BsonRepresentation(BsonType.String)]
-        public Guid TopicId { get; set; }
+        public string TopicId { get; set; }
     }
 
     

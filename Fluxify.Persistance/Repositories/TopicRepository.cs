@@ -5,7 +5,7 @@ using MongoDB.Driver;
 
 namespace Fluxify.Persistance.Repositories
 {
-    public class TopicRepository : MongoRepository<Topic, Guid>, ITopicRepository
+    public class TopicRepository : MongoRepository<Topic, string>, ITopicRepository
     {
         public TopicRepository(IMongoDatabase dataBase) : base(dataBase, "Topics")
         {
@@ -24,7 +24,7 @@ namespace Fluxify.Persistance.Repositories
         /// </summary>
         /// <param name="topics"></param>
         /// <returns></returns>
-        public async Task<List<Topic>> GetListAsync(params string[] keys)
-            => await GetListAsync(f => keys.Contains(f.Key));
+        public async Task<List<Topic>> GetListAsync(params string[] topics)
+            => await GetListAsync(f => topics.Contains(f.Id));
     }
 }

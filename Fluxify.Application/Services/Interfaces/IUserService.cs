@@ -18,12 +18,11 @@ namespace Fluxify.Application.Services.Interfaces
         Task<IDataResult<CreateUser.Response>> CreateAsync(Guid nameSpaceId, CreateUser.Request model);
         Task<IDataResult<UpdateUser.Response>> UpdateAsync(Guid id, UpdateUser.Request model);
         Task<IDataResult<UserDto.Detail>> GetDetailAsync(Guid id);
-        Task<IDataResult<DataListResponse<UserDto.Detail>>> GetListByTopicsAsync(Guid nameSpace, params Guid[] topics);
+        Task<IDataResult<DataListResponse<UserDto.Detail>>> GetListByTopicsAsync(Guid nameSpace, params string[] topics);
         Task<IDataResult<DataListResponse<UserDto.Detail>>> GetListAsync(Guid nameSpaceId);
 
 
         #region Internal
-        Task<IDataResult<User>> GetAsync(Guid id);
         Task<IDataResult<User>> GetAsync(string apiKey);
         #endregion
 

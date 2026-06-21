@@ -8,11 +8,10 @@ using System.Threading.Tasks;
 
 namespace Fluxify.Domain.Core
 {
-    public class Topic : MongoEntity<Guid>
+    public class Topic : MongoEntity<string>
     {
         [BsonRepresentation(BsonType.String)]
         public Guid ChannelId { get; set; }
-        public string Key { get; set; }
         public string Name { get; set; }
     }
 }

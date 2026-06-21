@@ -36,11 +36,11 @@ namespace Fluxify.Persistance.Repositories
                 .Filter
                 .And(filters);
 
-            var update = Builders<UserNotification>
-                .Update
-                .Set(x => x.Status, (int)status);
+            //var update = Builders<UserNotification>
+            //    .Update
+            //    .Set(x => x.Status, (int)status);
 
-            await Collection.UpdateManyAsync(filter, update);
+            //await Collection.UpdateManyAsync(filter, update);
         }
     }
 }

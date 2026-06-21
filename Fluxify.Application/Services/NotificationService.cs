@@ -30,18 +30,17 @@ namespace Fluxify.Application.Services
     public class NotificationService : INotificationService
     {
         readonly INotificationRepository NotificationRepository;
-        readonly IUserService UserService;
+        readonly IUserRepository UserRepository;
         readonly ITopicRepository TopicRepository;
         readonly IUserNotificationRepository UserNotificationRepository;
         readonly IUserTopicRepository UserTopicRepository;
         readonly RabbitMqClientService RabbitMqClient;
         readonly IMapper _mapper;
-        public NotificationService(INotificationRepository notifications, RabbitMqClientService rabbitMqClientService, IUserNotificationRepository userNotificationRepository, IUserService userService, ITopicRepository topicRepository, IMapper mapper, IUserTopicRepository userTopicRepository)
+        public NotificationService(INotificationRepository notifications, RabbitMqClientService rabbitMqClientService, IUserNotificationRepository userNotificationRepository, ITopicRepository topicRepository, IMapper mapper, IUserTopicRepository userTopicRepository)
         {
             NotificationRepository = notifications;
             RabbitMqClient = rabbitMqClientService;
             UserNotificationRepository = userNotificationRepository;
-            UserService = userService;
             TopicRepository = topicRepository;
             _mapper = mapper;
             UserTopicRepository = userTopicRepository;
@@ -67,19 +66,20 @@ namespace Fluxify.Application.Services
             if (req.Topics != null && req.Topics.Any())
             {
                 var topics = await TopicRepository.GetListAsync(req.Topics);
-                newNotification.Topics = topics.Select(x => x.Key)
+                newNotification.Topics = topics.Select(x => x.Id)
                                                .Where(f=> req.Topics.Contains(f))
                                                .ToList();
             }
 
             await NotificationRepository.AddAsync(newNotification);
-            await RabbitMqClient.PushAsync(Queues.NotificationQueue, ticketId);
+            await RabbitMqClient.PushAsync(Queues.FirebaseNotificationQueue, ticketId);
 
             return new SuccessResult("Notification is created");
         }
-        public async Task<IDataResult<DataListResponse<NotificationDto.List>>> GetListAsync(Guid userId, NotificationStatus[]? statuses = null)
+        public async Task<IDataResult<DataListResponse<NotificationDto.List>>> GetListAsync(Guid userId)
         {
             var userTopics = await UserTopicRepository.GetListAsync(x => x.UserId == userId);
+            var topics = await TopicRepository.GetListAsync(x => userTopics.Select(ut => ut.TopicId).Contains(x.Id));
             var userNotifications = await UserNotificationRepository.GetListAsync(x => x.UserId == userId);
 
             if (userNotifications.Count == 0)
@@ -91,14 +91,16 @@ namespace Fluxify.Application.Services
                 .Distinct()
                 .ToList();
 
-            var notifications = await NotificationRepository.GetListAsync(x =>
-                notificationIds.Contains(x.Id));
+            var notifications = await NotificationRepository.GetListAsync(x => notificationIds.Contains(x.Id) ||
+                                                                               x.Topics.Any(o=> topics.Select(s=> s.Id).Contains(o)));
 
             var mappedList = _mapper.Map<List<NotificationDto.List>>(notifications);
             mappedList.ForEach(x =>
             {
-                if (statusLookup.TryGetValue(x.Id, out var status))
-                    x.Status = EnumHelper.ToEnumString<NotificationStatus>(status);
+                if (userNotifications.Any(un => un.NotificationId == x.Id))
+                    x.IsRead = true;
+                else
+                    x.IsRead = false;
             });
 
             var result = DataListResponse<NotificationDto.List>.Load(mappedList);
@@ -107,29 +109,22 @@ namespace Fluxify.Application.Services
         }
         public async Task<IDataResult<NotificationDto.Detail>> GetDetailAsync(Guid id, Guid userId)
         {
-            #region User Notification
-            var userNotification = await UserNotificationRepository.GetFirstOrDefaultAsync(f => f.NotificationId == id &&
-                                                                                                f.UserId == userId &&
-                                                                                                (f.Status == (int)NotificationStatus.Delivered || f.Status == (int)NotificationStatus.Read));
-            var businessResult = await BusinessRuleEngine.Run(
-                    new DataMustBeFoundRule(userNotification, "Notification is not found")
-            );
-            if (!businessResult.IsSuccess)
-                return new ErrorDataResult<NotificationDto.Detail>(message: businessResult.Message);
-            #endregion
+            var isRead = await UserNotificationRepository.IsExistAsync(f => f.NotificationId == id &&
+                                                                                      f.UserId == userId);
+
 
             var notification = await NotificationRepository.GetSingleAsync(f => f.Id == id);
-            var user = await UserService.GetAsync(notification.Sender);
+            var user = await UserRepository.GetSingleAsync(f=> f.Id == notification.Sender);
             var result = new NotificationDto.Detail
             {
                 Id = notification.Id,
                 Level = EnumHelper.ToEnumString<NotificationLevelType>(notification.Level),
                 ContentType = EnumHelper.ToEnumString<NotificationContentType>(notification.ContentType),
-                Sender = user.Data.Key,
+                Sender = user.Key,
                 Title = notification.Title,
                 Summary = notification.Summary,
                 Content = notification.Content,
-                Status = EnumHelper.ToEnumString<NotificationStatus>(userNotification.Status),
+                IsRead = isRead,
                 CreateDate = notification.CreateDate,
                 Topics = notification.Topics,
                 Properties = notification.Properties

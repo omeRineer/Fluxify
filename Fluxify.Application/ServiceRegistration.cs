@@ -29,6 +29,7 @@ namespace Fluxify.Application
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IUserNotificationService, UserNotificationService>();
             services.AddScoped<IUserDeviceService, UserDeviceService>();
+            services.AddScoped<IUserTopicService, UserTopicService>();
             services.AddScoped<IChannelService, ChannelService>();
             services.AddScoped<ITopicService, TopicService>();
 
@@ -42,18 +43,21 @@ namespace Fluxify.Application
             {
                 var httpContextAccessor = i.GetService<IHttpContextAccessor>();
                 var user = httpContextAccessor?.HttpContext?.User;
-                var userClaims = user?.Claims.ToDictionary(k=> k.Type);
+                var userClaims = user.Claims
+                    .GroupBy(k => k.Type)
+                    .ToDictionary(g => g.Key, g => g.First().Value);
+
 
                 if (user != null && user.Identity.IsAuthenticated)
                     return new CurrentUser
                     {
-                        NameIdentifier = Guid.Parse(userClaims[ClaimTypes.NameIdentifier].Value),
-                        ApiKey = userClaims[FluxifyClaims.ApiKey].Value,
-                        Key = userClaims[FluxifyClaims.Key].Value,
-                        NameSpace = new CurrentUser.NameSpaceInfo(Guid.Parse(userClaims[FluxifyClaims.NameSpaceId].Value),
-                                                                  userClaims[FluxifyClaims.NameSpace].Value),
-                        Name = userClaims[ClaimTypes.Name].Value,
-                        Device = new CurrentUser.DeviceInfo(userClaims[FluxifyClaims.Device].Value, userClaims[FluxifyClaims.Platform].Value)
+                        NameIdentifier = Guid.Parse(userClaims[ClaimTypes.NameIdentifier]),
+                        ApiKey = userClaims[FluxifyClaims.ApiKey],
+                        Key = userClaims[FluxifyClaims.Key],
+                        NameSpace = new CurrentUser.NameSpaceInfo(Guid.Parse(userClaims[FluxifyClaims.NameSpaceId]),
+                                                                  userClaims[FluxifyClaims.NameSpace]),
+                        Name = userClaims[ClaimTypes.Name],
+                        Device = new CurrentUser.DeviceInfo(userClaims[FluxifyClaims.Device], userClaims[FluxifyClaims.Platform])
                     };
 
                 return new CurrentUser();

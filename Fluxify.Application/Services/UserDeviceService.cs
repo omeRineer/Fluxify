@@ -46,6 +46,7 @@ namespace Fluxify.Application.Services
             if (userDevice == null)
             {
                 userDevice = _mapper.Map<UserDevice>(req);
+                userDevice.UserId = userId;
 
                 await UserDeviceRepository.AddAsync(userDevice);
             }

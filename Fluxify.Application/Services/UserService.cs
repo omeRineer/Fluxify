@@ -99,7 +99,7 @@ namespace Fluxify.Application.Services
             return new SuccessDataResult<User>(subscriber);
         }
 
-        public async Task<IDataResult<DataListResponse<UserDto.Detail>>> GetListByTopicsAsync(Guid nameSpaceId, params Guid[] topics)
+        public async Task<IDataResult<DataListResponse<UserDto.Detail>>> GetListByTopicsAsync(Guid nameSpaceId, params string[] topics)
         {
             var userTopics = await UserTopicRepository.GetListAsync(f => topics.Contains(f.TopicId));
             var users = await UserRepository.GetListAsync(f => f.NameSpace == nameSpaceId && userTopics.Select(ut => ut.UserId).Contains(f.Id));

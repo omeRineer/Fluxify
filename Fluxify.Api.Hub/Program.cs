@@ -3,12 +3,15 @@ using Fluxify.Persistance;
 using Fluxify.Application.Hubs;
 using System.Security.Claims;
 using Fluxify.Api.Hub.Workers;
+using Fluxify.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 await builder.Services.AddRabbitMqAsync();
 builder.Services.AddHostedService<NotificationWorker>();
+builder.Services.AddHostedService<FirebaseNotificationWorker>();
 builder.Services.AddApplication();
 builder.Services.AddPersistance();
+builder.Services.AddInfrastructure();
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<HubConnectionManager<NotificationHub>>();
 builder.Services.AddSingleton<HubConnectionManager<PresenceHub>>();

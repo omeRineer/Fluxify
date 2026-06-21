@@ -16,9 +16,10 @@ namespace Fluxify.Infrastructure
         public static void AddInfrastructure(this IServiceCollection services)
         {
             services.AddScoped<INotificationService, FirebaseNotificationService>();
+
             FirebaseApp.Create(new AppOptions()
             {
-                Credential = CredentialFactory.FromFile<GoogleCredential>("Config/fluxify-adminsdk.json")
+                Credential = GoogleCredential.FromFile($"{AppDomain.CurrentDomain.BaseDirectory}/External/fluxify-adminsdk.json")
             });
         }
     }

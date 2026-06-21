@@ -19,22 +19,24 @@ namespace Fluxify.Application.Services
 {
     public class UserNotificationService : IUserNotificationService
     {
-        readonly INotificationRepository NotificationRepository;
         readonly IUserNotificationRepository UserNotificationRepository;
         readonly IMapper _mapper;
 
-        public UserNotificationService(IUserNotificationRepository userNotificationRepository, INotificationRepository notificationRepository, IMapper mapper)
+        public UserNotificationService(IUserNotificationRepository userNotificationRepository, IMapper mapper)
         {
             UserNotificationRepository = userNotificationRepository;
-            NotificationRepository = notificationRepository;
             _mapper = mapper;
-        }        
+        }
 
-        public async Task<IDataResult<List<UserNotification>>> GetTargetsAsync(Guid notificationId)
+        public async Task<IResult> AddAsync(Guid userId, Guid notificationId)
         {
-            var userNotifications = await UserNotificationRepository.GetListAsync(f => f.NotificationId == notificationId);
+            await UserNotificationRepository.AddAsync(new UserNotification
+            {
+                NotificationId = notificationId,
+                UserId = userId
+            });
 
-            return new SuccessDataResult<List<UserNotification>>(userNotifications);
+            return new SuccessResult();
         }
 
         public async Task<IResult> MarkAsStatusAsync(NotificationStatus status, Guid[] notificationIds, Guid[]? userIds = null)

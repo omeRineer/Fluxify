@@ -37,7 +37,7 @@ namespace Fluxify.Application.Services
             var newTopic = new Topic
             {
                 ChannelId = channel.Id,
-                Key = $"{channel.Key}:{req.Key}",
+                Id = $"{channel.Key}:{req.Key}",
                 Name = req.Name
             };
 

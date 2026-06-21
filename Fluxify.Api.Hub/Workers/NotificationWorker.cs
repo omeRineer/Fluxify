@@ -49,7 +49,7 @@ namespace Fluxify.Api.Hub.Workers
                     CreateDate = notificationResult.Data.CreateDate,
                     Properties = notificationResult.Data.Properties,
                     Level = EnumHelper.ToEnumString<NotificationLevelType>(notificationResult.Data.Level),
-                    Status = EnumHelper.ToEnumString<NotificationStatus>((int)NotificationStatus.Delivered),
+                    IsRead = false,
                     Sender = nameSpaceUsers.Single(f => f.Id == notificationResult.Data.Sender).Key,
                     Title = notificationResult.Data.Title,
                     Summary = notificationResult.Data.Summary

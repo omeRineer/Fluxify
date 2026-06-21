@@ -22,7 +22,7 @@ namespace Fluxify.Domain.Core
         public string Summary { get; set; }
         public int ContentType { get; set; }
         public string? Content { get; set; }
-        public List<string>? Topics { get; set; }
+        public List<string> Topics { get; set; }
 
         public Dictionary<string, object>? Properties { get; set; }
 

@@ -1,5 +1,6 @@
 ﻿using Fluxify.Application.Models.Common;
 using Fluxify.Application.Models.Rest.UserDevice;
+using Fluxify.Application.Models.Rest.UserTopic;
 using Fluxify.Application.Services;
 using Fluxify.Application.Services.Interfaces;
 using Fluxify.Domain.Enums;
@@ -11,13 +12,15 @@ namespace Fluxify.Api.Open.Controllers
     public class MeController : BaseController
     {
         readonly IUserService UserService;
+        readonly IUserTopicService UserTopicService;
         readonly INotificationService NotificationService;
         readonly IUserDeviceService UserDeviceService;
-        public MeController(CurrentUser currentUser, IUserService UserService, INotificationService notificationService, IUserDeviceService userDeviceService) : base(currentUser)
+        public MeController(CurrentUser currentUser, IUserService UserService, INotificationService notificationService, IUserDeviceService userDeviceService, IUserTopicService userTopicService) : base(currentUser)
         {
             this.UserService = UserService;
             NotificationService = notificationService;
             UserDeviceService = userDeviceService;
+            UserTopicService = userTopicService;
         }
 
         [HttpGet("Profile")]
@@ -26,21 +29,16 @@ namespace Fluxify.Api.Open.Controllers
 
         [HttpGet("Notifications")]
         public async Task<IActionResult> GetNotificationsAsync()
-            => Ok(await NotificationService.GetListAsync(CurrentUser.NameIdentifier,
-                                                                new[]
-                                                                {
-                                                                    NotificationStatus.Delivered,
-                                                                    NotificationStatus.Read
-                                                                }));
-
-        //[HttpGet("Devices")]
-        //public async Task<IActionResult> GetDevicesAsync()
-        //    => Ok(await UserDeviceService.SetAsync(CurrentUser.NameIdentifier,
-        //                                           req));
+            => Ok(await NotificationService.GetListAsync(CurrentUser.NameIdentifier));
 
         [HttpPost("Device/Set")]
-        public async Task<IActionResult> SetDeviceAsync(SetUserDevice.Request req)
+        public async Task<IActionResult> SetDeviceAsync([FromBody] SetUserDevice.Request req)
             => Ok(await UserDeviceService.SetAsync(CurrentUser.NameIdentifier,
                                                    req));
+
+        [HttpPost("Topic/Set")]
+        public async Task<IActionResult> SetTopicsAsync([FromBody] SetUserTopics.Request req)
+            => Ok(await UserTopicService.SetAsync(CurrentUser.NameIdentifier,
+                                                  req));
     }
 }

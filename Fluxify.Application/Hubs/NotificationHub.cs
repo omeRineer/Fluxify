@@ -42,38 +42,38 @@ namespace Fluxify.Application.Hubs
 
 
 
-        public async Task GetPendingNotifications()
-        {
-            ConnectionUser connectionUser = HubConnectionManager.GetConnection(Context.User.Claims.Single(f => f.Type == ClaimTypes.NameIdentifier).Value);
-            var pendingNotifications = await NotificationService.GetListAsync(connectionUser.Id, new[]
-            {
-                NotificationStatus.Pending
-            });
+        //public async Task GetPendingNotifications()
+        //{
+        //    ConnectionUser connectionUser = HubConnectionManager.GetConnection(Context.User.Claims.Single(f => f.Type == ClaimTypes.NameIdentifier).Value);
+        //    var pendingNotifications = await NotificationService.GetListAsync(connectionUser.Id, new[]
+        //    {
+        //        NotificationStatus.Pending
+        //    });
 
-            if(pendingNotifications.Data.Count > 0)
-            {
-                var sendingNotifications = pendingNotifications.Data.Items.Select(s => new PushToClientNotificationModel
-                {
-                    Id = s.Id,
-                    ContentType = s.ContentType,
-                    CreateDate = s.CreateDate,
-                    Properties = s.Properties,
-                    Status = s.Status,
-                    Level = s.Level,
-                    Sender = s.Sender,
-                    Title = s.Title,
-                    Summary = s.Summary
-                }).ToList();
+        //    if(pendingNotifications.Data.Count > 0)
+        //    {
+        //        var sendingNotifications = pendingNotifications.Data.Items.Select(s => new PushToClientNotificationModel
+        //        {
+        //            Id = s.Id,
+        //            ContentType = s.ContentType,
+        //            CreateDate = s.CreateDate,
+        //            Properties = s.Properties,
+        //            Status = s.Status,
+        //            Level = s.Level,
+        //            Sender = s.Sender,
+        //            Title = s.Title,
+        //            Summary = s.Summary
+        //        }).ToList();
 
-                await Clients.Caller.SendAsync(HubEvents.NotificationHub.ReceivePendingNotifications, sendingNotifications);
+        //        await Clients.Caller.SendAsync(HubEvents.NotificationHub.ReceivePendingNotifications, sendingNotifications);
 
-                await UserNotificationService.MarkAsStatusAsync(NotificationStatus.Delivered, 
-                                                                pendingNotifications.Data.Items.Select(s => s.Id).ToArray(), 
-                                                                new[] { connectionUser.Id });
+        //        await UserNotificationService.MarkAsStatusAsync(NotificationStatus.Delivered, 
+        //                                                        pendingNotifications.Data.Items.Select(s => s.Id).ToArray(), 
+        //                                                        new[] { connectionUser.Id });
 
-            }
+        //    }
 
-        }
+        //}
 
 
     }

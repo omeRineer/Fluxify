@@ -15,14 +15,14 @@ namespace Fluxify.Api.Hub.Auth
     public class FluxifyHubAuthenticationHandler : AuthenticationHandler<FluxifyHubAuthenticationOptions>
     {
         const string ApiKeyHeaderName = "Fluxify-Api-Key";
-        readonly IUserService NotificationSubscriberService;
         readonly INameSpaceRepository NameSpaceRepository;
-        readonly ITopicService topicService;
-        public FluxifyHubAuthenticationHandler(IOptionsMonitor<FluxifyHubAuthenticationOptions> options, IUserService notificationSubscriberService, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock, INameSpaceRepository nameSpaceRepository, ITopicService topicService) : base(options, logger, encoder, clock)
+        readonly IUserTopicRepository UserTopicRepository;
+        readonly IUserRepository UserRepository;
+        public FluxifyHubAuthenticationHandler(IOptionsMonitor<FluxifyHubAuthenticationOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock, INameSpaceRepository nameSpaceRepository, IUserTopicRepository userTopicRepository, IUserRepository userRepository) : base(options, logger, encoder, clock)
         {
-            NotificationSubscriberService = notificationSubscriberService;
             NameSpaceRepository = nameSpaceRepository;
-            this.topicService = topicService;
+            UserTopicRepository = userTopicRepository;
+            UserRepository = userRepository;
         }
 
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
@@ -32,7 +32,7 @@ namespace Fluxify.Api.Hub.Auth
                 return AuthenticateResult.Fail("API Key is not provided.");
 
             var providedApiKey = headers.FirstOrDefault() ?? queries.FirstOrDefault();
-            var subscriber = (await NotificationSubscriberService.GetAsync(providedApiKey)).Data;
+            var subscriber = (await UserRepository.GetSingleAsync(f=> f.ApiKey == providedApiKey));
 
             if (subscriber == null)
                 return AuthenticateResult.Fail("Invalid API Key.");
@@ -54,10 +54,10 @@ namespace Fluxify.Api.Hub.Auth
                 new Claim(ClaimTypes.Name, subscriber.Name)
             };
 
-            var userTopicsResult = await topicService.GetListAsync(subscriber.Id);
-            if (userTopicsResult.Data != null && userTopicsResult.Data.Count > 0)
-                foreach (var topic in userTopicsResult.Data)
-                    claims.Add(new Claim(FluxifyClaims.Topic, topic.Key));
+            var userTopicsResult = await UserTopicRepository.GetListAsync(f=> f.UserId == subscriber.Id);
+            if (userTopicsResult != null && userTopicsResult.Count > 0)
+                foreach (var topic in userTopicsResult)
+                    claims.Add(new Claim(FluxifyClaims.Topic, topic.TopicId));
 
             var identity = new ClaimsIdentity(claims, Scheme.Name);
             var principal = new ClaimsPrincipal(identity);

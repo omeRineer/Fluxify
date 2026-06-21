@@ -14,8 +14,7 @@ namespace Fluxify.Application.Models.SignalR
         public string ContentType { get; set; }
         public string Title { get; set; }
         public string Summary { get; set; }
-        public string? Content { get; set; }
-        public string Status { get; set; }
+        public bool IsRead { get; set; }
         public DateTime CreateDate { get; set; }
         public Dictionary<string, object>? Properties { get; set; }
     }

@@ -43,9 +43,7 @@ namespace Fluxify.Api.Open.Controllers
         [HttpPut("{id}/Read")]
         public async Task<IActionResult> ReadAsync([FromRoute] Guid id)
         {
-            var result = await UserNotificationService.MarkAsStatusAsync(NotificationStatus.Read,
-                                                                         new[] { id },
-                                                                         new[] { CurrentUser.NameIdentifier });
+            var result = await UserNotificationService.AddAsync(CurrentUser.NameIdentifier, id);
 
             return Ok(result);
         }
