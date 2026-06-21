@@ -12,6 +12,8 @@ namespace Fluxify.Domain.Core
     {
         [BsonRepresentation(BsonType.String)]
         public Guid UserId { get; set; }
+        [BsonRepresentation(BsonType.String)]
+        public Guid NameSpaceId { get; set; }
         public string DeviceId { get; set; }
         public int Platform { get; set; }
         public string Token { get; set; }

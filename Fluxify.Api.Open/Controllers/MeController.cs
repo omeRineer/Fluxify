@@ -34,11 +34,13 @@ namespace Fluxify.Api.Open.Controllers
         [HttpPost("Device/Set")]
         public async Task<IActionResult> SetDeviceAsync([FromBody] SetUserDevice.Request req)
             => Ok(await UserDeviceService.SetAsync(CurrentUser.NameIdentifier,
+                                                   CurrentUser.NameSpace.Id,
                                                    req));
 
         [HttpPost("Topic/Set")]
         public async Task<IActionResult> SetTopicsAsync([FromBody] SetUserTopics.Request req)
             => Ok(await UserTopicService.SetAsync(CurrentUser.NameIdentifier,
+                                                  CurrentUser.NameSpace.Id,
                                                   req));
     }
 }

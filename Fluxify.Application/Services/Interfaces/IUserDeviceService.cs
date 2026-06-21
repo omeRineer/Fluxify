@@ -6,7 +6,7 @@ namespace Fluxify.Application.Services.Interfaces
 {
     public interface IUserDeviceService
     {
-        Task<IResult> SetAsync(Guid userId, SetUserDevice.Request req);
+        Task<IResult> SetAsync(Guid userId, Guid nameSpaceId, SetUserDevice.Request req);
         Task<IDataResult<List<UserDevice>>> GetListAsync(Guid[] userIds);
 
     }

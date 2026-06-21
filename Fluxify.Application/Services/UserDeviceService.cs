@@ -30,7 +30,7 @@ namespace Fluxify.Application.Services
             return new SuccessDataResult<List<UserDevice>>(devices);
         }
 
-        public async Task<IResult> SetAsync(Guid userId, SetUserDevice.Request req)
+        public async Task<IResult> SetAsync(Guid userId, Guid nameSpaceId, SetUserDevice.Request req)
         {
             var userDevice = await UserDeviceRepository.GetSingleOrDefaultAsync(x => x.UserId == userId && x.DeviceId == req.DeviceId);
 
@@ -47,6 +47,7 @@ namespace Fluxify.Application.Services
             {
                 userDevice = _mapper.Map<UserDevice>(req);
                 userDevice.UserId = userId;
+                userDevice.NameSpaceId = nameSpaceId;
 
                 await UserDeviceRepository.AddAsync(userDevice);
             }

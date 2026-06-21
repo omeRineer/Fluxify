@@ -10,6 +10,6 @@ namespace Fluxify.Application.Services.Interfaces
 {
     public interface IUserTopicService
     {
-        Task<IResult> SetAsync(Guid userId, SetUserTopics.Request req);
+        Task<IResult> SetAsync(Guid userId, Guid nameSpaceId, SetUserTopics.Request req);
     }
 }

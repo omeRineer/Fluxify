@@ -21,7 +21,7 @@ namespace Fluxify.Application.Services
             TopicRepository = topicRepository;
         }
 
-        public async Task<IResult> SetAsync(Guid userId, SetUserTopics.Request req)
+        public async Task<IResult> SetAsync(Guid userId, Guid nameSpaceId, SetUserTopics.Request req)
         {
             var topics = await TopicRepository.GetListAsync(f => req.Topics.Contains(f.Id));
             var userTopics = await UserTopicRepository.GetListAsync(f => f.UserId == userId);
@@ -30,7 +30,8 @@ namespace Fluxify.Application.Services
             await UserTopicRepository.AddRangeAsync(topics.Select(t => new Domain.Core.UserTopic
             {
                 UserId = userId,
-                TopicId = t.Id
+                TopicId = t.Id,
+                NameSpaceId = nameSpaceId
             }));
 
             return new SuccessResult("User topics are updated");

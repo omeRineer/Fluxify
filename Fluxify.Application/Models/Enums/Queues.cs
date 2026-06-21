@@ -10,5 +10,6 @@ namespace Fluxify.Application.Models.Enums
     {
         public const string NotificationQueue = "Notification_Queue";
         public const string FirebaseNotificationQueue = "Firebase_Notification_Queue";
+        public const string NotificationRouterQueue = "Notification_Router_Queue";
     }
 }

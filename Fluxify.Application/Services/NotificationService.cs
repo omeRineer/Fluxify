@@ -72,7 +72,7 @@ namespace Fluxify.Application.Services
             }
 
             await NotificationRepository.AddAsync(newNotification);
-            await RabbitMqClient.PushAsync(Queues.FirebaseNotificationQueue, ticketId);
+            await RabbitMqClient.PushAsync(Queues.NotificationRouterQueue, ticketId);
 
             return new SuccessResult("Notification is created");
         }

@@ -13,6 +13,8 @@ namespace Fluxify.Domain.Core
     {
         [BsonRepresentation(BsonType.String)]
         public Guid UserId { get; set; }
+        [BsonRepresentation(BsonType.String)]
+        public Guid NameSpaceId { get; set; }
 
         [BsonRepresentation(BsonType.String)]
         public string TopicId { get; set; }

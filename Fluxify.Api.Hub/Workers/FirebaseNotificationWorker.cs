@@ -35,7 +35,7 @@ namespace Fluxify.Api.Hub.Workers
 
             var notification = await notificationRepository.GetSingleAsync(f => f.Id == notificationId);
             var connectedUsers = _connectionManager.GetAllConnections(notification.NameSpace);
-            var targetUsers = await userTopicRepository.GetListAsync(f => notification.Topics.Contains(f.TopicId));
+            var targetUsers = await userTopicRepository.GetListAsync(f => notification.Topics.Contains(f.TopicId) && f.NameSpaceId == notification.NameSpace);
             var userDevices = await userDeviceRepository.GetListAsync(f => targetUsers.Select(s => s.UserId).Contains(f.UserId));
             var targetDevices = userDevices.Where(f => !connectedUsers.SelectMany(s => s.Connections).Select(s => s.Value).Select(s => s.Device).Contains(f.DeviceId));
 
