@@ -28,11 +28,11 @@ namespace Fluxify.Application.Hubs
         {
             ConnectionUser connectionUser = HubConnectionManager.AddConnection(Context);
 
-            await Groups.AddToGroupAsync(Context.ConnectionId, connectionUser.NameSpace.Name);
+            await Groups.AddToGroupAsync(Context.ConnectionId, connectionUser.NameSpace.Signature);
 
             if (connectionUser.Connections.Count == 1)
             {
-                await Clients.Group(connectionUser.NameSpace.Name).SendAsync(HubEvents.PresenceHub.ReceiveUserStates, new PushToClientUserStateInfoModel
+                await Clients.Group(connectionUser.NameSpace.Signature).SendAsync(HubEvents.PresenceHub.ReceiveUserStates, new PushToClientUserStateInfoModel
                 {
                     UserId = Context.User.Claims.Single(f => f.Type == FluxifyClaims.Key).Value,
                     Date = DateTime.UtcNow,
@@ -51,7 +51,7 @@ namespace Fluxify.Application.Hubs
 
             if(connectionCount == 0)
             {
-                await Clients.Group(connectionUser.NameSpace.Name).SendAsync(HubEvents.PresenceHub.ReceiveUserStates, new PushToClientUserStateInfoModel
+                await Clients.Group(connectionUser.NameSpace.Signature).SendAsync(HubEvents.PresenceHub.ReceiveUserStates, new PushToClientUserStateInfoModel
                 {
                     UserId = Context.User.Claims.Single(f => f.Type == FluxifyClaims.Key).Value,
                     Date = DateTime.UtcNow,
@@ -82,7 +82,7 @@ namespace Fluxify.Application.Hubs
             ConnectionUser connectionUser = HubConnectionManager.GetConnection(Context.User.Claims.Single(f => f.Type == ClaimTypes.NameIdentifier).Value);
 
             connectionUser.Status.Id = status;
-            await Clients.Group(connectionUser.NameSpace.Name).SendAsync(HubEvents.PresenceHub.ReceiveUserStates, new PushToClientUserStateInfoModel
+            await Clients.Group(connectionUser.NameSpace.Signature).SendAsync(HubEvents.PresenceHub.ReceiveUserStates, new PushToClientUserStateInfoModel
             {
                 UserId = Context.User.Claims.Single(f => f.Type == FluxifyClaims.Key).Value,
                 Status = status,

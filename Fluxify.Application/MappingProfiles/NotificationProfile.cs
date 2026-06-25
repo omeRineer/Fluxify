@@ -24,7 +24,11 @@ namespace Fluxify.Application.MappingProfiles
                 .ForMember(des => des.ContentType, opt => opt.MapFrom(src => ((NotificationContentType)src.ContentType).ToString()))
                 .ForMember(des => des.Level, opt => opt.MapFrom(src => ((NotificationLevelType)src.Level).ToString()));
 
-            CreateMap<CreateNotification.Request, Notification>();
+            CreateMap<CreateNotification.Request, Notification>()
+                .ForMember(des => des.Id, opt => opt.MapFrom(src => Guid.NewGuid()))
+                .ForMember(des => des.CreateDate, opt => opt.MapFrom(src => DateTime.UtcNow))
+                .ForMember(des => des.Level, opt => opt.MapFrom(src => (int)EnumHelper.Parse(src.Level, NotificationLevelType.Info)))
+                .ForMember(des => des.ContentType, opt => opt.MapFrom(src => (int)EnumHelper.Parse(src.ContentType, NotificationContentType.Text)));
         }
     }
 }

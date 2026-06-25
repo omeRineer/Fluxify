@@ -40,20 +40,21 @@ namespace Fluxify.Api.Hub.Workers
 
             if (nameSpaceUsers != null && nameSpaceUsers.Count > 0)
             {
-                var destinationUsers = nameSpaceUsers.Where(f => notificationResult.Data.Topics.Any(item => f.Topics.Contains(item)));
 
-                await _hubContext.Clients.Clients(destinationUsers.SelectMany(s => s.Connections).Select(s => s.Key)).SendAsync(HubEvents.NotificationHub.ReceiveNotification, new PushToClientNotificationModel
-                {
-                    Id = notificationResult.Data.Id,
-                    ContentType = EnumHelper.ToEnumString<NotificationContentType>(notificationResult.Data.ContentType),
-                    CreateDate = notificationResult.Data.CreateDate,
-                    Properties = notificationResult.Data.Properties,
-                    Level = EnumHelper.ToEnumString<NotificationLevelType>(notificationResult.Data.Level),
-                    IsRead = false,
-                    Sender = nameSpaceUsers.Single(f => f.Id == notificationResult.Data.Sender).Key,
-                    Title = notificationResult.Data.Title,
-                    Summary = notificationResult.Data.Summary
-                });
+                // TODO : It should send to only target users without sender.
+                string nameSpace = nameSpaceUsers.First().NameSpace.Signature;
+                await _hubContext.Clients.Groups(notificationResult.Data.Topics.Select(s => $"{nameSpace}:{s}"))
+                                         .SendAsync(HubEvents.NotificationHub.ReceiveNotification,
+                                         new PushToClientNotificationModel
+                                         {
+                                             Id = notificationResult.Data.Id,
+                                             Date = notificationResult.Data.CreateDate,
+                                             Properties = notificationResult.Data.Properties,
+                                             Level = EnumHelper.ToEnumString<NotificationLevelType>(notificationResult.Data.Level),
+                                             Sender = nameSpaceUsers.Single(f => f.Id == notificationResult.Data.Sender).Key,
+                                             Title = notificationResult.Data.Title,
+                                             Summary = notificationResult.Data.Summary
+                                         });
 
             }
         }

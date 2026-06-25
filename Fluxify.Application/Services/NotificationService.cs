@@ -48,51 +48,24 @@ namespace Fluxify.Application.Services
 
         public async Task<IResult> CreateAsync(Guid nameSpaceId, Guid userId, CreateNotification.Request req)
         {
-            var ticketId = Guid.NewGuid();
-            var newNotification = new Notification
-            {
-                Id = ticketId,
-                NameSpace = nameSpaceId,
-                Sender = userId,
-                Level = (int)EnumHelper.Parse<NotificationLevelType>(req.Level),
-                Title = req.Title,
-                Summary = req.Summary,
-                Content = req.Content,
-                ContentType = (int)EnumHelper.Parse<NotificationContentType>(req.ContentType),
-                CreateDate = DateTime.Now,
-                Properties = req.Properties
-            };
+            var newNotification = _mapper.Map<Notification>(req);
+            newNotification.NameSpace = nameSpaceId;
+            newNotification.Sender = userId;
 
-            if (req.Topics != null && req.Topics.Any())
-            {
-                var topics = await TopicRepository.GetListAsync(req.Topics);
-                newNotification.Topics = topics.Select(x => x.Id)
-                                               .Where(f=> req.Topics.Contains(f))
-                                               .ToList();
-            }
+            var topics = await TopicRepository.GetListAsync(req.Topics);
+            newNotification.Topics = topics?.Select(s => s.Id)?.ToList() ?? new();
 
             await NotificationRepository.AddAsync(newNotification);
-            await RabbitMqClient.PushAsync(Queues.NotificationRouterQueue, ticketId);
+            await RabbitMqClient.PushAsync(Queues.NotificationRouterQueue, newNotification.Id);
 
             return new SuccessResult("Notification is created");
         }
         public async Task<IDataResult<DataListResponse<NotificationDto.List>>> GetListAsync(Guid userId)
         {
             var userTopics = await UserTopicRepository.GetListAsync(x => x.UserId == userId);
-            var topics = await TopicRepository.GetListAsync(x => userTopics.Select(ut => ut.TopicId).Contains(x.Id));
             var userNotifications = await UserNotificationRepository.GetListAsync(x => x.UserId == userId);
 
-            if (userNotifications.Count == 0)
-                return new SuccessDataResult<DataListResponse<NotificationDto.List>>(
-                    DataListResponse<NotificationDto.List>.Load([]));
-
-            var notificationIds = userNotifications
-                .Select(x => x.NotificationId)
-                .Distinct()
-                .ToList();
-
-            var notifications = await NotificationRepository.GetListAsync(x => notificationIds.Contains(x.Id) ||
-                                                                               x.Topics.Any(o=> topics.Select(s=> s.Id).Contains(o)));
+            var notifications = await NotificationRepository.GetListAsync(x => x.Topics.Any(o=> userTopics.Select(s=> s.TopicId).Contains(o)));
 
             var mappedList = _mapper.Map<List<NotificationDto.List>>(notifications);
             mappedList.ForEach(x =>
@@ -103,7 +76,7 @@ namespace Fluxify.Application.Services
                     x.IsRead = false;
             });
 
-            var result = DataListResponse<NotificationDto.List>.Load(mappedList);
+            var result = DataListResponse<NotificationDto.List>.Load(mappedList.OrderBy(o=> o.IsRead).ToList());
 
             return new SuccessDataResult<DataListResponse<NotificationDto.List>>(result);
         }

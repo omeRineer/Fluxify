@@ -69,6 +69,7 @@ namespace Fluxify.Application
         public static async Task<IServiceCollection> AddRabbitMqAsync(this IServiceCollection services)
         {
             var connectionFactory = new ConnectionFactory();
+            Console.WriteLine(AppConfiguration.RabbitMqOptions == null);
             connectionFactory.HostName = AppConfiguration.RabbitMqOptions.Host;
             connectionFactory.Port = AppConfiguration.RabbitMqOptions.Port;
             connectionFactory.VirtualHost = AppConfiguration.RabbitMqOptions.VirtualHost;

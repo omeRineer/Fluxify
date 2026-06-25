@@ -8,7 +8,7 @@ namespace Fluxify.Application.Utilities.Helpers
 {
     public static class EnumHelper
     {
-        public static TEnum Parse<TEnum>(string value, TEnum defaultValue = default(TEnum))
+        public static TEnum Parse<TEnum>(string? value, TEnum defaultValue = default(TEnum))
             where TEnum : struct, Enum
         {
             if (string.IsNullOrWhiteSpace(value))

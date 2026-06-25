@@ -46,7 +46,7 @@ namespace Fluxify.Application.Hubs
                         NameSpace = new ConnectionUser.NameSpaceInfo
                         {
                             Id = Guid.Parse(context.User.Claims.Single(f => f.Type == FluxifyClaims.NameSpaceId).Value),
-                            Name = context.User.Claims.Single(f => f.Type == FluxifyClaims.NameSpace).Value
+                            Signature = context.User.Claims.Single(f => f.Type == FluxifyClaims.NameSpace).Value
                         },
                         Status = new ConnectionUser.StatusInfo
                         {

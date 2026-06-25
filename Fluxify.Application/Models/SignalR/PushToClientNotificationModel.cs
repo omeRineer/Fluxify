@@ -11,11 +11,9 @@ namespace Fluxify.Application.Models.SignalR
         public Guid Id { get; set; }
         public string Sender { get; set; }
         public string Level { get; set; }
-        public string ContentType { get; set; }
         public string Title { get; set; }
         public string Summary { get; set; }
-        public bool IsRead { get; set; }
-        public DateTime CreateDate { get; set; }
+        public DateTime Date { get; set; }
         public Dictionary<string, object>? Properties { get; set; }
     }
 }

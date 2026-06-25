@@ -22,6 +22,7 @@ app.UseAuthentication();
 
 app.UseAuthorization();
 
+app.Map("/health", () => "Healthy!");
 app.MapControllers();
 
 app.Run();

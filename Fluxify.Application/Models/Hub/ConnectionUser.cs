@@ -34,7 +34,7 @@ namespace Fluxify.Application.Models.Hub
         public class NameSpaceInfo
         {
             public Guid Id { get; init; }
-            public string Name { get; init; }
+            public string Signature { get; init; }
         }
 
         public class StatusInfo

@@ -29,7 +29,7 @@ namespace Fluxify.Application.Hubs
             ConnectionUser connectionUser = HubConnectionManager.AddConnection(Context);
 
             foreach (var topic in Context.User.Claims.Where(f => f.Type == FluxifyClaims.Topic))
-                await Groups.AddToGroupAsync(Context.ConnectionId, $"{connectionUser.NameSpace.Name}:{topic.Value}");
+                await Groups.AddToGroupAsync(Context.ConnectionId, $"{connectionUser.NameSpace.Signature}:{topic.Value}");
 
             await base.OnConnectedAsync();
         }
