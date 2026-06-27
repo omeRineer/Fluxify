@@ -1,4 +1,5 @@
 using Fluxify.Application;
+using Fluxify.Infrastructure;
 using Fluxify.Persistance;
 
 var builder = WebApplication.CreateBuilder(args);

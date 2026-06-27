@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Fluxify.Application\Fluxify.Application.csproj" />
+    <ProjectReference Include="..\Fluxify.Infrastructure\Fluxify.Infrastructure.csproj" />
     <ProjectReference Include="..\Fluxify.Persistance\Fluxify.Persistance.csproj" />
   </ItemGroup>
 

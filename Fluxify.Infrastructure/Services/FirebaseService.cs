@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Fluxify.Infrastructure.Services
 {
-    public class FirebaseNotificationService : INotificationService
+    public class FirebaseNotificationService : IPushNotificationService
     {
         public async Task<string> SendNotificationAsync(string deviceToken, string title, string summary, Dictionary<string, string>? data = null)
         {

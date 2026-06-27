@@ -29,7 +29,7 @@ namespace Fluxify.Application.Utilities.Helpers
 
             var enumValue = (TEnum)Enum.ToObject(typeof(TEnum), value);
 
-            return useName ? enumValue.ToString() : value.ToString();
+            return useName ? enumValue.ToString().ToLower() : value.ToString();
         }
 
     }

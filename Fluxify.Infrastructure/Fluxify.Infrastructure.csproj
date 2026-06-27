@@ -1,17 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="FirebaseAdmin" Version="3.5.0" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="FirebaseAdmin" Version="3.5.0" />
+		<PackageReference Include="RabbitMQ.Client" Version="7.1.2" />
 
-  <ItemGroup>
-    <ProjectReference Include="..\Fluxify.Application\Fluxify.Application.csproj" />
-  </ItemGroup>
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Fluxify.Application\Fluxify.Application.csproj" />
+	</ItemGroup>
 
 </Project>

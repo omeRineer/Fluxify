@@ -9,7 +9,6 @@ using Fluxify.Configuration;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
-using RabbitMQ.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,7 +33,6 @@ namespace Fluxify.Application
             services.AddScoped<ITopicService, TopicService>();
 
             services.AddHttpContextAccessor();
-            services.AddScoped<RabbitMqClientService>();
             services.AddAuthentication()
                 .AddScheme<FluxifyHubAuthenticationOptions, FluxifyHubAuthenticationHandler>("FluxifySecurityScheme", null);
 
@@ -66,31 +64,6 @@ namespace Fluxify.Application
             services.AddAutoMapper(opt => { }, Assembly.GetExecutingAssembly());
         }
 
-        public static async Task<IServiceCollection> AddRabbitMqAsync(this IServiceCollection services)
-        {
-            var connectionFactory = new ConnectionFactory();
-            Console.WriteLine(AppConfiguration.RabbitMqOptions == null);
-            connectionFactory.HostName = AppConfiguration.RabbitMqOptions.Host;
-            connectionFactory.Port = AppConfiguration.RabbitMqOptions.Port;
-            connectionFactory.VirtualHost = AppConfiguration.RabbitMqOptions.VirtualHost;
-            connectionFactory.UserName = AppConfiguration.RabbitMqOptions.UserName;
-            connectionFactory.Password = AppConfiguration.RabbitMqOptions.Password;
-
-            IConnection? connection = null;
-            for (int i = 0; i < 20; i++)
-            {
-                await Task.Delay(1000);
-                connection = await connectionFactory.CreateConnectionAsync();
-
-                if (connection != null && connection.IsOpen)
-                    break;
-            }
-            var channel = await connection.CreateChannelAsync();
-
-            services.AddSingleton<IConnection>(connection);
-            services.AddSingleton<IChannel>(channel);
-
-            return services;
-        }
+        
     }
 }

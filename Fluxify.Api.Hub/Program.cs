@@ -9,7 +9,6 @@ var builder = WebApplication.CreateBuilder(args);
 await builder.Services.AddRabbitMqAsync();
 builder.Services.AddHostedService<NotificationWorker>();
 builder.Services.AddHostedService<FirebaseNotificationWorker>();
-builder.Services.AddHostedService<NotificationRouterWorker>();
 builder.Services.AddApplication();
 builder.Services.AddPersistance();
 builder.Services.AddInfrastructure();
@@ -22,7 +21,7 @@ builder.Services.AddCors(options =>
                                 policy.WithOrigins("http://127.0.0.1:5500", "http://localhost:5500", "https://localhost:3000") // Client'ýnýzýn çalýþtýðý adresleri virgülle ekleyin
                                       .AllowAnyHeader()
                                       .AllowAnyMethod()
-                                      .AllowCredentials(); // SignalR için bu zorunludur!
+                                      .AllowCredentials();
                             }));
 
 

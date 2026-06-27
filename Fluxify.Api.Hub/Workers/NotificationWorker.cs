@@ -15,27 +15,28 @@ using System.Threading.Channels;
 
 namespace Fluxify.Api.Hub.Workers
 {
-    public class NotificationWorker : ConsumerWorker
+    public class NotificationWorker : ConsumerWorker<Guid>
     {
+        protected override string QueueName => "notification-socket";
+
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly IHubContext<NotificationHub> _hubContext;
         readonly HubConnectionManager<NotificationHub> _connectionManager;
 
-        public NotificationWorker(IChannel channel, IConnection connection, IServiceScopeFactory scopeFactory, IHubContext<NotificationHub> hubContext, HubConnectionManager<NotificationHub> connectionManager)
-            : base(channel, connection, "Notification_Queue", "Notification_Worker", false)
+        public NotificationWorker(IChannel channel, IServiceScopeFactory scopeFactory, IHubContext<NotificationHub> hubContext, HubConnectionManager<NotificationHub> connectionManager)
+            : base(channel)
         {
             _scopeFactory = scopeFactory;
             _hubContext = hubContext;
             _connectionManager = connectionManager;
         }
 
-        protected override async Task HandleAsync(object model, BasicDeliverEventArgs args)
+        protected override async Task HandleAsync(Guid message, CancellationToken cancellationToken)
         {
             using var scope = _scopeFactory.CreateScope();
             var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
-            var notificationId = GetMessage<Guid>(args);
 
-            var notificationResult = await notificationService.GetAsync(notificationId);
+            var notificationResult = await notificationService.GetAsync(message);
             var nameSpaceUsers = _connectionManager.GetAllConnections(notificationResult.Data.NameSpace);
 
             if (nameSpaceUsers != null && nameSpaceUsers.Count > 0)

@@ -1,56 +1,69 @@
-﻿using RabbitMQ.Client;
+﻿using Microsoft.Extensions.Hosting;
+using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Channels;
 
-namespace Fluxify.Api.Hub.Workers.Main
+namespace Fluxify.Api.Hub.Workers.Main;
+
+public abstract class ConsumerWorker<TMessage> : BackgroundService
 {
-    public abstract class ConsumerWorker : BackgroundService
+    protected readonly IChannel Channel;
+
+    protected abstract string QueueName { get; }
+
+    protected ConsumerWorker(IChannel channel)
     {
-        protected string Tag { get; private init; }
-        protected string Queue { get; private init; }
-        protected bool AutoAck { get; private init; }
+        Channel = channel;
+    }
 
-        protected readonly IConnection Connection;
-        protected readonly IChannel Channel;
-        public ConsumerWorker(IChannel channel, IConnection connection, string queue, string tag, bool autoAck = true)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        var consumer = new AsyncEventingBasicConsumer(Channel);
+
+        consumer.ReceivedAsync += async (_, args) =>
         {
-            Channel = channel;
-            Tag = tag;
-            Queue = queue;
-            AutoAck = autoAck;
-            Connection = connection;
-        }
+            try
+            {
+                var message = Deserialize(args);
 
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-        {
-            await Channel.QueueDeclareAsync(queue: Queue,
-                                            durable: true,
-                                            exclusive: false,
-                                            autoDelete: false,
-                                            arguments: null);
+                if (message is null)
+                {
+                    await Channel.BasicNackAsync(args.DeliveryTag, false, false);
+                    return;
+                }
 
-            var consumer = new AsyncEventingBasicConsumer(Channel);
+                await HandleAsync(message, stoppingToken);
 
-            consumer.ReceivedAsync += HandleAsync;
+                await Channel.BasicAckAsync(args.DeliveryTag, false);
+            }
+            catch (Exception ex)
+            {
+                await OnErrorAsync(ex, args);
 
-            await Channel.BasicConsumeAsync(queue: Queue,
-                         autoAck: AutoAck,
-                         consumer: consumer,
-                         consumerTag: Tag,
-                         exclusive: false,
-                         noLocal: false,
-                         arguments: null);
-        }
-        protected abstract Task HandleAsync(object model, BasicDeliverEventArgs args);
+                await Channel.BasicNackAsync(args.DeliveryTag, false, true);
+            }
+        };
 
-        protected TMessage? GetMessage<TMessage>(BasicDeliverEventArgs args)
-        {
-            var body = Encoding.UTF8.GetString(args.Body.ToArray());
-            var deserializedMessage = JsonSerializer.Deserialize<TMessage>(body);
+        await Channel.BasicConsumeAsync(
+            queue: QueueName,
+            autoAck: false,
+            consumer: consumer,
+            cancellationToken: stoppingToken);
+    }
 
-            return deserializedMessage;
-        }
+    protected virtual Task OnErrorAsync(
+        Exception exception,
+        BasicDeliverEventArgs args)
+        => Task.CompletedTask;
+
+    protected abstract Task HandleAsync(
+        TMessage message,
+        CancellationToken cancellationToken);
+
+    private static TMessage? Deserialize(BasicDeliverEventArgs args)
+    {
+        var json = Encoding.UTF8.GetString(args.Body.ToArray());
+        return JsonSerializer.Deserialize<TMessage>(json);
     }
 }

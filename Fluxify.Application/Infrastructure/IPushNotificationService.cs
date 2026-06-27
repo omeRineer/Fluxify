@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Fluxify.Application.Infrastructure
 {
-    public interface INotificationService
+    public interface IPushNotificationService
     {
         Task<string> SendNotificationAsync(string deviceToken, string title, string summary, Dictionary<string, string>? data = null);
         Task<IEnumerable<string>> SendNotificationAsync(IEnumerable<string> deviceTokens, string title, string summary, Dictionary<string, string>? data = null);

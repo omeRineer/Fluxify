@@ -23,6 +23,7 @@ using System.Threading.Tasks;
 using Fluxify.Application.Models.Common;
 using Fluxify.Application.Models.Rest.Common;
 using AutoMapper;
+using Fluxify.Application.Infrastructure;
 
 namespace Fluxify.Application.Services
 {
@@ -34,16 +35,16 @@ namespace Fluxify.Application.Services
         readonly ITopicRepository TopicRepository;
         readonly IUserNotificationRepository UserNotificationRepository;
         readonly IUserTopicRepository UserTopicRepository;
-        readonly RabbitMqClientService RabbitMqClient;
+        readonly IEventPublisher EventPublisher;
         readonly IMapper _mapper;
-        public NotificationService(INotificationRepository notifications, RabbitMqClientService rabbitMqClientService, IUserNotificationRepository userNotificationRepository, ITopicRepository topicRepository, IMapper mapper, IUserTopicRepository userTopicRepository)
+        public NotificationService(INotificationRepository notifications, IUserNotificationRepository userNotificationRepository, ITopicRepository topicRepository, IMapper mapper, IUserTopicRepository userTopicRepository, IEventPublisher eventPublisher)
         {
             NotificationRepository = notifications;
-            RabbitMqClient = rabbitMqClientService;
             UserNotificationRepository = userNotificationRepository;
             TopicRepository = topicRepository;
             _mapper = mapper;
             UserTopicRepository = userTopicRepository;
+            EventPublisher = eventPublisher;
         }
 
         public async Task<IResult> CreateAsync(Guid nameSpaceId, Guid userId, CreateNotification.Request req)
@@ -56,7 +57,7 @@ namespace Fluxify.Application.Services
             newNotification.Topics = topics?.Select(s => s.Id)?.ToList() ?? new();
 
             await NotificationRepository.AddAsync(newNotification);
-            await RabbitMqClient.PushAsync(Queues.NotificationRouterQueue, newNotification.Id);
+            await EventPublisher.PublishAsync("notification-direct", newNotification.Id, "notification.created");
 
             return new SuccessResult("Notification is created");
         }
