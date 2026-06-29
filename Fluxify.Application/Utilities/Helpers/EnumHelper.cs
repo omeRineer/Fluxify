@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -29,7 +30,7 @@ namespace Fluxify.Application.Utilities.Helpers
 
             var enumValue = (TEnum)Enum.ToObject(typeof(TEnum), value);
 
-            return useName ? enumValue.ToString().ToLower() : value.ToString();
+            return useName ? enumValue.ToString().ToLower(new CultureInfo("en-EN")) : value.ToString();
         }
 
     }

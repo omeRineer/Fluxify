@@ -18,6 +18,7 @@ namespace Fluxify.Api.Hub.Workers
     public class NotificationWorker : ConsumerWorker<Guid>
     {
         protected override string QueueName => "notification-socket";
+        protected override int RetryCount => 3;
 
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly IHubContext<NotificationHub> _hubContext;
@@ -35,29 +36,25 @@ namespace Fluxify.Api.Hub.Workers
         {
             using var scope = _scopeFactory.CreateScope();
             var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
+            var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
 
             var notificationResult = await notificationService.GetAsync(message);
-            var nameSpaceUsers = _connectionManager.GetAllConnections(notificationResult.Data.NameSpace);
+            var sender = await userService.GetAsync(notificationResult.Data.Sender);
 
-            if (nameSpaceUsers != null && nameSpaceUsers.Count > 0)
-            {
+            
 
-                // TODO : It should send to only target users without sender.
-                string nameSpace = nameSpaceUsers.First().NameSpace.Signature;
-                await _hubContext.Clients.Groups(notificationResult.Data.Topics.Select(s => $"{nameSpace}:{s}"))
-                                         .SendAsync(HubEvents.NotificationHub.ReceiveNotification,
-                                         new PushToClientNotificationModel
-                                         {
-                                             Id = notificationResult.Data.Id,
-                                             Date = notificationResult.Data.CreateDate,
-                                             Properties = notificationResult.Data.Properties,
-                                             Level = EnumHelper.ToEnumString<NotificationLevelType>(notificationResult.Data.Level),
-                                             Sender = nameSpaceUsers.Single(f => f.Id == notificationResult.Data.Sender).Key,
-                                             Title = notificationResult.Data.Title,
-                                             Summary = notificationResult.Data.Summary
-                                         });
-
-            }
+            await _hubContext.Clients.Groups(notificationResult.Data.Topics.Select(s => $"{notificationResult.Data.NameSpace}:{s}"))
+                                     .SendAsync(HubEvents.NotificationHub.ReceiveNotification,
+                                     new PushToClientNotificationModel
+                                     {
+                                         Id = notificationResult.Data.Id,
+                                         Date = notificationResult.Data.CreateDate,
+                                         Properties = notificationResult.Data.Properties,
+                                         Level = EnumHelper.ToEnumString<NotificationLevelType>(notificationResult.Data.Level),
+                                         Sender = sender.Data.Key,
+                                         Title = notificationResult.Data.Title,
+                                         Summary = notificationResult.Data.Summary
+                                     });
         }
     }
 }

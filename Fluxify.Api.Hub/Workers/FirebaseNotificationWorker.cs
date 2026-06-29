@@ -12,6 +12,7 @@ namespace Fluxify.Api.Hub.Workers
     public class FirebaseNotificationWorker : ConsumerWorker<Guid>
     {
         protected override string QueueName => "notification-firebase";
+        protected override int RetryCount => 0;
 
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly IHubContext<NotificationHub> _hubContext;
@@ -36,10 +37,8 @@ namespace Fluxify.Api.Hub.Workers
             var userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
 
             var notification = await notificationRepository.GetSingleAsync(f => f.Id == message);
-            var connectedUsers = _connectionManager.GetAllConnections(notification.NameSpace);
             var targetUsers = await userTopicRepository.GetListAsync(f => notification.Topics.Contains(f.TopicId) && f.NameSpaceId == notification.NameSpace);
-            var userDevices = await userDeviceRepository.GetListAsync(f => targetUsers.Select(s => s.UserId).Contains(f.UserId));
-            var targetDevices = userDevices.Where(f => !connectedUsers.SelectMany(s => s.Connections).Select(s => s.Value).Select(s => s.Device).Contains(f.DeviceId));
+            var targetDevices = await userDeviceRepository.GetListAsync(f => targetUsers.Select(s => s.UserId).Contains(f.UserId));
 
             if (targetDevices != null && targetDevices.Any())
                 await fireBaseNotificationService.SendNotificationAsync(targetDevices.Select(s => s.Token), notification.Title, notification.Summary);

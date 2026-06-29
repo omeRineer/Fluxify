@@ -24,6 +24,7 @@ namespace Fluxify.Application.Services.Interfaces
 
         #region Internal
         Task<IDataResult<User>> GetAsync(string apiKey);
+        Task<IDataResult<User>> GetAsync(Guid id);
         #endregion
 
     }

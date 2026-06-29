@@ -1,6 +1,7 @@
 ﻿using FirebaseAdmin;
 using Fluxify.Application.Infrastructure;
 using Fluxify.Configuration;
+using Fluxify.Configuration.Options;
 using Fluxify.Infrastructure.Services;
 using Fluxify.Infrastructure.Services.EventPublishers;
 using Fluxify.Infrastructure.Services.Hosted;

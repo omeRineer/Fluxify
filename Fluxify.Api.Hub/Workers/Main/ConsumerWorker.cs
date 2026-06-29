@@ -11,6 +11,7 @@ public abstract class ConsumerWorker<TMessage> : BackgroundService
     protected readonly IChannel Channel;
 
     protected abstract string QueueName { get; }
+    protected abstract int RetryCount { get; }
 
     protected ConsumerWorker(IChannel channel)
     {
@@ -41,7 +42,16 @@ public abstract class ConsumerWorker<TMessage> : BackgroundService
             {
                 await OnErrorAsync(ex, args);
 
-                await Channel.BasicNackAsync(args.DeliveryTag, false, true);
+                var currentRetryCount = GetRetryCount(args);
+
+                if (currentRetryCount < RetryCount)
+                    await Channel.BasicNackAsync(args.DeliveryTag, multiple: false, requeue: false);
+                else
+                {
+                    await OnFailAsync(ex, args);
+
+                    await Channel.BasicAckAsync(args.DeliveryTag, multiple: false);
+                }
             }
         };
 
@@ -57,6 +67,11 @@ public abstract class ConsumerWorker<TMessage> : BackgroundService
         BasicDeliverEventArgs args)
         => Task.CompletedTask;
 
+    protected virtual Task OnFailAsync(
+        Exception exception,
+        BasicDeliverEventArgs args)
+        => Task.CompletedTask;
+
     protected abstract Task HandleAsync(
         TMessage message,
         CancellationToken cancellationToken);
@@ -65,5 +80,21 @@ public abstract class ConsumerWorker<TMessage> : BackgroundService
     {
         var json = Encoding.UTF8.GetString(args.Body.ToArray());
         return JsonSerializer.Deserialize<TMessage>(json);
+    }
+
+    private static long GetRetryCount(BasicDeliverEventArgs args)
+    {
+        if (args.BasicProperties.Headers == null || !args.BasicProperties.Headers.ContainsKey("x-death"))
+            return 0;
+
+        if (args.BasicProperties.Headers["x-death"] is List<object> deathList && deathList.Count > 0)
+        {
+            if (deathList[0] is Dictionary<string, object> deathProperties && deathProperties.ContainsKey("count"))
+            {
+                return Convert.ToInt64(deathProperties["count"]);
+            }
+        }
+
+        return 0;
     }
 }

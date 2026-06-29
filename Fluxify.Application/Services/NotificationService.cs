@@ -57,7 +57,7 @@ namespace Fluxify.Application.Services
             newNotification.Topics = topics?.Select(s => s.Id)?.ToList() ?? new();
 
             await NotificationRepository.AddAsync(newNotification);
-            await EventPublisher.PublishAsync("notification-direct", newNotification.Id, "notification.created");
+            await EventPublisher.PublishAsync("notification-topic", newNotification.Id, "notification.created");
 
             return new SuccessResult("Notification is created");
         }

@@ -27,12 +27,12 @@ namespace Fluxify.Api.Hub.Auth
 
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
-            if (!Request.Headers.TryGetValue(ApiKeyHeaderName, out var headers) &
+            if (!Request.Headers.TryGetValue(ApiKeyHeaderName, out var headers) &&
                 !Request.Query.TryGetValue(ApiKeyHeaderName, out var queries))
                 return AuthenticateResult.Fail("API Key is not provided.");
 
             var providedApiKey = headers.FirstOrDefault() ?? queries.FirstOrDefault();
-            var subscriber = (await UserRepository.GetSingleAsync(f=> f.ApiKey == providedApiKey));
+            var subscriber = await UserRepository.GetSingleOrDefaultAsync(f=> f.ApiKey == providedApiKey);
 
             if (subscriber == null)
                 return AuthenticateResult.Fail("Invalid API Key.");
