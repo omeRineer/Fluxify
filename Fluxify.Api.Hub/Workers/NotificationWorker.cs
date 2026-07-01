@@ -15,45 +15,33 @@ using System.Threading.Channels;
 
 namespace Fluxify.Api.Hub.Workers
 {
-    public class NotificationWorker : ConsumerWorker<Guid>
+    public class NotificationWorker : ConsumerWorker<NotificationQueueModel>
     {
         protected override string QueueName => "notification-socket";
         protected override int RetryCount => 3;
 
-        private readonly IServiceScopeFactory _scopeFactory;
         private readonly IHubContext<NotificationHub> _hubContext;
         readonly HubConnectionManager<NotificationHub> _connectionManager;
 
-        public NotificationWorker(IChannel channel, IServiceScopeFactory scopeFactory, IHubContext<NotificationHub> hubContext, HubConnectionManager<NotificationHub> connectionManager)
+        public NotificationWorker(IChannel channel, IHubContext<NotificationHub> hubContext, HubConnectionManager<NotificationHub> connectionManager)
             : base(channel)
         {
-            _scopeFactory = scopeFactory;
             _hubContext = hubContext;
             _connectionManager = connectionManager;
         }
 
-        protected override async Task HandleAsync(Guid message, CancellationToken cancellationToken)
+        protected override async Task HandleAsync(NotificationQueueModel message, CancellationToken cancellationToken)
         {
-            using var scope = _scopeFactory.CreateScope();
-            var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
-            var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
-
-            var notificationResult = await notificationService.GetAsync(message);
-            var sender = await userService.GetAsync(notificationResult.Data.Sender);
-
-            
-
-            await _hubContext.Clients.Groups(notificationResult.Data.Topics.Select(s => $"{notificationResult.Data.NameSpace}:{s}"))
+            await _hubContext.Clients.Groups(message.Topics.Select(s => $"{message.NameSpaceId}:{s}"))
                                      .SendAsync(HubEvents.NotificationHub.ReceiveNotification,
                                      new PushToClientNotificationModel
                                      {
-                                         Id = notificationResult.Data.Id,
-                                         Date = notificationResult.Data.CreateDate,
-                                         Properties = notificationResult.Data.Properties,
-                                         Level = EnumHelper.ToEnumString<NotificationLevelType>(notificationResult.Data.Level),
-                                         Sender = sender.Data.Key,
-                                         Title = notificationResult.Data.Title,
-                                         Summary = notificationResult.Data.Summary
+                                         Id = message.Id,
+                                         Date = message.Date,
+                                         Level = EnumHelper.ToEnumString<NotificationLevelType>(message.Level),
+                                         Title = message.Title,
+                                         Summary = message.Summary,
+                                         ImageUrl = message.ImageUrl
                                      });
         }
     }

@@ -22,12 +22,21 @@ namespace Fluxify.Api.Open.Controllers
             UserNotificationService = userNotificationService;
         }
 
-        [HttpPost("Send")]
-        public async Task<IActionResult> SendAsync([FromBody] CreateNotification.Request request)
+        [HttpPost("Create")]
+        public async Task<IActionResult> CreateAsync([FromBody] CreateNotification.Request request)
         {
             var result = await NotificationService.CreateAsync(CurrentUser.NameSpace.Id,
                                                                CurrentUser.NameIdentifier,                                     
                                                                request);
+
+            return Ok(result);
+        }
+
+        [HttpPost("Fire")]
+        public async Task<IActionResult> FireAsync([FromBody] FireNotification.Request request)
+        {
+            var result = await NotificationService.FireAsync(CurrentUser.NameSpace.Id,
+                                                             request);
 
             return Ok(result);
         }

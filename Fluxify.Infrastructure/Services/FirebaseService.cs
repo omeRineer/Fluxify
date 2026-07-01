@@ -18,9 +18,11 @@ namespace Fluxify.Infrastructure.Services
                 Notification = new Notification()
                 {
                     Title = title,
-                    Body = summary
+                    Body = summary,
+                    ImageUrl = "https://cdn-icons-png.flaticon.com/512/3119/3119338.png"
                 },
-                Data = data
+                Data = data,
+                
             };
 
             return await FirebaseMessaging.DefaultInstance.SendAsync(message);
@@ -34,7 +36,8 @@ namespace Fluxify.Infrastructure.Services
                 Notification = new Notification()
                 {
                     Title = title,
-                    Body = summary
+                    Body = summary,
+                    ImageUrl = "https://cdn-icons-png.flaticon.com/512/3119/3119338.png"
                 },
                 Data = data
             };

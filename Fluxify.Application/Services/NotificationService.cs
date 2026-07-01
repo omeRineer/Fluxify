@@ -24,6 +24,7 @@ using Fluxify.Application.Models.Common;
 using Fluxify.Application.Models.Rest.Common;
 using AutoMapper;
 using Fluxify.Application.Infrastructure;
+using Fluxify.Application.Models.Queue;
 
 namespace Fluxify.Application.Services
 {
@@ -57,7 +58,18 @@ namespace Fluxify.Application.Services
             newNotification.Topics = topics?.Select(s => s.Id)?.ToList() ?? new();
 
             await NotificationRepository.AddAsync(newNotification);
-            await EventPublisher.PublishAsync("notification-topic", newNotification.Id, "notification.created");
+            await EventPublisher.PublishAsync("notification-topic",
+                                              new NotificationQueueModel
+                                              {
+                                                  Id = newNotification.Id,
+                                                  NameSpaceId = nameSpaceId,
+                                                  Level = newNotification.Level,
+                                                  Title = newNotification.Title,
+                                                  Summary = newNotification.Summary,
+                                                  Date = newNotification.CreateDate,
+                                                  Topics = newNotification.Topics
+                                              },
+                                              "notification.created");
 
             return new SuccessResult("Notification is created");
         }
@@ -66,7 +78,7 @@ namespace Fluxify.Application.Services
             var userTopics = await UserTopicRepository.GetListAsync(x => x.UserId == userId);
             var userNotifications = await UserNotificationRepository.GetListAsync(x => x.UserId == userId);
 
-            var notifications = await NotificationRepository.GetListAsync(x => x.Topics.Any(o=> userTopics.Select(s=> s.TopicId).Contains(o)));
+            var notifications = await NotificationRepository.GetListAsync(x => x.Topics.Any(o => userTopics.Select(s => s.TopicId).Contains(o)));
 
             var mappedList = _mapper.Map<List<NotificationDto.List>>(notifications);
             mappedList.ForEach(x =>
@@ -77,7 +89,7 @@ namespace Fluxify.Application.Services
                     x.IsRead = false;
             });
 
-            var result = DataListResponse<NotificationDto.List>.Load(mappedList.OrderBy(o=> o.IsRead).ToList());
+            var result = DataListResponse<NotificationDto.List>.Load(mappedList.OrderBy(o => o.IsRead).ToList());
 
             return new SuccessDataResult<DataListResponse<NotificationDto.List>>(result);
         }
@@ -88,7 +100,7 @@ namespace Fluxify.Application.Services
 
 
             var notification = await NotificationRepository.GetSingleAsync(f => f.Id == id);
-            var user = await UserRepository.GetSingleAsync(f=> f.Id == notification.Sender);
+            var user = await UserRepository.GetSingleAsync(f => f.Id == notification.Sender);
             var result = new NotificationDto.Detail
             {
                 Id = notification.Id,
@@ -112,6 +124,24 @@ namespace Fluxify.Application.Services
             var notification = await NotificationRepository.GetSingleAsync(f => f.Id == id);
 
             return new SuccessDataResult<Notification>(notification);
+        }
+
+        public async Task<IResult> FireAsync(Guid nameSpaceId, FireNotification.Request req)
+        {
+            await EventPublisher.PublishAsync("notification-topic",
+                                              new NotificationQueueModel
+                                              {
+                                                  NameSpaceId = nameSpaceId,
+                                                  Level = (int)EnumHelper.Parse(req.Level, NotificationLevelType.Info),
+                                                  Title = req.Title,
+                                                  Summary = req.Summary,
+                                                  Date = DateTime.UtcNow,
+                                                  Topics = req.Topics,
+                                                  ImageUrl = req.ImageUrl
+                                              },
+                                              "notification.created");
+
+            return new SuccessResult("Notification is created");
         }
     }
 }
