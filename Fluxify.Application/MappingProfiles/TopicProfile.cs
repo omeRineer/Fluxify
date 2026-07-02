@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Fluxify.Application.Models.Dto.Topic;
 using Fluxify.Application.Models.Rest.Topic;
 using Fluxify.Domain.Core;
 using System;
@@ -13,6 +14,8 @@ namespace Fluxify.Application.MappingProfiles
     {
         public TopicProfile()
         {
+            CreateMap<Topic, TopicDto.List>();
+
             CreateMap<CreateTopic.Request, Topic>();
         }
     }

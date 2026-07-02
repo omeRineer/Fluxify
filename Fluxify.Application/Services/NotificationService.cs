@@ -141,7 +141,7 @@ namespace Fluxify.Application.Services
                                               },
                                               "notification.created");
 
-            return new SuccessResult("Notification is created");
+            return new SuccessResult("Notification is fired");
         }
     }
 }

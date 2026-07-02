@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Fluxify.Application.Models.Dto.UserDevice;
+using Fluxify.Application.Models.Rest.Common;
 using Fluxify.Application.Models.Rest.UserDevice;
 using Fluxify.Application.Repositories;
 using Fluxify.Application.Services.Interfaces;
@@ -23,11 +25,15 @@ namespace Fluxify.Application.Services
             _mapper = mapper;
         }
 
-        public async Task<IDataResult<List<UserDevice>>> GetListAsync(Guid[] userIds)
+        public async Task<IDataResult<DataListResponse<UserDeviceDto.List>>> GetListAsync(Guid userId)
         {
-            var devices = await UserDeviceRepository.GetListAsync(x => userIds.Contains(x.UserId) && x.IsActive);
+            var devices = await UserDeviceRepository.GetListAsync(x => x.UserId == userId);
 
-            return new SuccessDataResult<List<UserDevice>>(devices);
+            var mappedList = _mapper.Map<List<UserDeviceDto.List>>(devices);
+
+            var result = DataListResponse<UserDeviceDto.List>.Load(mappedList);
+
+            return new SuccessDataResult<DataListResponse<UserDeviceDto.List>>(result);
         }
 
         public async Task<IResult> SetAsync(Guid userId, Guid nameSpaceId, SetUserDevice.Request req)

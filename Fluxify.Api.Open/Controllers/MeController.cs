@@ -25,21 +25,31 @@ namespace Fluxify.Api.Open.Controllers
 
         [HttpGet("Profile")]
         public async Task<IActionResult> GetProfileAsync()
-            => Ok(await UserService.GetDetailAsync(CurrentUser.NameIdentifier));
+            => Response(await UserService.GetDetailAsync(CurrentUser.NameIdentifier));
 
         [HttpGet("Notifications")]
         public async Task<IActionResult> GetNotificationsAsync()
-            => Ok(await NotificationService.GetListAsync(CurrentUser.NameIdentifier));
+            => Response(await NotificationService.GetListAsync(CurrentUser.NameIdentifier));
+
+        [HttpGet("Topics")]
+        public async Task<IActionResult> GetTopicsAsync()
+            => Response(await UserTopicService.GetListAsync(CurrentUser.NameIdentifier));
+
+        [HttpGet("Devices")]
+        public async Task<IActionResult> GetDevicesAsync()
+            => Response(await UserDeviceService.GetListAsync(CurrentUser.NameIdentifier));
+
+
 
         [HttpPost("Device/Set")]
         public async Task<IActionResult> SetDeviceAsync([FromBody] SetUserDevice.Request req)
-            => Ok(await UserDeviceService.SetAsync(CurrentUser.NameIdentifier,
+            => Response(await UserDeviceService.SetAsync(CurrentUser.NameIdentifier,
                                                    CurrentUser.NameSpace.Id,
                                                    req));
 
         [HttpPost("Topic/Set")]
         public async Task<IActionResult> SetTopicsAsync([FromBody] SetUserTopics.Request req)
-            => Ok(await UserTopicService.SetAsync(CurrentUser.NameIdentifier,
+            => Response(await UserTopicService.SetAsync(CurrentUser.NameIdentifier,
                                                   CurrentUser.NameSpace.Id,
                                                   req));
     }

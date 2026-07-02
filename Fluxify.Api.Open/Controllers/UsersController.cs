@@ -21,7 +21,7 @@ namespace Fluxify.Api.Open.Controllers
         {
             var result = await UserService.GetListAsync(CurrentUser.NameSpace.Id);
 
-            return Ok(result);
+            return Response(result);
         }
 
 
@@ -30,7 +30,7 @@ namespace Fluxify.Api.Open.Controllers
         {
             var result = await UserService.GetDetailAsync(id);
 
-            return Ok(result);
+            return Response(result);
         }
 
         [HttpPost("Create")]
@@ -38,7 +38,7 @@ namespace Fluxify.Api.Open.Controllers
         {
             var result = await UserService.CreateAsync(CurrentUser.NameSpace.Id, model);
 
-            return Ok(result);
+            return Response(result);
         }
 
         [HttpPost("{id}/Update")]
@@ -46,7 +46,7 @@ namespace Fluxify.Api.Open.Controllers
         {
             var result = await UserService.UpdateAsync(id, model);
 
-            return Ok(result);
+            return Response(result);
         }
     }
 }

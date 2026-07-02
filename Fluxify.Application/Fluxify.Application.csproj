@@ -20,7 +20,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Models\Dto\Topic\" />
 	  <Folder Include="Models\Dto\UserNotification\" />
 	</ItemGroup>
 

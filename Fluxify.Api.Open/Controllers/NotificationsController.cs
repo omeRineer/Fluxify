@@ -29,7 +29,7 @@ namespace Fluxify.Api.Open.Controllers
                                                                CurrentUser.NameIdentifier,                                     
                                                                request);
 
-            return Ok(result);
+            return Response(result);
         }
 
         [HttpPost("Fire")]
@@ -38,7 +38,7 @@ namespace Fluxify.Api.Open.Controllers
             var result = await NotificationService.FireAsync(CurrentUser.NameSpace.Id,
                                                              request);
 
-            return Ok(result);
+            return Response(result);
         }
 
         [HttpGet("{id}")]
@@ -46,7 +46,7 @@ namespace Fluxify.Api.Open.Controllers
         {
             var result = await NotificationService.GetDetailAsync(id, CurrentUser.NameIdentifier);
 
-            return Ok(result);
+            return Response(result);
         }
 
         [HttpPut("{id}/Read")]
@@ -54,7 +54,7 @@ namespace Fluxify.Api.Open.Controllers
         {
             var result = await UserNotificationService.AddAsync(CurrentUser.NameIdentifier, id);
 
-            return Ok(result);
+            return Response(result);
         }
     }
 }

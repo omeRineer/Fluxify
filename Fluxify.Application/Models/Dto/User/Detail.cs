@@ -22,4 +22,5 @@ namespace Fluxify.Application.Models.Dto.User
             public DateTime EditDate { get; set; }
         }
     }
+
 }

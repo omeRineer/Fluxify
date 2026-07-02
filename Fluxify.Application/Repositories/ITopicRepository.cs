@@ -7,6 +7,6 @@ namespace Fluxify.Application.Repositories
     public interface ITopicRepository : IMongoRepository<Topic, string>
     {
         Task<List<Topic>> GetListAsync(Guid channelId);
-        Task<List<Topic>> GetListAsync(params string[] topics);
+        Task<List<Topic>> GetListAsync(string[] topics);
     }
 }

@@ -12,6 +12,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Fluxify.Application.Models.Rest.Common;
+using Fluxify.Application.Models.Dto.Topic;
 
 namespace Fluxify.Application.Services
 {
@@ -19,15 +21,13 @@ namespace Fluxify.Application.Services
     {
         readonly IChannelRepository channelRepository;
         readonly ITopicRepository topicRepository;
-        readonly IUserTopicRepository userTopicRepository;
         readonly IMapper _mapper;
 
-        public TopicService(ITopicRepository topicRepository, IMapper mapper, IChannelRepository channelRepository, IUserTopicRepository userTopicRepository)
+        public TopicService(ITopicRepository topicRepository, IMapper mapper, IChannelRepository channelRepository)
         {
             this.topicRepository = topicRepository;
             _mapper = mapper;
             this.channelRepository = channelRepository;
-            this.userTopicRepository = userTopicRepository;
         }
 
         public async Task<IResult> CreateAsync(CreateTopic.Request req)
@@ -46,12 +46,15 @@ namespace Fluxify.Application.Services
             return new SuccessResult("Topic is created");
         }
 
-        public async Task<IDataResult<List<Topic>>> GetListAsync(Guid userId)
+        public async Task<IDataResult<DataListResponse<TopicDto.List>>> GetListAsync()
         {
-            var userTopics = await userTopicRepository.GetListAsync(f => f.UserId == userId);
-            var topicList = await topicRepository.GetListAsync(f => userTopics.Select(ut => ut.TopicId).Contains(f.Id));
+            var topicList = await topicRepository.GetListAsync();
 
-            return new SuccessDataResult<List<Topic>>(topicList);
+            var mappedList = _mapper.Map<List<TopicDto.List>>(topicList);
+
+            var result = DataListResponse<TopicDto.List>.Load(mappedList);
+
+            return new SuccessDataResult<DataListResponse<TopicDto.List>>(result);
         }
     }
 }

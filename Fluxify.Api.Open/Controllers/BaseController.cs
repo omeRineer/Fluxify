@@ -17,18 +17,7 @@ namespace Fluxify.Api.Open.Controllers
             CurrentUser = currentUser;
         }
 
-        //protected IActionResult Response(R.IResult result)
-        //{
-        //    switch (result)
-        //    {
-        //        case R.IDataResult<dynamic> dataResult:
-        //            if (dataResult.Success)
-        //                return Ok(new ApiDataResponse<(dataResult.Success, );
-        //            else
-        //                return BadRequest(new ErrorApiResponse(message: dataResult.Message));
-        //        default:
-        //            break;
-        //    }
-        //}
+        protected IActionResult Response(R.IResult result)
+            => result.Success ? Ok(result) : BadRequest(result);
     }
 }

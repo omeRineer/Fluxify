@@ -24,7 +24,7 @@ namespace Fluxify.Persistance.Repositories
         /// </summary>
         /// <param name="topics"></param>
         /// <returns></returns>
-        public async Task<List<Topic>> GetListAsync(params string[] topics)
+        public async Task<List<Topic>> GetListAsync(string[] topics)
             => await GetListAsync(f => topics.Contains(f.Id));
     }
 }

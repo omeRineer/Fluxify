@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Fluxify.Application.Models.Dto.UserDevice;
 using Fluxify.Application.Models.Rest.UserDevice;
 using Fluxify.Application.Utilities.Helpers;
 using Fluxify.Domain.Core;
@@ -15,6 +16,9 @@ namespace Fluxify.Application.MappingProfiles
     {
         public UserDeviceProfile()
         {
+            CreateMap<UserDevice, UserDeviceDto.List>()
+                .ForMember(dest => dest.Platform, opt => opt.MapFrom(src => EnumHelper.ToEnumString<DeviceType>(src.Platform, true)));
+
             CreateMap<SetUserDevice.Request, UserDevice>()
                 .ForMember(dest => dest.Platform, opt => opt.MapFrom(src => EnumHelper.Parse<DeviceType>(src.Platform, DeviceType.Android)))
                 .ForMember(dest => dest.UserId, opt => opt.Ignore())

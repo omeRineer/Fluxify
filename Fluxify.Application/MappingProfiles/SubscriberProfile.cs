@@ -9,6 +9,7 @@ namespace Fluxify.Application.MappingProfiles
     {
         public SubscriberProfile()
         {
+            CreateMap<User, UserDto.List>();
             CreateMap<User, UserDto.Detail>();
             CreateMap<User, CreateUser.Response>().IncludeBase<User, UserDto.Detail>();
             CreateMap<User, UpdateUser.Response>().IncludeBase<User, UserDto.Detail>();

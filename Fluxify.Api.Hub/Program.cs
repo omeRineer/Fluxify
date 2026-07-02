@@ -4,6 +4,7 @@ using Fluxify.Application.Hubs;
 using System.Security.Claims;
 using Fluxify.Api.Hub.Workers;
 using Fluxify.Infrastructure;
+using Fluxify.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 await builder.Services.AddRabbitMqAsync();
@@ -18,7 +19,7 @@ builder.Services.AddSingleton<HubConnectionManager<PresenceHub>>();
 builder.Services.AddCors(options =>
                             options.AddDefaultPolicy(policy =>
                             {
-                                policy.WithOrigins("http://127.0.0.1:5500", "http://localhost:5500", "https://localhost:3000", "http://localhost:7485", "http://192.168.1.108:7486") // Client'ýnýzýn çalýþtýðý adresleri virgülle ekleyin
+                                policy.WithOrigins(AppConfiguration.AllowOrigins)
                                       .AllowAnyHeader()
                                       .AllowAnyMethod()
                                       .AllowCredentials();
