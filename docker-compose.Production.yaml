@@ -31,8 +31,8 @@ services:
   api.open:
     container_name: fluxify.api.open
     build:
-      context: Fluxify.Api.Open
-      dockerfile: dockerfile.Production
+      context: .
+      dockerfile: Fluxify.Api.Open/dockerfile.Production
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -47,8 +47,8 @@ services:
   api.hub:
     container_name: fluxify.api.hub
     build:
-      context: Fluxify.Api.Hub
-      dockerfile: dockerfile.Production
+      context: .
+      dockerfile: Fluxify.Api.Hub/dockerfile.Production
     depends_on:
       db.mongo:
         condition: service_started
