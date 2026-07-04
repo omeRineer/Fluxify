@@ -20,7 +20,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Fluxify.Api.Open", Version = "v1" });
-    c.CustomSchemaIds(s => s.FullName);
+    c.CustomSchemaIds(s => s.FullName?.Replace('+', '_'));
 
     c.AddSecurityDefinition("ApiKey", new OpenApiSecurityScheme
     {
