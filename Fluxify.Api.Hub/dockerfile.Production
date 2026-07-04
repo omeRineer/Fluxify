@@ -1,0 +1,25 @@
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+EXPOSE 1453
+
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+ARG BUILD_CONFIGURATION=Release
+WORKDIR /src
+COPY ["Fluxify.Api.Hub/Fluxify.Api.Hub.csproj", "Fluxify.Api.Hub/"]
+COPY ["Fluxify.Application/Fluxify.Application.csproj", "Fluxify.Application/"]
+COPY ["Fluxify.Configuration/Fluxify.Configuration.csproj", "Fluxify.Configuration/"]
+COPY ["Fluxify.Infrastructure/Fluxify.Infrastructure.csproj", "Fluxify.Infrastructure/"]
+COPY ["Fluxify.Persistance/Fluxify.Persistance.csproj", "Fluxify.Persistance/"]
+COPY ["Fluxify.Domain/Fluxify.Domain.csproj", "Fluxify.Domain/"]
+RUN dotnet restore "./Fluxify.Api.Hub/Fluxify.Api.Hub.csproj"
+COPY . .
+WORKDIR "/src/Fluxify.Api.Hub"
+RUN dotnet build "Fluxify.Api.Hub.csproj" -c $BUILD_CONFIGURATION -o /app/build
+
+FROM build AS publish
+ARG BUILD_CONFIGURATION=Release
+RUN dotnet publish "Fluxify.Api.Hub.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "Fluxify.Api.Hub.dll"]
