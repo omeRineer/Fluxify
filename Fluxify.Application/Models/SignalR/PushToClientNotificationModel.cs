@@ -8,14 +8,11 @@ namespace Fluxify.Application.Models.SignalR
 {
     public class PushToClientNotificationModel
     {
-        public Guid Id { get; set; }
-        public string Sender { get; set; }
-        public int Level { get; set; }
-        public int ContentType { get; set; }
+        public Guid? Id { get; set; }
+        public string Level { get; set; }
         public string Title { get; set; }
-        public string? Content { get; set; }
-        public int Status { get; set; }
-        public DateTime CreateDate { get; set; }
-        public Dictionary<string, object>? Custom { get; set; }
+        public string Summary { get; set; }
+        public string? ImageUrl { get; set; }
+        public DateTime Date { get; set; }
     }
 }

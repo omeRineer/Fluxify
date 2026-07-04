@@ -14,6 +14,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Fluxify.Application.Models.Dto.Channel;
 
 namespace Fluxify.Application.Services
 {
@@ -28,56 +29,53 @@ namespace Fluxify.Application.Services
             Mapper = mapper;
         }
 
-        public async Task<IDataResult<CreateChannelResponse>> CreateAsync(CreateChannelRequest model)
+        public async Task<IDataResult<CreateChannel.Response>> CreateAsync(CreateChannel.Request model)
         {
-            var channel = await channelRepository.GetSingleOrDefaultAsync(f => f.Prefix == model.Prefix);
+            var channel = await channelRepository.GetSingleOrDefaultAsync(f => f.Key == model.Key);
             var businessResult = await BusinessRuleEngine.Run(
                     new DataMustBeAvaibleRule(channel, "Channel is avaible")
             );
             if (!businessResult.IsSuccess)
-                return new ErrorDataResult<CreateChannelResponse>(message: businessResult.Message);
+                return new ErrorDataResult<CreateChannel.Response>(message: businessResult.Message);
 
             var newChannel = Mapper.Map<Channel>(model);
-            newChannel.Topics = newChannel.Topics?.Select(s => $"{model.Prefix}_{s}").ToList();
 
             await channelRepository.AddAsync(newChannel);
 
-            var result = Mapper.Map<CreateChannelResponse>(newChannel);
+            var result = Mapper.Map<CreateChannel.Response>(newChannel);
 
-            return new SuccessDataResult<CreateChannelResponse>(result, "Channel is created");
+            return new SuccessDataResult<CreateChannel.Response>(result, "Channel is created");
         }
-        public async Task<IDataResult<UpdateChannelResponse>> UpdateAsync(UpdateChannelRequest model)
-        {
-            var channel = await channelRepository.GetSingleOrDefaultAsync(f => f.Id == model.Id);
-            var businessResult = await BusinessRuleEngine.Run(
-                    new DataMustBeFoundRule(channel, "Channel is not found")
-            );
-            if (!businessResult.IsSuccess)
-                return new ErrorDataResult<UpdateChannelResponse>(message: businessResult.Message);
-
-            channel = Mapper.Map(model, channel);
-            channel.Topics = channel.Topics?.Select(s => $"{channel.Prefix}{s}").ToList();
-
-            await channelRepository.UpdateAsync(channel);
-
-            var result = Mapper.Map<UpdateChannelResponse>(channel);
-
-            return new SuccessDataResult<UpdateChannelResponse>(result, "Channel is updated.");
-        }
-        public async Task<IDataResult<GetChannelDetailResponse>> GetDetailAsync(Guid id)
+        public async Task<IDataResult<UpdateChannel.Response>> UpdateAsync(Guid id, UpdateChannel.Request model)
         {
             var channel = await channelRepository.GetSingleOrDefaultAsync(f => f.Id == id);
             var businessResult = await BusinessRuleEngine.Run(
                     new DataMustBeFoundRule(channel, "Channel is not found")
             );
             if (!businessResult.IsSuccess)
-                return new ErrorDataResult<GetChannelDetailResponse>(message: businessResult.Message);
+                return new ErrorDataResult<UpdateChannel.Response>(message: businessResult.Message);
 
-            var result = Mapper.Map<GetChannelDetailResponse>(channel);
+            channel = Mapper.Map(model, channel);
 
-            return new SuccessDataResult<GetChannelDetailResponse>(result);
+            await channelRepository.UpdateAsync(channel);
+
+            var result = Mapper.Map<UpdateChannel.Response>(channel);
+
+            return new SuccessDataResult<UpdateChannel.Response>(result, "Channel is updated.");
+        }
+        public async Task<IDataResult<ChannelDto.Detail>> GetDetailAsync(Guid id)
+        {
+            var channel = await channelRepository.GetSingleOrDefaultAsync(f => f.Id == id);
+            var businessResult = await BusinessRuleEngine.Run(
+                    new DataMustBeFoundRule(channel, "Channel is not found")
+            );
+            if (!businessResult.IsSuccess)
+                return new ErrorDataResult<ChannelDto.Detail>(message: businessResult.Message);
+
+            var result = Mapper.Map<ChannelDto.Detail>(channel);
+
+            return new SuccessDataResult<ChannelDto.Detail>(result);
         }
 
-        
     }
 }

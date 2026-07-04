@@ -1,4 +1,6 @@
-﻿using Fluxify.Application.Models.Rest.Topic;
+﻿using Fluxify.Application.Models.Dto.Topic;
+using Fluxify.Application.Models.Rest.Common;
+using Fluxify.Application.Models.Rest.Topic;
 using Fluxify.Application.Utilities.Result;
 using Fluxify.Domain.Core;
 using System;
@@ -11,9 +13,8 @@ namespace Fluxify.Application.Services.Interfaces
 {
     public interface ITopicService
     {
-        Task<IDataResult<List<Topic>>> GetListByChannelAsync(Guid channelId);
-        Task<IDataResult<List<Topic>>> GetListByKey(params string[] topics);
+        Task<IResult> CreateAsync(CreateTopic.Request req);
+        Task<IDataResult<DataListResponse<TopicDto.List>>> GetListAsync();
 
-        Task<IResult> CreateAsync(CreateTopicRequest req);
     }
 }

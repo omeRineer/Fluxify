@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Fluxify.Application.Utilities.ApiResponse;
-using Fluxify.Application.Models.Client;
 using Microsoft.AspNetCore.Authorization;
+using Fluxify.Application.Models.Common;
 
 namespace Fluxify.Api.Web.Controllers
 {

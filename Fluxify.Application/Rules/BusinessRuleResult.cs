@@ -17,6 +17,6 @@
             => new(true, null, null);
 
         public static BusinessRuleResult Fail(string errorCode, string message)
-            => new(false, errorCode, message);
+            => new(false, message, errorCode);
     }
 }

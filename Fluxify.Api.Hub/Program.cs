@@ -1,23 +1,29 @@
 using Fluxify.Application;
 using Fluxify.Persistance;
 using Fluxify.Application.Hubs;
-using Fluxify.Application.Models.Client;
 using System.Security.Claims;
 using Fluxify.Api.Hub.Workers;
+using Fluxify.Infrastructure;
+using Fluxify.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 await builder.Services.AddRabbitMqAsync();
 builder.Services.AddHostedService<NotificationWorker>();
+builder.Services.AddHostedService<FirebaseNotificationWorker>();
 builder.Services.AddApplication();
 builder.Services.AddPersistance();
+builder.Services.AddInfrastructure();
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<HubConnectionManager<NotificationHub>>();
 builder.Services.AddSingleton<HubConnectionManager<PresenceHub>>();
 builder.Services.AddCors(options =>
-                            options.AddDefaultPolicy(builder =>
-                            builder.AllowAnyHeader()
-                                   .AllowAnyMethod()
-                                   .AllowAnyOrigin()));
+                            options.AddDefaultPolicy(policy =>
+                            {
+                                policy.WithOrigins(AppConfiguration.AllowOrigins)
+                                      .AllowAnyHeader()
+                                      .AllowAnyMethod()
+                                      .AllowCredentials();
+                            }));
 
 
 var app = builder.Build();

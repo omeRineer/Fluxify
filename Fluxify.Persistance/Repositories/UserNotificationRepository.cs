@@ -12,25 +12,35 @@ namespace Fluxify.Persistance.Repositories
         {
         }
 
+        public Task<List<UserNotification>> GetListAsync(Guid notificationId)
+            => GetListAsync(f => f.NotificationId == notificationId);
 
-        public async Task MarkAsStatusAsync(NotificationStatus status, params Guid[] ids) =>
-            await Collection.UpdateManyAsync(
-                Builders<UserNotification>.Filter.And
-                (
-                    Builders<UserNotification>.Filter.In(x => x.Id, ids)
-                ),
-                Builders<UserNotification>.Update.Set(x => x.Status, (int)status));
-
-        public async Task MarkAsStatusByNotificationAsync(NotificationStatus status, Guid? userId = null, params Guid[] notificationIds)
+        public async Task MarkAsStatusAsync(NotificationStatus status, Guid[] notifications, Guid[]? users = null)
         {
-            var filter = Builders<UserNotification>.Filter.In(x => x.NotificationId, notificationIds) &
-        (userId.HasValue ? Builders<UserNotification>.Filter.Eq(x => x.UserId, userId.Value)
-                         : Builders<UserNotification>.Filter.Empty);
+            var filters = new List<FilterDefinition<UserNotification>>
+            {
+                Builders<UserNotification>
+                    .Filter
+                    .In(x => x.NotificationId, notifications)
+            };
 
-            await Collection.UpdateManyAsync(
-                filter,
-                Builders<UserNotification>.Update.Set(x => x.Status, (int)status)
-            );
+            if (users is { Length: > 0 })
+            {
+                filters.Add(
+                    Builders<UserNotification>
+                        .Filter
+                        .In(x => x.UserId, users));
+            }
+
+            var filter = Builders<UserNotification>
+                .Filter
+                .And(filters);
+
+            //var update = Builders<UserNotification>
+            //    .Update
+            //    .Set(x => x.Status, (int)status);
+
+            //await Collection.UpdateManyAsync(filter, update);
         }
     }
 }

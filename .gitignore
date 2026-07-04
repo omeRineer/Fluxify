@@ -10,6 +10,8 @@
 *.userosscache
 *.sln.docstates
 
+Fluxify.Configuration/External/*.json
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 Fluxify.Configuration/External/*.json

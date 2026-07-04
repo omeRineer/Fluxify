@@ -10,6 +10,7 @@ namespace Fluxify.Application.Models.SignalR
     {
         public string UserId { get; set; }
         public DateTime Date { get; set; }
-        public bool IsConnected { get; set; }
+        public int Status { get; set; }
+        public string Title { get; set; }
     }
 }

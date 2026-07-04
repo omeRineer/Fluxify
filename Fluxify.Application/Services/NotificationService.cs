@@ -1,6 +1,6 @@
 ﻿using Fluxify.Application.Hubs;
-using Fluxify.Application.Models.Client;
 using Fluxify.Application.Models.Enums;
+using Fluxify.Application.Models.Dto.Notification;
 using Fluxify.Application.Models.Rest.Channel;
 using Fluxify.Application.Models.Rest.Notification;
 using Fluxify.Application.Repositories;
@@ -20,181 +20,128 @@ using System.Linq;
 using System.Text;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+using Fluxify.Application.Models.Common;
+using Fluxify.Application.Models.Rest.Common;
+using AutoMapper;
+using Fluxify.Application.Infrastructure;
+using Fluxify.Application.Models.Queue;
 
 namespace Fluxify.Application.Services
 {
+
     public class NotificationService : INotificationService
     {
         readonly INotificationRepository NotificationRepository;
-        readonly IUserService UserService;
-        readonly IChannelService ChannelService;
-        readonly ITopicService TopicService;
+        readonly IUserRepository UserRepository;
+        readonly ITopicRepository TopicRepository;
         readonly IUserNotificationRepository UserNotificationRepository;
-        readonly RabbitMqClientService RabbitMqClient;
-        readonly CurrentUser CurrentUser;
-        public NotificationService(INotificationRepository notifications, CurrentUser currentUser, RabbitMqClientService rabbitMqClientService, IUserNotificationRepository userNotificationRepository, IUserService userService, IChannelService channelService, ITopicService topicService)
+        readonly IUserTopicRepository UserTopicRepository;
+        readonly IEventPublisher EventPublisher;
+        readonly IMapper _mapper;
+        public NotificationService(INotificationRepository notifications, IUserNotificationRepository userNotificationRepository, ITopicRepository topicRepository, IMapper mapper, IUserTopicRepository userTopicRepository, IEventPublisher eventPublisher)
         {
             NotificationRepository = notifications;
-            CurrentUser = currentUser;
-            CurrentUser = currentUser;
-            RabbitMqClient = rabbitMqClientService;
             UserNotificationRepository = userNotificationRepository;
-            UserService = userService;
-            ChannelService = channelService;
-            TopicService = topicService;
+            TopicRepository = topicRepository;
+            _mapper = mapper;
+            UserTopicRepository = userTopicRepository;
+            EventPublisher = eventPublisher;
         }
 
-        public async Task<IResult> CreateAsync(CreateNotificationRequest req)
+        public async Task<IResult> CreateAsync(Guid nameSpaceId, Guid userId, CreateNotification.Request req)
         {
-            var ticketId = Guid.NewGuid();
-            var newNotification = new Notification
-            {
-                Id = ticketId,
-                NameSpace = CurrentUser.NameSpace,
-                Level = req.Level ?? (int)NotificationLevelType.Info,
-                Sender = CurrentUser.Key,
-                Title = req.Title,
-                Content = req.Content,
-                ContentType = req.ContentType ?? (int)NotificationContentType.Text,
-                CreateDate = DateTime.Now,
-                Properties = req.Properties
-            };
+            var newNotification = _mapper.Map<Notification>(req);
+            newNotification.NameSpace = nameSpaceId;
+            newNotification.Sender = userId;
 
-
-            List<UserNotification>? notificationUsers = null;
-            if (req.Topics != null && req.Topics.Any())
-            {
-                var topics = await TopicService.GetListByKey(req.Topics);
-                var targetUsers = await UserService.GetListByTopicsAsync(newNotification.NameSpace, topics.Data.Select(s => s.Id).ToArray());
-
-                notificationUsers = targetUsers.Data.Select(s => new UserNotification
-                {
-                    NotificationId = ticketId,
-                    UserId = s.Id,
-                    Status = (int)NotificationStatus.Pending,
-                    CreateDate = newNotification.CreateDate
-                }).ToList();
-            }
+            var topics = await TopicRepository.GetListAsync(req.Topics);
+            newNotification.Topics = topics?.Select(s => s.Id)?.ToList() ?? new();
 
             await NotificationRepository.AddAsync(newNotification);
-
-            if (notificationUsers != null && notificationUsers.Any())
-                await UserNotificationRepository.AddRangeAsync(notificationUsers);
-
-            await RabbitMqClient.PushAsync(Queue.NotificationQueue, ticketId);
+            await EventPublisher.PublishAsync("notification-topic",
+                                              new NotificationQueueModel
+                                              {
+                                                  Id = newNotification.Id,
+                                                  NameSpaceId = nameSpaceId,
+                                                  Level = newNotification.Level,
+                                                  Title = newNotification.Title,
+                                                  Summary = newNotification.Summary,
+                                                  Date = newNotification.CreateDate,
+                                                  Topics = newNotification.Topics
+                                              },
+                                              "notification.created");
 
             return new SuccessResult("Notification is created");
         }
-
-        public async Task<IDataResult<Notification>> GetAsync(Guid id)
-            => new SuccessDataResult<Notification>(await NotificationRepository.GetSingleAsync(f => f.Id == id));
-
-        public async Task<IDataResult<GetNotificationDetailResponse>> GetDetailAsync(Guid id)
+        public async Task<IDataResult<DataListResponse<NotificationDto.List>>> GetListAsync(Guid userId)
         {
-            #region Notification
-            var notification = await NotificationRepository.GetSingleAsync(f => f.Id == id && f.NameSpace == CurrentUser.NameSpace);
-            var businessResult = await BusinessRuleEngine.Run(
-                    new DataMustBeFoundRule(notification, "Notification is not found")
-            );
-            if (!businessResult.IsSuccess)
-                return new ErrorDataResult<GetNotificationDetailResponse>(message: businessResult.Message);
-            #endregion
+            var userTopics = await UserTopicRepository.GetListAsync(x => x.UserId == userId);
+            var userNotifications = await UserNotificationRepository.GetListAsync(x => x.UserId == userId);
 
-            #region User Notification
-            var userNotification = await UserNotificationRepository.GetFirstOrDefaultAsync(f => f.NotificationId == id &&
-                                                                                                f.UserId == CurrentUser.NameIdentifier &&
-                                                                                                (f.Status == (int)NotificationStatus.Delivered || f.Status == (int)NotificationStatus.Read));
-            businessResult = await BusinessRuleEngine.Run(
-                    new DataMustBeFoundRule(userNotification, "User notification is not found")
-            );
-            if (!businessResult.IsSuccess)
-                return new ErrorDataResult<GetNotificationDetailResponse>(message: businessResult.Message);
-            #endregion
+            var notifications = await NotificationRepository.GetListAsync(x => x.Topics.Any(o => userTopics.Select(s => s.TopicId).Contains(o)));
 
-            var result = new GetNotificationDetailResponse
+            var mappedList = _mapper.Map<List<NotificationDto.List>>(notifications);
+            mappedList.ForEach(x =>
+            {
+                if (userNotifications.Any(un => un.NotificationId == x.Id))
+                    x.IsRead = true;
+                else
+                    x.IsRead = false;
+            });
+
+            var result = DataListResponse<NotificationDto.List>.Load(mappedList.OrderBy(o => o.IsRead).ToList());
+
+            return new SuccessDataResult<DataListResponse<NotificationDto.List>>(result);
+        }
+        public async Task<IDataResult<NotificationDto.Detail>> GetDetailAsync(Guid id, Guid userId)
+        {
+            var isRead = await UserNotificationRepository.IsExistAsync(f => f.NotificationId == id &&
+                                                                                      f.UserId == userId);
+
+
+            var notification = await NotificationRepository.GetSingleAsync(f => f.Id == id);
+            var user = await UserRepository.GetSingleAsync(f => f.Id == notification.Sender);
+            var result = new NotificationDto.Detail
             {
                 Id = notification.Id,
-                Level = notification.Level,
-                ContentType = notification.ContentType,
-                Sender = notification.Sender,
+                Level = EnumHelper.ToEnumString<NotificationLevelType>(notification.Level),
+                ContentType = EnumHelper.ToEnumString<NotificationContentType>(notification.ContentType),
+                Sender = user.Key,
                 Title = notification.Title,
+                Summary = notification.Summary,
                 Content = notification.Content,
-                Status = userNotification.Status,
+                IsRead = isRead,
                 CreateDate = notification.CreateDate,
                 Topics = notification.Topics,
                 Properties = notification.Properties
             };
 
-            return new SuccessDataResult<GetNotificationDetailResponse>(result);
-        }
-        public async Task<IDataResult<GetNotificationsResponse>> GetListAsync()
-        {
-            var userNotifications = await UserNotificationRepository.GetListAsync(f => f.UserId == CurrentUser.NameIdentifier &&
-                                                                                       (f.Status == (int)NotificationStatus.Delivered || f.Status == (int)NotificationStatus.Read));
-            var notifications = await NotificationRepository.GetListAsync(f => f.NameSpace == CurrentUser.NameSpace &&
-                                                                               userNotifications.Select(s => s.NotificationId).Contains(f.Id));
-
-            var result = new GetNotificationsResponse
-            {
-                Notifications = notifications.Select(s => new NotificationResponse
-                {
-                    Id = s.Id,
-                    Level = s.Level,
-                    ContentType = s.ContentType,
-                    Sender = s.Sender,
-                    Title = s.Title,
-                    CreateDate = s.CreateDate,
-                    Status = userNotifications.First(f => f.NotificationId == s.Id).Status,
-                    Properties = s.Properties
-                }).ToList()
-            };
-
-            return new SuccessDataResult<GetNotificationsResponse>(result);
-        }
-        public async Task<IDataResult<GetNotificationsResponse>> GetListByStatusAsync(int status)
-        {
-            var userNotifications = await UserNotificationRepository.GetListAsync(f => f.UserId == CurrentUser.NameIdentifier &&
-                                                                                       f.Status == status);
-            var notifications = await NotificationRepository.GetListAsync(f => f.NameSpace == CurrentUser.NameSpace &&
-                                                                               userNotifications.Select(s => s.NotificationId).Contains(f.Id));
-
-            var result = new GetNotificationsResponse
-            {
-                Notifications = notifications.Select(s => new NotificationResponse
-                {
-                    Id = s.Id,
-                    Level = s.Level,
-                    ContentType = s.ContentType,
-                    Sender = s.Sender,
-                    Title = s.Title,
-                    CreateDate = s.CreateDate,
-                    Status = userNotifications.First(f => f.NotificationId == s.Id).Status,
-                    Properties = s.Properties
-                }).ToList()
-            };
-
-            return new SuccessDataResult<GetNotificationsResponse>(result);
+            return new SuccessDataResult<NotificationDto.Detail>(result);
         }
 
-        public async Task<IDataResult<List<UserNotification>>> GetTargetsAsync(Guid notificationId)
+        public async Task<IDataResult<Notification>> GetAsync(Guid id)
         {
-            var userNotifications = await UserNotificationRepository.GetListAsync(f => f.NotificationId == notificationId);
+            var notification = await NotificationRepository.GetSingleAsync(f => f.Id == id);
 
-            return new SuccessDataResult<List<UserNotification>>(userNotifications);
+            return new SuccessDataResult<Notification>(notification);
         }
 
-        public async Task<IResult> MarkAsStatusAsync(NotificationStatus status, params Guid[] ids)
+        public async Task<IResult> FireAsync(Guid nameSpaceId, FireNotification.Request req)
         {
-            await UserNotificationRepository.MarkAsStatusAsync(status, ids);
+            await EventPublisher.PublishAsync("notification-topic",
+                                              new NotificationQueueModel
+                                              {
+                                                  NameSpaceId = nameSpaceId,
+                                                  Level = (int)EnumHelper.Parse(req.Level, NotificationLevelType.Info),
+                                                  Title = req.Title,
+                                                  Summary = req.Summary,
+                                                  Date = DateTime.UtcNow,
+                                                  Topics = req.Topics,
+                                                  ImageUrl = req.ImageUrl
+                                              },
+                                              "notification.created");
 
-            return new SuccessResult();
-        }
-
-        public async Task<IResult> MarkAsStatusByNotificationAsync(NotificationStatus status, Guid? userId = null, params Guid[] notificationIds)
-        {
-            await UserNotificationRepository.MarkAsStatusByNotificationAsync(status, userId, notificationIds);
-
-            return new SuccessResult();
+            return new SuccessResult("Notification is fired");
         }
     }
 }

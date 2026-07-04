@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Fluxify.Application.Models.Dto.Channel;
 using Fluxify.Application.Models.Rest.Channel;
 using Fluxify.Domain.Core;
 using System;
@@ -13,13 +14,12 @@ namespace Fluxify.Application.MappingProfiles
     {
         public ChannelProfile()
         {
-            CreateMap<Channel, ChannelResponse>();
-            CreateMap<Channel, CreateChannelResponse>().IncludeBase<Channel, ChannelResponse>();
-            CreateMap<Channel, UpdateChannelResponse>().IncludeBase<Channel, ChannelResponse>();
-            CreateMap<Channel, GetChannelDetailResponse>().IncludeBase<Channel, ChannelResponse>();
+            CreateMap<Channel, ChannelDto.Detail>();
+            CreateMap<Channel, CreateChannel.Response>().IncludeBase<Channel, ChannelDto.Detail>();
+            CreateMap<Channel, UpdateChannel.Response>().IncludeBase<Channel, ChannelDto.Detail>();
 
-            CreateMap<CreateChannelRequest, Channel>();
-            CreateMap<UpdateChannelRequest, Channel>();
+            CreateMap<CreateChannel.Request, Channel>();
+            CreateMap<UpdateChannel.Request, Channel>();
         }
     }
 }

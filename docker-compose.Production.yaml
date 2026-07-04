@@ -1,0 +1,69 @@
+name: "fluxify-production"
+services:
+  db.mongo:
+    image: mongodb/mongodb-community-server:latest
+    container_name: fluxify.db.mongodb
+    ports:
+      - "27000:27017"
+    networks:
+      - appnet
+    volumes:
+      - mongo_data:/data/db
+
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: fluxify.rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=fluxify
+      - RABBITMQ_DEFAULT_PASS=fluxify
+    networks:
+      - appnet
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+  
+  api.open:
+    container_name: fluxify.api.open
+    build:
+      context: Fluxify.Api.Open
+      dockerfile: dockerfile.Production
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      db.mongo:
+        condition: service_started
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:1071
+    networks:
+      - appnet
+
+  api.hub:
+    container_name: fluxify.api.hub
+    build:
+      context: Fluxify.Api.Hub
+      dockerfile: dockerfile.Production
+    depends_on:
+      db.mongo:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:1453
+    networks:
+      - appnet
+
+networks:
+  appnet:
+    driver: bridge
+
+volumes:
+  mongo_data:
+    

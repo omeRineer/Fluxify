@@ -1,5 +1,6 @@
 ﻿using Fluxify.Api.Hub.Auth;
-using Fluxify.Application.Models.Client;
+using Fluxify.Application.Models.Common;
+using Fluxify.Application.Models.Enums;
 using Fluxify.Application.Repositories;
 using Fluxify.Application.Services;
 using Fluxify.Application.Services.Interfaces;
@@ -8,7 +9,6 @@ using Fluxify.Configuration;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
-using RabbitMQ.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,11 +26,13 @@ namespace Fluxify.Application
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<INameSpaceService, NameSpaceService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IUserNotificationService, UserNotificationService>();
+            services.AddScoped<IUserDeviceService, UserDeviceService>();
+            services.AddScoped<IUserTopicService, UserTopicService>();
             services.AddScoped<IChannelService, ChannelService>();
             services.AddScoped<ITopicService, TopicService>();
 
             services.AddHttpContextAccessor();
-            services.AddScoped<RabbitMqClientService>();
             services.AddAuthentication()
                 .AddScheme<FluxifyHubAuthenticationOptions, FluxifyHubAuthenticationHandler>("FluxifySecurityScheme", null);
 
@@ -39,15 +41,21 @@ namespace Fluxify.Application
             {
                 var httpContextAccessor = i.GetService<IHttpContextAccessor>();
                 var user = httpContextAccessor?.HttpContext?.User;
+                var userClaims = user.Claims
+                    .GroupBy(k => k.Type)
+                    .ToDictionary(g => g.Key, g => g.First().Value);
+
 
                 if (user != null && user.Identity.IsAuthenticated)
                     return new CurrentUser
                     {
-                        NameIdentifier = Guid.Parse(user.Claims.FirstOrDefault(f => f.Type == ClaimTypes.NameIdentifier)?.Value),
-                        ApiKey = user.Claims.FirstOrDefault(f => f.Type == "ApiKey")?.Value,
-                        Key = user.Claims.FirstOrDefault(f => f.Type == "Key")?.Value,
-                        NameSpace = Guid.Parse(user.Claims.FirstOrDefault(f => f.Type == "NameSpace")?.Value),
-                        Name = user.Claims.FirstOrDefault(f => f.Type == ClaimTypes.Name)?.Value
+                        NameIdentifier = Guid.Parse(userClaims[ClaimTypes.NameIdentifier]),
+                        ApiKey = userClaims[FluxifyClaims.ApiKey],
+                        Key = userClaims[FluxifyClaims.Key],
+                        NameSpace = new CurrentUser.NameSpaceInfo(Guid.Parse(userClaims[FluxifyClaims.NameSpaceId]),
+                                                                  userClaims[FluxifyClaims.NameSpace]),
+                        Name = userClaims[ClaimTypes.Name],
+                        Device = new CurrentUser.DeviceInfo(userClaims[FluxifyClaims.Device], userClaims[FluxifyClaims.Platform])
                     };
 
                 return new CurrentUser();
@@ -56,30 +64,6 @@ namespace Fluxify.Application
             services.AddAutoMapper(opt => { }, Assembly.GetExecutingAssembly());
         }
 
-        public static async Task<IServiceCollection> AddRabbitMqAsync(this IServiceCollection services)
-        {
-            var connectionFactory = new ConnectionFactory();
-            connectionFactory.HostName = AppConfiguration.RabbitMqOptions.Host;
-            connectionFactory.Port = AppConfiguration.RabbitMqOptions.Port;
-            connectionFactory.VirtualHost = AppConfiguration.RabbitMqOptions.VirtualHost;
-            connectionFactory.UserName = AppConfiguration.RabbitMqOptions.UserName;
-            connectionFactory.Password = AppConfiguration.RabbitMqOptions.Password;
-
-            IConnection? connection = null;
-            for (int i = 0; i < 20; i++)
-            {
-                await Task.Delay(1000);
-                connection = await connectionFactory.CreateConnectionAsync();
-
-                if (connection != null && connection.IsOpen)
-                    break;
-            }
-            var channel = await connection.CreateChannelAsync();
-
-            services.AddSingleton<IConnection>(connection);
-            services.AddSingleton<IChannel>(channel);
-
-            return services;
-        }
+        
     }
 }

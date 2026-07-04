@@ -15,13 +15,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fluxify.Persistance", "Flux
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{5C75EBE9-D67D-42C8-8C73-6A40DD76B349}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Persistance", "Persistance", "{8C0AB383-0926-43E6-9FD0-82A0034FA303}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastructure", "{8C0AB383-0926-43E6-9FD0-82A0034FA303}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fluxify.Api.Web", "Fluxify.Api.Web\Fluxify.Api.Web.csproj", "{8B8E61E5-8E4D-4124-A788-D2F0D8141CC6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fluxify.Dashboard", "Fluxify.Dashboard\Fluxify.Dashboard.csproj", "{D7A99352-AB02-440D-B14A-E2A9010B5CAD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fluxify.Api.Open", "Fluxify.Api.Open\Fluxify.Api.Open.csproj", "{0F0D43FA-78C5-4235-8966-E9D9E94272F9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fluxify.Api.Open", "Fluxify.Api.Open\Fluxify.Api.Open.csproj", "{0F0D43FA-78C5-4235-8966-E9D9E94272F9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fluxify.Infrastructure", "Fluxify.Infrastructure\Fluxify.Infrastructure.csproj", "{35333EA5-5654-49FC-898E-0ECAEBBB1387}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -61,6 +63,10 @@ Global
 		{0F0D43FA-78C5-4235-8966-E9D9E94272F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0F0D43FA-78C5-4235-8966-E9D9E94272F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0F0D43FA-78C5-4235-8966-E9D9E94272F9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{35333EA5-5654-49FC-898E-0ECAEBBB1387}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{35333EA5-5654-49FC-898E-0ECAEBBB1387}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{35333EA5-5654-49FC-898E-0ECAEBBB1387}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{35333EA5-5654-49FC-898E-0ECAEBBB1387}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -70,6 +76,7 @@ Global
 		{B7BEC65E-C49B-4CD6-8C6E-5DD34E2FDE22} = {5C75EBE9-D67D-42C8-8C73-6A40DD76B349}
 		{84B172D7-FBD9-4ECC-86E3-399BDC14D916} = {5C75EBE9-D67D-42C8-8C73-6A40DD76B349}
 		{C895B774-CF95-4D34-8235-B9247A93D3A5} = {8C0AB383-0926-43E6-9FD0-82A0034FA303}
+		{35333EA5-5654-49FC-898E-0ECAEBBB1387} = {8C0AB383-0926-43E6-9FD0-82A0034FA303}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9FB04A1E-9989-46EF-9D74-816B66133FEC}

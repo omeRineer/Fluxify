@@ -22,6 +22,7 @@ namespace Fluxify.Persistance
             services.AddScoped<ITopicRepository, TopicRepository>();
             services.AddScoped<IUserTopicRepository, UserTopicRepository>();
             services.AddScoped<IUserNotificationRepository, UserNotificationRepository>();
+            services.AddScoped<IUserDeviceRepository, UserDeviceRepository>();
 
             services.AddSingleton<IMongoClient>(opt => new MongoClient(AppConfiguration.MongoDbOptions.ConnectionString));
             services.AddScoped(opt =>

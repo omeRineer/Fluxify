@@ -2,8 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Fluxify.Application.Utilities.ApiResponse;
 using R = Fluxify.Application.Utilities.Result;
-using Fluxify.Application.Models.Client;
 using Microsoft.AspNetCore.Authorization;
+using Fluxify.Application.Models.Common;
 
 namespace Fluxify.Api.Open.Controllers
 {
@@ -17,11 +17,7 @@ namespace Fluxify.Api.Open.Controllers
             CurrentUser = currentUser;
         }
 
-        //protected IActionResult Response(R.IResult result)
-        //    => result.Success ? Ok(new ApiResponse
-        //                            {
-        //        Message = result.Message,
-        //    }) 
-        //                      : BadRequest(ApiResponseHelper.Error(result.Message,));
+        protected IActionResult Response(R.IResult result)
+            => result.Success ? Ok(result) : BadRequest(result);
     }
 }

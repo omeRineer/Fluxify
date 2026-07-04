@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Fluxify.Application.Models.Dto.User;
+using Fluxify.Application.Models.Rest.Common;
 using Fluxify.Application.Models.Rest.Subscriber;
 using Fluxify.Application.Repositories;
 using Fluxify.Application.Rules;
@@ -30,33 +32,20 @@ namespace Fluxify.Application.Services
             UserTopicRepository = userTopicRepository;
         }
 
-        public async Task<IDataResult<CreateUserResponse>> CreateAsync(CreateUserRequest model)
+        public async Task<IDataResult<CreateUser.Response>> CreateAsync(Guid nameSpaceId, CreateUser.Request model)
         {
-            var nameSpace = await NameSpaceRepository.GetSingleOrDefaultAsync(f => f.Id == model.NameSpace);
-            var avaibleSubscriber = await UserRepository.GetSingleOrDefaultAsync(f => f.Key == model.Key && f.NameSpace == model.NameSpace);
+            var nameSpaceE = await NameSpaceRepository.GetSingleAsync(f => f.Id == nameSpaceId);
+            var avaibleSubscriber = await UserRepository.GetSingleOrDefaultAsync(f => f.Key == model.Key && f.NameSpace == nameSpaceE.Id);
             var businessResult = await BusinessRuleEngine.Run(
-                    new DataMustBeFoundRule(nameSpace, "Namespace is not found."),
                     new DataMustBeAvaibleRule(avaibleSubscriber, "Subscriber is avaible. Please, set a different key")
             );
             if (!businessResult.IsSuccess)
-                return new ErrorDataResult<CreateUserResponse>(message: businessResult.Message);
+                return new ErrorDataResult<CreateUser.Response>(message: businessResult.Message);
 
-            if (model.Topics != null && model.Topics.Count > 0)
-            {
-                var topics = (await ChannelRepository.GetListAsync()).SelectMany(s => s.Topics);
-                var topicNotAvaible = model.Topics.FirstOrDefault(x => !topics.Contains(x));
-
-                businessResult = await BusinessRuleEngine.Run(
-                    new DataMustBeAvaibleRule(topicNotAvaible, $"{topicNotAvaible} is not found")
-                );
-                if (!businessResult.IsSuccess)
-                    return new ErrorDataResult<CreateUserResponse>(message: businessResult.Message);
-            }
-
-            string apiKey = CryptoHelper.Encrypt(model.Key, nameSpace.Signature);
+            string apiKey = CryptoHelper.Encrypt(model.Key, nameSpaceE.Signature);
             var subscriber = new User
             {
-                NameSpace = model.NameSpace,
+                NameSpace = nameSpaceE.Id,
                 Key = model.Key,
                 ApiKey = apiKey,
                 Email = model.Email,
@@ -66,86 +55,77 @@ namespace Fluxify.Application.Services
 
             await UserRepository.AddAsync(subscriber);
 
-            var result = Mapper.Map<CreateUserResponse>(subscriber);
+            var result = Mapper.Map<CreateUser.Response>(subscriber);
 
-            return new SuccessDataResult<CreateUserResponse>(result, "Subscriber is created.");
+            return new SuccessDataResult<CreateUser.Response>(result, "Subscriber is created.");
         }
 
-        public async Task<IDataResult<UpdateUserResponse>> UpdateAsync(UpdateUserRequest model)
+        public async Task<IDataResult<UpdateUser.Response>> UpdateAsync(Guid id, UpdateUser.Request model)
         {
-            var subscriber = await UserRepository.GetSingleOrDefaultAsync(f => f.Id == model.Id);
+            var subscriber = await UserRepository.GetSingleOrDefaultAsync(f => f.Id == id);
             var businessResult = await BusinessRuleEngine.Run(
                     new DataMustBeFoundRule(subscriber, "Subscriber is not found.")
             );
             if (!businessResult.IsSuccess)
-                return new ErrorDataResult<UpdateUserResponse>(message: businessResult.Message);
-
-            if (model.Topics != null && model.Topics.Count > 0)
-            {
-                var topics = (await ChannelRepository.GetListAsync()).SelectMany(s => s.Topics);
-                var isNotAvaibleTopic = model.Topics.FirstOrDefault(x => !topics.Contains(x));
-
-                businessResult = await BusinessRuleEngine.Run(
-                    new DataMustBeFoundRule(isNotAvaibleTopic, $"{isNotAvaibleTopic} is not found")
-                );
-                if (!businessResult.IsSuccess)
-                    return new ErrorDataResult<UpdateUserResponse>(message: businessResult.Message);
-            }
+                return new ErrorDataResult<UpdateUser.Response>(message: businessResult.Message);
 
             subscriber = Mapper.Map(model, subscriber);
 
             await UserRepository.UpdateAsync(subscriber);
 
-            var result = Mapper.Map<UpdateUserResponse>(subscriber);
+            var result = Mapper.Map<UpdateUser.Response>(subscriber);
 
-            return new SuccessDataResult<UpdateUserResponse>(result, "Subscriber is updated.");
+            return new SuccessDataResult<UpdateUser.Response>(result, "Subscriber is updated.");
         }
 
-        public async Task<IDataResult<GetUserDetailResponse>> GetDetailAsync(Guid id)
+        public async Task<IDataResult<UserDto.Detail>> GetDetailAsync(Guid id)
         {
             var subscriber = await UserRepository.GetSingleOrDefaultAsync(f => f.Id == id);
             var businessResult = await BusinessRuleEngine.Run(
                                 new DataMustBeFoundRule(subscriber, "Subscriber is not found.")
                         );
             if (!businessResult.IsSuccess)
-                return new ErrorDataResult<GetUserDetailResponse>(message: businessResult.Message);
+                return new ErrorDataResult<UserDto.Detail>(message: businessResult.Message);
 
-            var result = Mapper.Map<GetUserDetailResponse>(subscriber);
+            var result = Mapper.Map<UserDto.Detail>(subscriber);
 
-            return new SuccessDataResult<GetUserDetailResponse>(data: result);
+            return new SuccessDataResult<UserDto.Detail>(data: result);
         }
 
-        public async Task<IDataResult<GetUserDetailResponse?>> GetDetailAsync(string apiKey)
+        public async Task<IDataResult<User>> GetAsync(string apiKey)
         {
-            var subscriber = await UserRepository.GetSingleOrDefaultAsync(f => f.ApiKey == apiKey);
-            var businessResult = await BusinessRuleEngine.Run(
-                    new DataMustBeFoundRule(subscriber, "Subscriber is not found.")
-            );
-            if (!businessResult.IsSuccess)
-                return new ErrorDataResult<GetUserDetailResponse?>(message: businessResult.Message);
+            var subscriber = await UserRepository.GetSingleAsync(f => f.ApiKey == apiKey);
 
-            var result = Mapper.Map<GetUserDetailResponse>(subscriber);
-
-            return new SuccessDataResult<GetUserDetailResponse?>(result);
+            return new SuccessDataResult<User>(subscriber);
         }
 
-        public async Task<IDataResult<List<UserResponse>>> GetListByNameSpaceAsync(Guid nameSpace)
-        {
-            var subscribers = await UserRepository.GetListAsync(f => f.NameSpace == nameSpace);
-
-            var result = Mapper.Map<List<UserResponse>>(subscribers);
-
-            return new SuccessDataResult<List<UserResponse>>(result);
-        }
-
-        public async Task<IDataResult<List<UserResponse>>> GetListByTopicsAsync(Guid nameSpace, params Guid[] topics)
+        public async Task<IDataResult<DataListResponse<UserDto.List>>> GetListByTopicsAsync(Guid nameSpaceId, params string[] topics)
         {
             var userTopics = await UserTopicRepository.GetListAsync(f => topics.Contains(f.TopicId));
-            var users = await UserRepository.GetListAsync(f => f.NameSpace == nameSpace && userTopics.Select(ut => ut.UserId).Contains(f.Id));
+            var users = await UserRepository.GetListAsync(f => f.NameSpace == nameSpaceId && userTopics.Select(ut => ut.UserId).Contains(f.Id));
 
-            var result = Mapper.Map<List<UserResponse>>(users);
+            var mappedList = Mapper.Map<List<UserDto.List>>(users);
 
-            return new SuccessDataResult<List<UserResponse>>(result);
+            var result = DataListResponse<UserDto.List>.Load(mappedList);
+            return new SuccessDataResult<DataListResponse<UserDto.List>>(result);
+        }
+
+        public async Task<IDataResult<DataListResponse<UserDto.List>>> GetListAsync(Guid nameSpaceId)
+        {
+            var users = await UserRepository.GetListAsync(f => f.NameSpace == nameSpaceId);
+
+            var mappedList = Mapper.Map<List<UserDto.List>>(users);
+
+            var result = DataListResponse<UserDto.List>.Load(mappedList);
+            return new SuccessDataResult<DataListResponse<UserDto.List>>(result);
+
+        }
+
+        public async Task<IDataResult<User>> GetAsync(Guid id)
+        {
+            var subscriber = await UserRepository.GetSingleAsync(f => f.Id == id);
+
+            return new SuccessDataResult<User>(subscriber);
         }
     }
 }

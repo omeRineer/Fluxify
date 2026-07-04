@@ -12,43 +12,49 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Fluxify.Application.Models.Rest.Common;
+using Fluxify.Application.Models.Dto.Topic;
 
 namespace Fluxify.Application.Services
 {
     public class TopicService : ITopicService
     {
-        readonly IChannelService channelService;
+        readonly IChannelRepository channelRepository;
         readonly ITopicRepository topicRepository;
         readonly IMapper _mapper;
 
-        public TopicService(ITopicRepository topicRepository, IMapper mapper, IChannelService channelService)
+        public TopicService(ITopicRepository topicRepository, IMapper mapper, IChannelRepository channelRepository)
         {
             this.topicRepository = topicRepository;
             _mapper = mapper;
-            this.channelService = channelService;
+            this.channelRepository = channelRepository;
         }
 
-        public async Task<IResult> CreateAsync(CreateTopicRequest req)
+        public async Task<IResult> CreateAsync(CreateTopic.Request req)
         {
-            var entity = _mapper.Map<Topic>(req);
+            var channel = await channelRepository.GetSingleAsync(f => f.Key == req.Channel);
 
-            await topicRepository.AddAsync(entity);
+            var newTopic = new Topic
+            {
+                ChannelId = channel.Id,
+                Id = $"{channel.Key}:{req.Key}",
+                Name = req.Name
+            };
+
+            await topicRepository.AddAsync(newTopic);
 
             return new SuccessResult("Topic is created");
         }
 
-        public async Task<IDataResult<List<Topic>>> GetListByChannelAsync(Guid channelId)
+        public async Task<IDataResult<DataListResponse<TopicDto.List>>> GetListAsync()
         {
-            var topics = await topicRepository.GetListAsync(f => f.ChannelId == channelId);
+            var topicList = await topicRepository.GetListAsync();
 
-            return new SuccessDataResult<List<Topic>>(topics);
-        }
+            var mappedList = _mapper.Map<List<TopicDto.List>>(topicList);
 
-        public async Task<IDataResult<List<Topic>>> GetListByKey(params string[] topics)
-        {
-            var topicList = await topicRepository.GetListAsync(f => topics.Contains(f.Key));
+            var result = DataListResponse<TopicDto.List>.Load(mappedList);
 
-            return new SuccessDataResult<List<Topic>>(topicList);
+            return new SuccessDataResult<DataListResponse<TopicDto.List>>(result);
         }
     }
 }

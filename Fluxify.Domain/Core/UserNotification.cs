@@ -15,6 +15,5 @@ namespace Fluxify.Domain.Core
 
         [BsonRepresentation(BsonType.String)]
         public Guid NotificationId { get; set; }
-        public int Status { get; set; }
     }
 }

@@ -10,6 +10,7 @@
 		<None Remove="appsettings.Development.json" />
 		<None Remove="appsettings.Local.json" />
 		<None Remove="appsettings.Production.json" />
+		<None Remove="External\fluxify-adminsdk.json" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -21,6 +22,9 @@
 		</Content>
 		<Content Include="appsettings.Production.json">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+		<Content Include="External\fluxify-adminsdk.json">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 	</ItemGroup>
 

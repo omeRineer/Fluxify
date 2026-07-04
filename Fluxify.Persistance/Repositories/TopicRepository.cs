@@ -5,10 +5,26 @@ using MongoDB.Driver;
 
 namespace Fluxify.Persistance.Repositories
 {
-    public class TopicRepository : MongoRepository<Topic, Guid>, ITopicRepository
+    public class TopicRepository : MongoRepository<Topic, string>, ITopicRepository
     {
         public TopicRepository(IMongoDatabase dataBase) : base(dataBase, "Topics")
         {
         }
+
+        /// <summary>
+        /// By Channel
+        /// </summary>
+        /// <param name="channelId"></param>
+        /// <returns></returns>
+        public async Task<List<Topic>> GetListAsync(Guid channelId)
+            => await GetListAsync(f => f.ChannelId == channelId);
+
+        /// <summary>
+        /// By Topics
+        /// </summary>
+        /// <param name="topics"></param>
+        /// <returns></returns>
+        public async Task<List<Topic>> GetListAsync(string[] topics)
+            => await GetListAsync(f => topics.Contains(f.Id));
     }
 }

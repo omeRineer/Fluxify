@@ -1,4 +1,6 @@
 using Fluxify.Application;
+using Fluxify.Configuration;
+using Fluxify.Infrastructure;
 using Fluxify.Persistance;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,9 +10,9 @@ builder.Services.AddApplication();
 builder.Services.AddPersistance();
 builder.Services.AddCors(options =>
                             options.AddDefaultPolicy(builder =>
-                            builder.AllowAnyHeader()
-                                   .AllowAnyMethod()
-                                   .AllowAnyOrigin()));
+                            builder.WithOrigins(AppConfiguration.AllowOrigins)
+                                   .AllowAnyHeader()
+                                   .AllowAnyMethod()));
 
 var app = builder.Build();
 
@@ -22,6 +24,7 @@ app.UseAuthentication();
 
 app.UseAuthorization();
 
+app.Map("/health", () => "Healthy!");
 app.MapControllers();
 
 app.Run();
