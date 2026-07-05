@@ -67,7 +67,8 @@ namespace Fluxify.Application.Services
                                                   Title = newNotification.Title,
                                                   Summary = newNotification.Summary,
                                                   Date = newNotification.CreateDate,
-                                                  Topics = newNotification.Topics
+                                                  Topics = newNotification.Topics,
+                                                  Url = req.Url
                                               },
                                               "notification.created");
 
@@ -137,7 +138,8 @@ namespace Fluxify.Application.Services
                                                   Summary = req.Summary,
                                                   Date = DateTime.UtcNow,
                                                   Topics = req.Topics,
-                                                  ImageUrl = req.ImageUrl
+                                                  ImageUrl = req.ImageUrl,
+                                                  Url = req.Url
                                               },
                                               "notification.created");
 

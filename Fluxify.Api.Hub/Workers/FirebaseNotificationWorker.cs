@@ -40,7 +40,13 @@ namespace Fluxify.Api.Hub.Workers
             var targetDevices = await userDeviceRepository.GetListAsync(f => targetUsers.Select(s => s.UserId).Contains(f.UserId));
 
             if (targetDevices != null && targetDevices.Any())
-                await fireBaseNotificationService.SendNotificationAsync(targetDevices.Select(s => s.Token), message.Title, message.Summary);
+                await fireBaseNotificationService.SendNotificationAsync(targetDevices.Select(s => s.Token), 
+                                                                        message.Title, 
+                                                                        message.Summary,
+                                                                        new()
+                                                                        {
+                                                                            { "url", message.Url }
+                                                                        });
 
         }
     }

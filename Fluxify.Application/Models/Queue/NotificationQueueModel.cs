@@ -9,6 +9,7 @@
         public string Summary { get; set; }
         public DateTime Date { get; set; }
         public string? ImageUrl { get; set; }
+        public string? Url { get; set; }
         public List<string> Topics { get; set; }
     }
 }
