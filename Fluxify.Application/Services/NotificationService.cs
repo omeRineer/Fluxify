@@ -136,8 +136,7 @@ namespace Fluxify.Application.Services
                                                   Title = req.Title,
                                                   Summary = req.Summary,
                                                   Date = DateTime.UtcNow,
-                                                  Topics = req.Topics,
-                                                  ImageUrl = req.ImageUrl
+                                                  Topics = req.Topics
                                               },
                                               "notification.created");
 

@@ -8,7 +8,7 @@
         public string Title { get; set; }
         public string Summary { get; set; }
         public DateTime Date { get; set; }
-        public string? ImageUrl { get; set; }
+        public string? Image { get; set; }
         public List<string> Topics { get; set; }
     }
 }
