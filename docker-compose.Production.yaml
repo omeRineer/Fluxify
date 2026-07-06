@@ -31,7 +31,7 @@ services:
   api.open:
     container_name: fluxify.api.open
     ports:
-      - "127.0.0.1:1071:1071"
+      - "1071:1071"
     build:
       context: .
       dockerfile: Fluxify.Api.Open/dockerfile.Production
@@ -48,7 +48,7 @@ services:
 
   api.hub:
     ports:
-      - "127.0.0.1:1453:1453"
+      - "1453:1453"
     container_name: fluxify.api.hub
     build:
       context: .
