@@ -42,8 +42,12 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-app.UseSwagger();
-app.UseSwaggerUI();
+app.UseSwagger(opt=> { opt.RouteTemplate = "openapi/swagger/{documentName}/swagger.json"; });
+app.UseSwaggerUI(c =>
+{
+    c.RoutePrefix = "openapi/swagger";
+    c.SwaggerEndpoint("/openapi/swagger/v1/swagger.json", "Fluxify Open API v1");
+});
 
 app.UseCors();
 

@@ -1,5 +1,17 @@
 name: "fluxify-development"
 services:
+
+  nginx:
+    image: nginx:latest
+    container_name: fluxify.nginx
+    ports:
+      - "1020:80"
+      - "443:443"
+    networks:
+      - appnet
+    volumes:
+      - ./nginx.Development.conf:/etc/nginx/nginx.conf:ro
+
   db.mongo:
     image: mongodb/mongodb-community-server:latest
     container_name: fluxify.db.mongodb
@@ -29,9 +41,8 @@ services:
       start_period: 15s
   
   api.open:
+    image: fluxify-development-api-open:latest
     container_name: fluxify.api.open
-    ports:
-      - "1071:1071"
     build:
       context: .
       dockerfile: Fluxify.Api.Open/dockerfile.Production
@@ -47,9 +58,8 @@ services:
       - appnet
 
   api.hub:
+    image: fluxify-development-api-hub:latest
     container_name: fluxify.api.hub
-    ports:
-      - "1453:1453"
     build:
       context: .
       dockerfile: Fluxify.Api.Hub/dockerfile.Production
