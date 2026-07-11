@@ -16,10 +16,10 @@ namespace Fluxify.Api.Hub.Workers
         protected override int RetryCount => 0;
 
         private readonly IServiceScopeFactory _scopeFactory;
-        private readonly IHubContext<NotificationHub> _hubContext;
-        readonly HubConnectionManager<NotificationHub> _connectionManager;
+        private readonly IHubContext<PresenceHub> _hubContext;
+        readonly HubConnectionManager<PresenceHub> _connectionManager;
 
-        public FirebaseNotificationWorker(IChannel channel, IServiceScopeFactory scopeFactory, IHubContext<NotificationHub> hubContext, HubConnectionManager<NotificationHub> connectionManager)
+        public FirebaseNotificationWorker(IChannel channel, IServiceScopeFactory scopeFactory, IHubContext<PresenceHub> hubContext, HubConnectionManager<PresenceHub> connectionManager)
             : base(channel)
         {
             _scopeFactory = scopeFactory;

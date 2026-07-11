@@ -20,10 +20,10 @@ namespace Fluxify.Api.Hub.Workers
         protected override string QueueName => "notification-socket";
         protected override int RetryCount => 3;
 
-        private readonly IHubContext<NotificationHub> _hubContext;
-        readonly HubConnectionManager<NotificationHub> _connectionManager;
+        private readonly IHubContext<PresenceHub> _hubContext;
+        readonly HubConnectionManager<PresenceHub> _connectionManager;
 
-        public NotificationWorker(IChannel channel, IHubContext<NotificationHub> hubContext, HubConnectionManager<NotificationHub> connectionManager)
+        public NotificationWorker(IChannel channel, IHubContext<PresenceHub> hubContext, HubConnectionManager<PresenceHub> connectionManager)
             : base(channel)
         {
             _hubContext = hubContext;

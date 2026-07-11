@@ -28,6 +28,9 @@ namespace Fluxify.Application.Hubs
         {
             ConnectionUser connectionUser = HubConnectionManager.AddConnection(Context);
 
+            foreach (var topic in Context.User.Claims.Where(f => f.Type == FluxifyClaims.Topic))
+                await Groups.AddToGroupAsync(Context.ConnectionId, $"{connectionUser.NameSpace.Id}:{topic.Value}");
+
             await Groups.AddToGroupAsync(Context.ConnectionId, connectionUser.NameSpace.Signature);
 
             if (connectionUser.Connections.Count == 1)

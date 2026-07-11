@@ -14,7 +14,6 @@ builder.Services.AddApplication();
 builder.Services.AddPersistance();
 builder.Services.AddInfrastructure();
 builder.Services.AddSignalR();
-builder.Services.AddSingleton<HubConnectionManager<NotificationHub>>();
 builder.Services.AddSingleton<HubConnectionManager<PresenceHub>>();
 builder.Services.AddCors(options =>
                             options.AddDefaultPolicy(policy =>
@@ -36,7 +35,6 @@ app.UseAuthentication();
 
 app.UseAuthorization();
 
-app.MapHub<NotificationHub>("/hub/notification");
 app.MapHub<PresenceHub>("/hub/presence");
 
 app.Run();
