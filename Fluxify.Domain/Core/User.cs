@@ -17,6 +17,7 @@ namespace Fluxify.Domain.Core
         public string Email { get; set; }
         public string Key { get; set; }
         public string ApiKey { get; set; }
+        public string? Image { get; set; }
         public DateTime? ExpireDate { get; set; }
     }
 }

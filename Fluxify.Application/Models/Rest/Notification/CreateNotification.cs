@@ -15,6 +15,7 @@ namespace Fluxify.Application.Models.Rest.Notification
             public string Summary { get; set; }
             public string? ContentType { get; set; }
             public string? Content { get; set; }
+            public string? Thumbnail { get; set; }
             public string[] Topics { get; set; }
 
             public Dictionary<string, object>? Properties { get; set; }
