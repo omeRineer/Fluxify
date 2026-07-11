@@ -67,7 +67,8 @@ namespace Fluxify.Application.Services
                                                   Title = newNotification.Title,
                                                   Summary = newNotification.Summary,
                                                   Date = newNotification.CreateDate,
-                                                  Topics = newNotification.Topics
+                                                  Topics = newNotification.Topics,
+                                                  Thumbnail = newNotification.Thumbnail
                                               },
                                               "notification.created");
 
@@ -113,7 +114,8 @@ namespace Fluxify.Application.Services
                 IsRead = isRead,
                 CreateDate = notification.CreateDate,
                 Topics = notification.Topics,
-                Properties = notification.Properties
+                Properties = notification.Properties,
+                Thumbnail = notification.Thumbnail
             };
 
             return new SuccessDataResult<NotificationDto.Detail>(result);
@@ -136,7 +138,8 @@ namespace Fluxify.Application.Services
                                                   Title = req.Title,
                                                   Summary = req.Summary,
                                                   Date = DateTime.UtcNow,
-                                                  Topics = req.Topics
+                                                  Topics = req.Topics,
+                                                  Thumbnail = req.Thumbnail
                                               },
                                               "notification.created");
 

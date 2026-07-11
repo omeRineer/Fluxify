@@ -41,7 +41,7 @@ namespace Fluxify.Api.Hub.Workers
                                          Level = EnumHelper.ToEnumString<NotificationLevelType>(message.Level),
                                          Title = message.Title,
                                          Summary = message.Summary,
-                                         Image = message.Image
+                                         Thumbnail = message.Thumbnail
                                      });
         }
     }

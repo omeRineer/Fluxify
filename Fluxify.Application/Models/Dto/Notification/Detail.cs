@@ -18,6 +18,7 @@ namespace Fluxify.Application.Models.Dto.Notification
             public string? Content { get; set; }
             public string Title { get; set; }
             public string Summary { get; set; }
+            public string? Thumbnail { get; set; }
             public DateTime CreateDate { get; set; }
             public List<string>? Topics { get; set; }
             public Dictionary<string, object>? Properties { get; set; }
@@ -33,6 +34,7 @@ namespace Fluxify.Application.Models.Dto.Notification
             public string ContentType { get; set; }
             public string Title { get; set; }
             public string Summary { get; set; }
+            public string? Thumbnail { get; set; }
             public DateTime CreateDate { get; set; }
             public Dictionary<string, object>? Properties { get; set; }
 

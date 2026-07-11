@@ -12,7 +12,7 @@ namespace Fluxify.Application.Models.SignalR
         public string Level { get; set; }
         public string Title { get; set; }
         public string Summary { get; set; }
-        public string? Image { get; set; }
+        public string? Thumbnail { get; set; }
         public DateTime Date { get; set; }
     }
 }

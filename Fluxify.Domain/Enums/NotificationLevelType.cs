@@ -10,6 +10,8 @@ namespace Fluxify.Domain.Enums
     {
         Info,
         Warning,
-        Fatal
+        Error,
+        Fatal,
+        Chat
     }
 }
