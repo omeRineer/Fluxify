@@ -35,4 +35,6 @@
 		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="6.0.0" />
 	</ItemGroup>
 
+	<ProjectExtensions><VisualStudio><UserProperties appsettings_1production_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
+
 </Project>
