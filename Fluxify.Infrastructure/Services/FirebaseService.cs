@@ -10,7 +10,7 @@ namespace Fluxify.Infrastructure.Services
 {
     public class FirebaseNotificationService : IPushNotificationService
     {
-        public async Task<string> SendNotificationAsync(string deviceToken, string title, string summary, Dictionary<string, string>? data = null, string? imageUrl = null)
+        public async Task<string> SendNotificationAsync(string deviceToken, string title, string summary, string? thumbnail = null, Dictionary<string, string>? data = null)
         {
             var message = new Message()
             {
@@ -19,7 +19,7 @@ namespace Fluxify.Infrastructure.Services
                 {
                     Title = title,
                     Body = summary,
-                    ImageUrl = imageUrl
+                    ImageUrl = thumbnail
                 },
                 Data = data,
                 
@@ -28,7 +28,7 @@ namespace Fluxify.Infrastructure.Services
             return await FirebaseMessaging.DefaultInstance.SendAsync(message);
         }
 
-        public async Task<IEnumerable<string>> SendNotificationAsync(IEnumerable<string> deviceTokens, string title, string summary, Dictionary<string, string>? data = null, string? imageUrl = null)
+        public async Task<IEnumerable<string>> SendNotificationAsync(IEnumerable<string> deviceTokens, string title, string summary, string? thumbnail = null, Dictionary<string, string>? data = null)
         {
             var message = new MulticastMessage()
             {
@@ -37,7 +37,7 @@ namespace Fluxify.Infrastructure.Services
                 {
                     Title = title,
                     Body = summary,
-                    ImageUrl = imageUrl
+                    ImageUrl = thumbnail
                 },
                 Data = data
             };
@@ -47,7 +47,7 @@ namespace Fluxify.Infrastructure.Services
             return response.Responses.Where(f => f.IsSuccess).Select(s => s.MessageId);
         }
 
-        public async Task<string> SendToTopicAsync(string topic, string title, string summary, Dictionary<string, string>? data = null, string? imageUrl = null)
+        public async Task<string> SendToTopicAsync(string topic, string title, string summary, string? thumbnail = null, Dictionary<string, string>? data = null)
         {
             var message = new Message()
             {
@@ -56,7 +56,7 @@ namespace Fluxify.Infrastructure.Services
                 {
                     Title = title,
                     Body = summary,
-                    ImageUrl = imageUrl
+                    ImageUrl = thumbnail
                 },
                 Data = data
             };
