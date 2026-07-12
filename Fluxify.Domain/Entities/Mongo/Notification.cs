@@ -1,5 +1,4 @@
-﻿using Fluxify.Domain;
-using MongoDB.Bson;
+﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using System;
 using System.Collections.Generic;
@@ -7,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Fluxify.Domain.Core
+namespace Fluxify.Domain.Entities.Mongo
 {
     public class Notification : MongoEntity<Guid>
     {
@@ -23,7 +22,7 @@ namespace Fluxify.Domain.Core
         public int ContentType { get; set; }
         public string? Content { get; set; }
         public string? Thumbnail { get; set; }
-        public List<string> Topics { get; set; }
+        public List<Guid> Topics { get; set; }
 
         public Dictionary<string, object>? Properties { get; set; }
 

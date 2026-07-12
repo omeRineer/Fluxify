@@ -10,7 +10,6 @@ using Fluxify.Application.Services.Interfaces;
 using Fluxify.Application.Utilities.ApiResponse;
 using Fluxify.Application.Utilities.Helpers;
 using Fluxify.Application.Utilities.Result;
-using Fluxify.Domain.Core;
 using Fluxify.Domain.Enums;
 using Microsoft.AspNetCore.SignalR;
 using System;
@@ -25,6 +24,7 @@ using Fluxify.Application.Models.Rest.Common;
 using AutoMapper;
 using Fluxify.Application.Infrastructure;
 using Fluxify.Application.Models.Queue;
+using Fluxify.Domain.Entities.Mongo;
 
 namespace Fluxify.Application.Services
 {

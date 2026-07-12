@@ -1,5 +1,4 @@
-﻿using Fluxify.Domain;
-using MongoDB.Bson;
+﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using System;
 using System.Collections.Generic;
@@ -7,12 +6,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Fluxify.Domain.Core
+namespace Fluxify.Domain.Entities.Core
 {
-    public class User : MongoEntity<Guid>
+    public class User : CoreEntity<Guid>
     {
-        [BsonRepresentation(BsonType.String)]
-        public Guid NameSpace { get; set; }
+        public Guid NameSpaceId { get; set; }
         public string Name { get; set; }
         public string Email { get; set; }
         public string Key { get; set; }

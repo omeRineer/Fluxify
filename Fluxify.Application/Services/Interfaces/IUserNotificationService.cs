@@ -1,7 +1,6 @@
 ﻿using Fluxify.Application.Models.Rest.Common;
 using Fluxify.Application.Models.Rest.Notification;
 using Fluxify.Application.Utilities.Result;
-using Fluxify.Domain.Core;
 using Fluxify.Domain.Enums;
 using System;
 using System.Collections.Generic;

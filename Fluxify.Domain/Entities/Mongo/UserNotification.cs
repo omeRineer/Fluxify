@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Fluxify.Domain.Core
+namespace Fluxify.Domain.Entities.Mongo
 {
     public class UserNotification : MongoEntity<Guid>
     {

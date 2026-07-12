@@ -2,7 +2,7 @@
 using Fluxify.Application.Models.Rest.Common;
 using Fluxify.Application.Models.Rest.Topic;
 using Fluxify.Application.Utilities.Result;
-using Fluxify.Domain.Core;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;

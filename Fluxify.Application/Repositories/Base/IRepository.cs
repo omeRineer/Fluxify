@@ -8,8 +8,7 @@ using System.Threading.Tasks;
 
 namespace Fluxify.Application.Repositories.Base
 {
-    public interface IMongoRepository<TEntity, TKey>
-        where TEntity : MongoEntity<TKey>
+    public interface IRepository<TEntity, TKey>
     {
         Task<List<TEntity>> GetListAsync(Expression<Func<TEntity, bool>> filter = null,
         Func<IEnumerable<TEntity>, IOrderedEnumerable<TEntity>> orderBy = null);

@@ -4,7 +4,7 @@ using Fluxify.Application.Models.Rest.Common;
 using Fluxify.Application.Models.Rest.Subscriber;
 using Fluxify.Application.Utilities.ApiResponse;
 using Fluxify.Application.Utilities.Result;
-using Fluxify.Domain.Core;
+using Fluxify.Domain.Entities.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +18,7 @@ namespace Fluxify.Application.Services.Interfaces
         Task<IDataResult<CreateUser.Response>> CreateAsync(Guid nameSpaceId, CreateUser.Request model);
         Task<IDataResult<UpdateUser.Response>> UpdateAsync(Guid id, UpdateUser.Request model);
         Task<IDataResult<UserDto.Detail>> GetDetailAsync(Guid id);
-        Task<IDataResult<DataListResponse<UserDto.List>>> GetListByTopicsAsync(Guid nameSpace, params string[] topics);
+        Task<IDataResult<DataListResponse<UserDto.List>>> GetListByTopicsAsync(Guid nameSpace, params Guid[] topics);
         Task<IDataResult<DataListResponse<UserDto.List>>> GetListAsync(Guid nameSpaceId);
 
 

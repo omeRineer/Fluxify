@@ -13,7 +13,8 @@ using System.Threading.Tasks;
 using Fluxify.Application.Models.Common;
 using Fluxify.Application.Models.Rest.Common;
 using AutoMapper;
-using Fluxify.Domain.Core;
+using Fluxify.Domain.Entities.Mongo;
+
 
 namespace Fluxify.Application.Services
 {

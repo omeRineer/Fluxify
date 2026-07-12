@@ -6,7 +6,7 @@ using Fluxify.Application.Rules.Common;
 using Fluxify.Application.Rules;
 using Fluxify.Application.Services.Interfaces;
 using Fluxify.Application.Utilities.Result;
-using Fluxify.Domain.Core;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +14,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Fluxify.Application.Models.Rest.Common;
 using Fluxify.Application.Models.Dto.Topic;
+using Fluxify.Domain.Entities.Core;
 
 namespace Fluxify.Application.Services
 {
@@ -37,7 +38,6 @@ namespace Fluxify.Application.Services
             var newTopic = new Topic
             {
                 ChannelId = channel.Id,
-                Id = $"{channel.Key}:{req.Key}",
                 Name = req.Name
             };
 

@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using Fluxify.Application.Models.Dto.Topic;
 using Fluxify.Application.Models.Rest.Topic;
-using Fluxify.Domain.Core;
+using Fluxify.Domain.Entities.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -1,5 +1,5 @@
 ﻿using Fluxify.Application.Repositories.Base;
-using Fluxify.Domain.Core;
+using Fluxify.Domain.Entities.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Fluxify.Application.Repositories
 {
-    public interface IChannelRepository : IMongoRepository<Channel, Guid>
+    public interface IChannelRepository : IRepository<Channel, Guid>
     {
     }
 }

@@ -5,6 +5,7 @@ using Fluxify.Application.Models.Rest.UserTopic;
 using Fluxify.Application.Repositories;
 using Fluxify.Application.Services.Interfaces;
 using Fluxify.Application.Utilities.Result;
+using Fluxify.Domain.Entities.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -43,7 +44,7 @@ namespace Fluxify.Application.Services
             var userTopics = await UserTopicRepository.GetListAsync(f => f.UserId == userId);
 
             await UserTopicRepository.DeleteRangeAsync(userTopics.Select(s=> s.Id));
-            await UserTopicRepository.AddRangeAsync(topics.Select(t => new Domain.Core.UserTopic
+            await UserTopicRepository.AddRangeAsync(topics.Select(t => new UserTopic
             {
                 UserId = userId,
                 TopicId = t.Id,

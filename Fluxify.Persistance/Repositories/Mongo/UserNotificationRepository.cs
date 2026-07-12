@@ -1,10 +1,10 @@
 ﻿using Fluxify.Application.Repositories;
 using Fluxify.Application.Repositories.Base;
-using Fluxify.Domain.Core;
+using Fluxify.Domain.Entities.Mongo;
 using Fluxify.Domain.Enums;
 using MongoDB.Driver;
 
-namespace Fluxify.Persistance.Repositories
+namespace Fluxify.Persistance.Repositories.Mongo
 {
     public class UserNotificationRepository : MongoRepository<UserNotification, Guid>, IUserNotificationRepository
     {

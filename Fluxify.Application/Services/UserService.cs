@@ -9,7 +9,7 @@ using Fluxify.Application.Services.Interfaces;
 using Fluxify.Application.Utilities.ApiResponse;
 using Fluxify.Application.Utilities.Helpers;
 using Fluxify.Application.Utilities.Result;
-using Fluxify.Domain.Core;
+using Fluxify.Domain.Entities.Core;
 using System.Linq;
 using System.Threading.Channels;
 
@@ -35,7 +35,7 @@ namespace Fluxify.Application.Services
         public async Task<IDataResult<CreateUser.Response>> CreateAsync(Guid nameSpaceId, CreateUser.Request model)
         {
             var nameSpaceE = await NameSpaceRepository.GetSingleAsync(f => f.Id == nameSpaceId);
-            var avaibleSubscriber = await UserRepository.GetSingleOrDefaultAsync(f => f.Key == model.Key && f.NameSpace == nameSpaceE.Id);
+            var avaibleSubscriber = await UserRepository.GetSingleOrDefaultAsync(f => f.Key == model.Key && f.NameSpaceId == nameSpaceE.Id);
             var businessResult = await BusinessRuleEngine.Run(
                     new DataMustBeAvaibleRule(avaibleSubscriber, "Subscriber is avaible. Please, set a different key")
             );
@@ -45,7 +45,7 @@ namespace Fluxify.Application.Services
             string apiKey = CryptoHelper.Encrypt(model.Key, nameSpaceE.Signature);
             var subscriber = new User
             {
-                NameSpace = nameSpaceE.Id,
+                NameSpaceId = nameSpaceE.Id,
                 Key = model.Key,
                 ApiKey = apiKey,
                 Email = model.Email,
@@ -99,10 +99,10 @@ namespace Fluxify.Application.Services
             return new SuccessDataResult<User>(subscriber);
         }
 
-        public async Task<IDataResult<DataListResponse<UserDto.List>>> GetListByTopicsAsync(Guid nameSpaceId, params string[] topics)
+        public async Task<IDataResult<DataListResponse<UserDto.List>>> GetListByTopicsAsync(Guid nameSpaceId, params Guid[] topics)
         {
             var userTopics = await UserTopicRepository.GetListAsync(f => topics.Contains(f.TopicId));
-            var users = await UserRepository.GetListAsync(f => f.NameSpace == nameSpaceId && userTopics.Select(ut => ut.UserId).Contains(f.Id));
+            var users = await UserRepository.GetListAsync(f => f.NameSpaceId == nameSpaceId && userTopics.Select(ut => ut.UserId).Contains(f.Id));
 
             var mappedList = Mapper.Map<List<UserDto.List>>(users);
 
@@ -112,7 +112,7 @@ namespace Fluxify.Application.Services
 
         public async Task<IDataResult<DataListResponse<UserDto.List>>> GetListAsync(Guid nameSpaceId)
         {
-            var users = await UserRepository.GetListAsync(f => f.NameSpace == nameSpaceId);
+            var users = await UserRepository.GetListAsync(f => f.NameSpaceId == nameSpaceId);
 
             var mappedList = Mapper.Map<List<UserDto.List>>(users);
 

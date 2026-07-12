@@ -6,11 +6,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Fluxify.Domain.Core
+namespace Fluxify.Domain.Entities.Core
 {
-    public class Topic : MongoEntity<string>
+    public class Topic : CoreEntity<Guid>
     {
-        [BsonRepresentation(BsonType.String)]
         public Guid ChannelId { get; set; }
         public string Name { get; set; }
     }

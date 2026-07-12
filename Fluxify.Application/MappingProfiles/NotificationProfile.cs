@@ -3,7 +3,7 @@ using Fluxify.Application.Models.Dto.Notification;
 using Fluxify.Application.Models.Rest.Channel;
 using Fluxify.Application.Models.Rest.Notification;
 using Fluxify.Application.Utilities.Helpers;
-using Fluxify.Domain.Core;
+using Fluxify.Domain.Entities.Mongo;
 using Fluxify.Domain.Enums;
 using System;
 using System.Collections.Generic;

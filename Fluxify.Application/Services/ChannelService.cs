@@ -7,7 +7,6 @@ using Fluxify.Application.Rules;
 using Fluxify.Application.Services.Interfaces;
 using Fluxify.Application.Utilities.ApiResponse;
 using Fluxify.Application.Utilities.Result;
-using Fluxify.Domain.Core;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -15,6 +14,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Fluxify.Application.Models.Dto.Channel;
+using Fluxify.Domain.Entities.Core;
 
 namespace Fluxify.Application.Services
 {

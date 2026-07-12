@@ -5,7 +5,7 @@ using Fluxify.Application.Models.Rest.UserDevice;
 using Fluxify.Application.Repositories;
 using Fluxify.Application.Services.Interfaces;
 using Fluxify.Application.Utilities.Result;
-using Fluxify.Domain.Core;
+using Fluxify.Domain.Entities.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;

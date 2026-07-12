@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using Fluxify.Application.Models.Dto.NameSpace;
 using Fluxify.Application.Models.Rest.NameSpace;
-using Fluxify.Domain.Core;
+using Fluxify.Domain.Entities.Core;
 
 namespace Fluxify.Application.MappingProfiles
 {

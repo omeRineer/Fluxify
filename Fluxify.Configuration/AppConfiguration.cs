@@ -19,6 +19,7 @@ namespace Fluxify.Configuration
                                 .Build();
         }
 
+        public static ConnectionStrings ConnectionStrings { get => ConfigurationRoot.GetSection("ConnectionStrings").Get<ConnectionStrings>(); }
         public static string[] AllowOrigins { get => ConfigurationRoot.GetSection("AllowOrigins").Get<string[]>(); }
         public static MongoDbOptions MongoDbOptions { get => ConfigurationRoot.GetSection("MongoDbOptions").Get<MongoDbOptions>(); }
         public static RabbitMqOptions RabbitMqOptions { get => ConfigurationRoot.GetSection("RabbitMqOptions").Get<RabbitMqOptions>(); }

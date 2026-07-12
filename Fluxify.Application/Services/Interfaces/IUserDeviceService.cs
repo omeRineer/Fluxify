@@ -2,7 +2,7 @@
 using Fluxify.Application.Models.Rest.Common;
 using Fluxify.Application.Models.Rest.UserDevice;
 using Fluxify.Application.Utilities.Result;
-using Fluxify.Domain.Core;
+
 
 namespace Fluxify.Application.Services.Interfaces
 {

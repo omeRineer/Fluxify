@@ -1,13 +1,12 @@
-﻿using Fluxify.Domain;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Fluxify.Domain.Core
+namespace Fluxify.Domain.Entities.Core
 {
-    public class NameSpace : MongoEntity<Guid>
+    public class NameSpace : CoreEntity<Guid>
     {
         public string Signature { get; set; }
         public string Name { get; set; }

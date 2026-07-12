@@ -7,9 +7,9 @@ using Fluxify.Application.Rules;
 using Fluxify.Application.Services.Interfaces;
 using Fluxify.Application.Utilities.ApiResponse;
 using Fluxify.Application.Utilities.Result;
-using Fluxify.Domain.Core;
 using System.Threading.Channels;
 using Fluxify.Application.Models.Dto.NameSpace;
+using Fluxify.Domain.Entities.Core;
 
 namespace Fluxify.Application.Services
 {

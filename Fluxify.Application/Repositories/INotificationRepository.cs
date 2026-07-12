@@ -1,9 +1,9 @@
 ﻿using Fluxify.Application.Repositories.Base;
-using Fluxify.Domain.Core;
+using Fluxify.Domain.Entities.Mongo;
 
 namespace Fluxify.Application.Repositories
 {
-    public interface INotificationRepository : IMongoRepository<Notification, Guid>
+    public interface INotificationRepository : IRepository<Notification, Guid>
     {
     }
 }

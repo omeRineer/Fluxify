@@ -6,13 +6,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Fluxify.Domain.Core
+namespace Fluxify.Domain.Entities.Core
 {
-    public class UserDevice : MongoEntity<Guid>
+    public class UserDevice : CoreEntity<Guid>
     {
-        [BsonRepresentation(BsonType.String)]
         public Guid UserId { get; set; }
-        [BsonRepresentation(BsonType.String)]
         public Guid NameSpaceId { get; set; }
         public string DeviceId { get; set; }
         public int Platform { get; set; }

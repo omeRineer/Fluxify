@@ -2,7 +2,6 @@
 using Fluxify.Application.Models.Rest.Channel;
 using Fluxify.Application.Utilities.ApiResponse;
 using Fluxify.Application.Utilities.Result;
-using Fluxify.Domain.Core;
 
 namespace Fluxify.Application.Services.Interfaces
 {

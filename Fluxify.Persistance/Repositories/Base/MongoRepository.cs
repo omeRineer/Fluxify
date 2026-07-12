@@ -9,8 +9,8 @@ using System.Threading.Tasks;
 
 namespace Fluxify.Application.Repositories.Base
 {
-    public class MongoRepository<TEntity, TKey> : IMongoRepository<TEntity, TKey>
-where TEntity : MongoEntity<TKey>, new()
+    public class MongoRepository<TEntity, TKey> : IRepository<TEntity, TKey>
+        where TEntity : MongoEntity<TKey>, new()
     {
         protected readonly IMongoCollection<TEntity> Collection;
 
