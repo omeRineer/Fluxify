@@ -3,7 +3,7 @@ using Fluxify.Application.Models.Rest.Channel;
 using Fluxify.Application.Utilities.ApiResponse;
 using Fluxify.Application.Utilities.Result;
 
-namespace Fluxify.Application.Services.Interfaces
+namespace Fluxify.Application.Services.Interfaces.Core
 {
     public interface IChannelService
     {

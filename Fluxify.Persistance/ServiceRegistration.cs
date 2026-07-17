@@ -18,6 +18,7 @@ namespace Fluxify.Persistance
     {
         public static void AddMongoContext(this IServiceCollection services)
         {
+            //services.AddScoped<IDbSession, MongoDbSession>();
             services.AddScoped<INotificationRepository, NotificationRepository>();
             services.AddScoped<IUserNotificationRepository, UserNotificationRepository>();
 
@@ -31,6 +32,8 @@ namespace Fluxify.Persistance
 
         public static void AddCoreContext(this IServiceCollection services)
         {
+            //services.AddScoped<IDbSession, CoreDbSession<CoreContext>>();
+
             services.AddDbContext<CoreContext>(opt =>
             {
                 opt.UseNpgsql(AppConfiguration.ConnectionStrings.DefaultConnection);

@@ -1,9 +1,13 @@
-﻿using Fluxify.Api.Hub.Auth;
+﻿using AutoMapper;
+using AutoMapper.Internal;
+using Fluxify.Api.Hub.Auth;
 using Fluxify.Application.Models.Common;
 using Fluxify.Application.Models.Enums;
 using Fluxify.Application.Repositories;
-using Fluxify.Application.Services;
-using Fluxify.Application.Services.Interfaces;
+using Fluxify.Application.Services.Core;
+using Fluxify.Application.Services.Interfaces.Core;
+using Fluxify.Application.Services.Interfaces.Mongo;
+using Fluxify.Application.Services.Mongo;
 using Fluxify.Application.Utilities.Helpers;
 using Fluxify.Configuration;
 using Microsoft.AspNetCore.Http;
@@ -23,10 +27,10 @@ namespace Fluxify.Application
     {
         public static void AddApplication(this IServiceCollection services)
         {
-            services.AddScoped<INotificationService, NotificationService>();
+            //services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<INameSpaceService, NameSpaceService>();
             services.AddScoped<IUserService, UserService>();
-            services.AddScoped<IUserNotificationService, UserNotificationService>();
+            //services.AddScoped<IUserNotificationService, UserNotificationService>();
             services.AddScoped<IUserDeviceService, UserDeviceService>();
             services.AddScoped<IUserTopicService, UserTopicService>();
             services.AddScoped<IChannelService, ChannelService>();
@@ -61,9 +65,12 @@ namespace Fluxify.Application
                 return new CurrentUser();
             });
 
-            services.AddAutoMapper(opt => { }, Assembly.GetExecutingAssembly());
+            services.AddAutoMapper(opt =>
+            {
+                
+            }, Assembly.GetExecutingAssembly());
         }
 
-        
+
     }
 }

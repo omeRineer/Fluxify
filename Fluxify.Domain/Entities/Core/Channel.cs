@@ -8,7 +8,9 @@ namespace Fluxify.Domain.Entities.Core
 {
     public class Channel : CoreEntity<Guid>
     {
-        public string Key { get; set; }
+        public string Slug { get; set; }
         public string Name { get; set; }
+
+        public virtual List<Topic>? Topics { get; set; }
     }
 }

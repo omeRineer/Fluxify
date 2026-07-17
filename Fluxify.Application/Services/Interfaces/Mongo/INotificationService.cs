@@ -11,7 +11,7 @@ using Fluxify.Application.Models.Rest.Common;
 using Fluxify.Application.Repositories;
 using Fluxify.Domain.Entities.Mongo;
 
-namespace Fluxify.Application.Services.Interfaces
+namespace Fluxify.Application.Services.Interfaces.Mongo
 {
     public interface INotificationService
     {

@@ -2,7 +2,8 @@
 using Fluxify.Application.Models.Rest.UserDevice;
 using Fluxify.Application.Models.Rest.UserTopic;
 using Fluxify.Application.Services;
-using Fluxify.Application.Services.Interfaces;
+using Fluxify.Application.Services.Interfaces.Core;
+using Fluxify.Application.Services.Interfaces.Mongo;
 using Fluxify.Domain.Enums;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -13,12 +14,12 @@ namespace Fluxify.Api.Open.Controllers
     {
         readonly IUserService UserService;
         readonly IUserTopicService UserTopicService;
-        readonly INotificationService NotificationService;
+        //readonly INotificationService NotificationService;
         readonly IUserDeviceService UserDeviceService;
-        public MeController(CurrentUser currentUser, IUserService UserService, INotificationService notificationService, IUserDeviceService userDeviceService, IUserTopicService userTopicService) : base(currentUser)
+        public MeController(CurrentUser currentUser, IUserService UserService, IUserDeviceService userDeviceService, IUserTopicService userTopicService) : base(currentUser)
         {
             this.UserService = UserService;
-            NotificationService = notificationService;
+            //NotificationService = notificationService;
             UserDeviceService = userDeviceService;
             UserTopicService = userTopicService;
         }
@@ -27,9 +28,9 @@ namespace Fluxify.Api.Open.Controllers
         public async Task<IActionResult> GetProfileAsync()
             => Response(await UserService.GetDetailAsync(CurrentUser.NameIdentifier));
 
-        [HttpGet("Notifications")]
-        public async Task<IActionResult> GetNotificationsAsync()
-            => Response(await NotificationService.GetListAsync(CurrentUser.NameIdentifier));
+        //[HttpGet("Notifications")]
+        //public async Task<IActionResult> GetNotificationsAsync()
+        //    => Response(await NotificationService.GetListAsync(CurrentUser.NameIdentifier));
 
         [HttpGet("Topics")]
         public async Task<IActionResult> GetTopicsAsync()

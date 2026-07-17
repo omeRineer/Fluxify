@@ -11,5 +11,7 @@ namespace Fluxify.Domain.Entities.Core
         public string Signature { get; set; }
         public string Name { get; set; }
         public DateTime? ExpireDate { get; set; }
+
+        public virtual List<User>? Users { get; set; }
     }
 }

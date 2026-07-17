@@ -3,7 +3,7 @@ using Fluxify.Application.Models.Dto.UserDevice;
 using Fluxify.Application.Models.Rest.Common;
 using Fluxify.Application.Models.Rest.UserDevice;
 using Fluxify.Application.Repositories;
-using Fluxify.Application.Services.Interfaces;
+using Fluxify.Application.Services.Interfaces.Core;
 using Fluxify.Application.Utilities.Result;
 using Fluxify.Domain.Entities.Core;
 using System;
@@ -12,7 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Fluxify.Application.Services
+namespace Fluxify.Application.Services.Core
 {
     public class UserDeviceService : IUserDeviceService
     {
@@ -64,6 +64,8 @@ namespace Fluxify.Application.Services
 
                 await UserDeviceRepository.UpdateAsync(userDevice);
             }
+
+            await UserDeviceRepository.SaveChangesAsync();
 
             return new SuccessResult("User device is settled");
         }

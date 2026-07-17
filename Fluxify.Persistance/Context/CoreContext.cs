@@ -41,11 +41,11 @@ namespace Fluxify.Persistance.Context
                     case EntityState.Unchanged: break;
                     case EntityState.Deleted: break;
                     case EntityState.Modified:
-                        data.Entity.EditDate = DateTime.Now;
+                        data.Entity.EditDate = DateTime.UtcNow;
                         break;
                     case EntityState.Added:
-                        data.Entity.CreateDate = DateTime.Now;
-                        data.Entity.EditDate = DateTime.Now;
+                        data.Entity.CreateDate = DateTime.UtcNow;
+                        data.Entity.EditDate = DateTime.UtcNow;
                         break;
                 }
             }

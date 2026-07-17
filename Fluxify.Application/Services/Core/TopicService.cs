@@ -4,7 +4,6 @@ using Fluxify.Application.Models.Rest.Topic;
 using Fluxify.Application.Repositories;
 using Fluxify.Application.Rules.Common;
 using Fluxify.Application.Rules;
-using Fluxify.Application.Services.Interfaces;
 using Fluxify.Application.Utilities.Result;
 
 using System;
@@ -15,8 +14,9 @@ using System.Threading.Tasks;
 using Fluxify.Application.Models.Rest.Common;
 using Fluxify.Application.Models.Dto.Topic;
 using Fluxify.Domain.Entities.Core;
+using Fluxify.Application.Services.Interfaces.Core;
 
-namespace Fluxify.Application.Services
+namespace Fluxify.Application.Services.Core
 {
     public class TopicService : ITopicService
     {
@@ -33,7 +33,7 @@ namespace Fluxify.Application.Services
 
         public async Task<IResult> CreateAsync(CreateTopic.Request req)
         {
-            var channel = await channelRepository.GetSingleAsync(f => f.Key == req.Channel);
+            var channel = await channelRepository.GetSingleAsync(f => f.Slug == req.Channel);
 
             var newTopic = new Topic
             {
@@ -42,6 +42,7 @@ namespace Fluxify.Application.Services
             };
 
             await topicRepository.AddAsync(newTopic);
+            await topicRepository.SaveChangesAsync();
 
             return new SuccessResult("Topic is created");
         }

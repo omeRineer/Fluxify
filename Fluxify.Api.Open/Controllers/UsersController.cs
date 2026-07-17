@@ -1,6 +1,6 @@
 ﻿using Fluxify.Application.Models.Common;
 using Fluxify.Application.Models.Rest.Subscriber;
-using Fluxify.Application.Services.Interfaces;
+using Fluxify.Application.Services.Interfaces.Core;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

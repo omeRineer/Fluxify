@@ -17,5 +17,10 @@ namespace Fluxify.Domain.Entities.Core
         public string ApiKey { get; set; }
         public string? Image { get; set; }
         public DateTime? ExpireDate { get; set; }
+
+
+        public virtual NameSpace NameSpace { get; set; }
+        public virtual List<UserTopic>? Topics { get; set; }
+        public virtual List<UserDevice>? Devices { get; set; }
     }
 }

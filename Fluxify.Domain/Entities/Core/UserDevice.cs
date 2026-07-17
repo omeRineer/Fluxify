@@ -17,5 +17,8 @@ namespace Fluxify.Domain.Entities.Core
         public string Token { get; set; }
         public bool IsActive { get; set; }
         public DateTime LastSeen { get; set; }
+
+        public virtual NameSpace NameSpace { get; set; }
+        public virtual User User { get; set; }
     }
 }

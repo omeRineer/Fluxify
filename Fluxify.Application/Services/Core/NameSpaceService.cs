@@ -4,14 +4,14 @@ using Fluxify.Application.Models.Rest.NameSpace;
 using Fluxify.Application.Repositories;
 using Fluxify.Application.Rules.Common;
 using Fluxify.Application.Rules;
-using Fluxify.Application.Services.Interfaces;
 using Fluxify.Application.Utilities.ApiResponse;
 using Fluxify.Application.Utilities.Result;
 using System.Threading.Channels;
 using Fluxify.Application.Models.Dto.NameSpace;
 using Fluxify.Domain.Entities.Core;
+using Fluxify.Application.Services.Interfaces.Core;
 
-namespace Fluxify.Application.Services
+namespace Fluxify.Application.Services.Core
 {
     public class NameSpaceService : INameSpaceService
     {
@@ -36,6 +36,7 @@ namespace Fluxify.Application.Services
             var newNameSpace = Mapper.Map<NameSpace>(model);
 
             await NameSpaceRepository.AddAsync(newNameSpace);
+            await NameSpaceRepository.SaveChangesAsync();
 
             var result = Mapper.Map<CreateNameSpace.Response>(newNameSpace);
 
@@ -55,6 +56,7 @@ namespace Fluxify.Application.Services
             nameSpace = Mapper.Map(model, nameSpace);
 
             await NameSpaceRepository.UpdateAsync(nameSpace);
+            await NameSpaceRepository.SaveChangesAsync();
 
             var result = Mapper.Map<UpdateNameSpace.Response>(nameSpace);
 

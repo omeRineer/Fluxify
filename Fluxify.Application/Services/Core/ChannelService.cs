@@ -4,7 +4,6 @@ using Fluxify.Application.Models.Rest.Subscriber;
 using Fluxify.Application.Repositories;
 using Fluxify.Application.Rules.Common;
 using Fluxify.Application.Rules;
-using Fluxify.Application.Services.Interfaces;
 using Fluxify.Application.Utilities.ApiResponse;
 using Fluxify.Application.Utilities.Result;
 using System;
@@ -15,8 +14,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Fluxify.Application.Models.Dto.Channel;
 using Fluxify.Domain.Entities.Core;
+using Fluxify.Application.Services.Interfaces.Core;
 
-namespace Fluxify.Application.Services
+namespace Fluxify.Application.Services.Core
 {
     public class ChannelService : IChannelService
     {
@@ -31,7 +31,7 @@ namespace Fluxify.Application.Services
 
         public async Task<IDataResult<CreateChannel.Response>> CreateAsync(CreateChannel.Request model)
         {
-            var channel = await channelRepository.GetSingleOrDefaultAsync(f => f.Key == model.Key);
+            var channel = await channelRepository.GetSingleOrDefaultAsync(f => f.Slug == model.Key);
             var businessResult = await BusinessRuleEngine.Run(
                     new DataMustBeAvaibleRule(channel, "Channel is avaible")
             );
@@ -41,6 +41,7 @@ namespace Fluxify.Application.Services
             var newChannel = Mapper.Map<Channel>(model);
 
             await channelRepository.AddAsync(newChannel);
+            await channelRepository.SaveChangesAsync();
 
             var result = Mapper.Map<CreateChannel.Response>(newChannel);
 
@@ -58,6 +59,7 @@ namespace Fluxify.Application.Services
             channel = Mapper.Map(model, channel);
 
             await channelRepository.UpdateAsync(channel);
+            await channelRepository.SaveChangesAsync();
 
             var result = Mapper.Map<UpdateChannel.Response>(channel);
 

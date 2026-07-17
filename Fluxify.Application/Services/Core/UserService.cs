@@ -5,15 +5,16 @@ using Fluxify.Application.Models.Rest.Subscriber;
 using Fluxify.Application.Repositories;
 using Fluxify.Application.Rules;
 using Fluxify.Application.Rules.Common;
-using Fluxify.Application.Services.Interfaces;
+using Fluxify.Application.Services.Interfaces.Core;
 using Fluxify.Application.Utilities.ApiResponse;
 using Fluxify.Application.Utilities.Helpers;
 using Fluxify.Application.Utilities.Result;
 using Fluxify.Domain.Entities.Core;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Threading.Channels;
 
-namespace Fluxify.Application.Services
+namespace Fluxify.Application.Services.Core
 {
     public class UserService : IUserService
     {
@@ -21,15 +22,17 @@ namespace Fluxify.Application.Services
         readonly IUserTopicRepository UserTopicRepository;
         readonly INameSpaceRepository NameSpaceRepository;
         readonly IChannelRepository ChannelRepository;
+        readonly ITopicRepository TopicRepository;
         readonly IMapper Mapper;
 
-        public UserService(IUserRepository userRepository, INameSpaceRepository nameSpaceRepository, IMapper mapper, IChannelRepository channelRepository, IUserTopicRepository userTopicRepository)
+        public UserService(IUserRepository userRepository, INameSpaceRepository nameSpaceRepository, IMapper mapper, IChannelRepository channelRepository, IUserTopicRepository userTopicRepository, ITopicRepository topicRepository)
         {
             UserRepository = userRepository;
             NameSpaceRepository = nameSpaceRepository;
             Mapper = mapper;
             ChannelRepository = channelRepository;
             UserTopicRepository = userTopicRepository;
+            TopicRepository = topicRepository;
         }
 
         public async Task<IDataResult<CreateUser.Response>> CreateAsync(Guid nameSpaceId, CreateUser.Request model)
@@ -53,7 +56,14 @@ namespace Fluxify.Application.Services
                 ExpireDate = model.ExpireDate,
             };
 
+            if (model.Topics != null && model.Topics.Count > 0)
+            {
+                var topics = await TopicRepository.GetListAsync(f => model.Topics.Contains(f.Slug));
+                subscriber.Topics = topics.Select(s => new UserTopic { TopicId = s.Id }).ToList();
+            }
+
             await UserRepository.AddAsync(subscriber);
+            await UserRepository.SaveChangesAsync();
 
             var result = Mapper.Map<CreateUser.Response>(subscriber);
 
@@ -72,6 +82,7 @@ namespace Fluxify.Application.Services
             subscriber = Mapper.Map(model, subscriber);
 
             await UserRepository.UpdateAsync(subscriber);
+            await UserRepository.SaveChangesAsync();
 
             var result = Mapper.Map<UpdateUser.Response>(subscriber);
 

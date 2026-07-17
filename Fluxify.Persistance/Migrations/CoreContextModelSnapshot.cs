@@ -34,11 +34,11 @@ namespace Fluxify.Persistance.Migrations
                     b.Property<DateTime>("EditDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Key")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("Slug")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -94,7 +94,13 @@ namespace Fluxify.Persistance.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("ChannelId");
 
                     b.ToTable("Topics");
                 });
@@ -138,6 +144,8 @@ namespace Fluxify.Persistance.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("NameSpaceId");
+
                     b.ToTable("Users");
                 });
 
@@ -178,6 +186,10 @@ namespace Fluxify.Persistance.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("NameSpaceId");
+
+                    b.HasIndex("UserId");
+
                     b.ToTable("UserDevices");
                 });
 
@@ -204,7 +216,93 @@ namespace Fluxify.Persistance.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("TopicId");
+
+                    b.HasIndex("UserId");
+
                     b.ToTable("UserTopics");
+                });
+
+            modelBuilder.Entity("Fluxify.Domain.Entities.Core.Topic", b =>
+                {
+                    b.HasOne("Fluxify.Domain.Entities.Core.Channel", "Channel")
+                        .WithMany("Topics")
+                        .HasForeignKey("ChannelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Channel");
+                });
+
+            modelBuilder.Entity("Fluxify.Domain.Entities.Core.User", b =>
+                {
+                    b.HasOne("Fluxify.Domain.Entities.Core.NameSpace", "NameSpace")
+                        .WithMany("Users")
+                        .HasForeignKey("NameSpaceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("NameSpace");
+                });
+
+            modelBuilder.Entity("Fluxify.Domain.Entities.Core.UserDevice", b =>
+                {
+                    b.HasOne("Fluxify.Domain.Entities.Core.NameSpace", "NameSpace")
+                        .WithMany()
+                        .HasForeignKey("NameSpaceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Fluxify.Domain.Entities.Core.User", "User")
+                        .WithMany("Devices")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("NameSpace");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Fluxify.Domain.Entities.Core.UserTopic", b =>
+                {
+                    b.HasOne("Fluxify.Domain.Entities.Core.Topic", "Topic")
+                        .WithMany("Users")
+                        .HasForeignKey("TopicId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Fluxify.Domain.Entities.Core.User", "User")
+                        .WithMany("Topics")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Topic");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Fluxify.Domain.Entities.Core.Channel", b =>
+                {
+                    b.Navigation("Topics");
+                });
+
+            modelBuilder.Entity("Fluxify.Domain.Entities.Core.NameSpace", b =>
+                {
+                    b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("Fluxify.Domain.Entities.Core.Topic", b =>
+                {
+                    b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("Fluxify.Domain.Entities.Core.User", b =>
+                {
+                    b.Navigation("Devices");
+
+                    b.Navigation("Topics");
                 });
 #pragma warning restore 612, 618
         }

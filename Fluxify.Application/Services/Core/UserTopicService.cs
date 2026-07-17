@@ -3,7 +3,7 @@ using Fluxify.Application.Models.Dto.UserTopic;
 using Fluxify.Application.Models.Rest.Common;
 using Fluxify.Application.Models.Rest.UserTopic;
 using Fluxify.Application.Repositories;
-using Fluxify.Application.Services.Interfaces;
+using Fluxify.Application.Services.Interfaces.Core;
 using Fluxify.Application.Utilities.Result;
 using Fluxify.Domain.Entities.Core;
 using System;
@@ -12,7 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Fluxify.Application.Services
+namespace Fluxify.Application.Services.Core
 {
     public class UserTopicService : IUserTopicService
     {
@@ -29,7 +29,18 @@ namespace Fluxify.Application.Services
 
         public async Task<IDataResult<DataListResponse<UserTopicDto.List>>> GetListAsync(Guid userId)
         {
-            var userTopics = await UserTopicRepository.GetListAsync(f => f.UserId == userId);
+            var userTopics = await UserTopicRepository.GetProjectedListAsync(
+                select: s=> new UserTopic 
+                {
+                    Id = s.Id,
+                    TopicId = s.TopicId,
+                    Topic = new Topic
+                    {
+                        Slug = s.Topic.Slug,
+                        Name = s.Topic.Name
+                    }
+                },
+                filter:f => f.UserId == userId);
 
             var mappedList = _mapper.Map<List<UserTopicDto.List>>(userTopics);
 
@@ -40,16 +51,17 @@ namespace Fluxify.Application.Services
 
         public async Task<IResult> SetAsync(Guid userId, Guid nameSpaceId, SetUserTopics.Request req)
         {
-            var topics = await TopicRepository.GetListAsync(f => req.Topics.Contains(f.Id));
+            var topics = await TopicRepository.GetListAsync(f => req.Topics.Contains(f.Slug));
             var userTopics = await UserTopicRepository.GetListAsync(f => f.UserId == userId);
 
-            await UserTopicRepository.DeleteRangeAsync(userTopics.Select(s=> s.Id));
+            await UserTopicRepository.DeleteRangeAsync(userTopics.Select(s => s.Id));
             await UserTopicRepository.AddRangeAsync(topics.Select(t => new UserTopic
             {
                 UserId = userId,
                 TopicId = t.Id,
                 NameSpaceId = nameSpaceId
             }));
+            await UserTopicRepository.SaveChangesAsync();
 
             return new SuccessResult("User topics are updated");
         }

@@ -5,7 +5,7 @@ using Fluxify.Domain.Enums;
 
 namespace Fluxify.Application.Repositories
 {
-    public interface IUserNotificationRepository : IRepository<UserNotification, Guid>
+    public interface IUserNotificationRepository
     {
         Task MarkAsStatusAsync(NotificationStatus status, Guid[] notifications, Guid[]? users = null);
         Task<List<UserNotification>> GetListAsync(Guid notificationId);

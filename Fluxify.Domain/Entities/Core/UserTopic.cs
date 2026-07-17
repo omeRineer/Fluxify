@@ -14,6 +14,10 @@ namespace Fluxify.Domain.Entities.Core
         public Guid UserId { get; set; }
         public Guid NameSpaceId { get; set; }
         public Guid TopicId { get; set; }
+
+
+        public virtual User User { get; set; }
+        public virtual Topic Topic { get; set; }
     }
 
 

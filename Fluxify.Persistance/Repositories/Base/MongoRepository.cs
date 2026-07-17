@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Fluxify.Application.Repositories.Base
 {
-    public class MongoRepository<TEntity, TKey> : IRepository<TEntity, TKey>
+    public class MongoRepository<TEntity, TKey>
         where TEntity : MongoEntity<TKey>, new()
     {
         protected readonly IMongoCollection<TEntity> Collection;
@@ -108,6 +108,10 @@ namespace Fluxify.Application.Repositories.Base
             return await Collection.Find(expression).AnyAsync();
         }
 
+        public async Task SaveChangesAsync()
+        {
+            await Task.CompletedTask;
+        }
 
         public async Task UpdateAsync(TEntity entity)
         {

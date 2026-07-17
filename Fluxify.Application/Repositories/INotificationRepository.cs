@@ -3,7 +3,7 @@ using Fluxify.Domain.Entities.Mongo;
 
 namespace Fluxify.Application.Repositories
 {
-    public interface INotificationRepository : IRepository<Notification, Guid>
+    public interface INotificationRepository
     {
     }
 }
