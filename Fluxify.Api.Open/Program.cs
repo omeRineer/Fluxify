@@ -2,13 +2,16 @@ using Fluxify.Application;
 using Fluxify.Configuration;
 using Fluxify.Infrastructure;
 using Fluxify.Persistance;
+using Fluxify.Persistance.Context;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 await builder.Services.AddRabbitMqAsync();
 builder.Services.AddControllers();
 builder.Services.AddApplication();
-builder.Services.AddPersistance();
+builder.Services.AddMongoContext();
+builder.Services.AddCoreContext();
 builder.Services.AddCors(options =>
                             options.AddDefaultPolicy(builder =>
                             builder.WithOrigins(AppConfiguration.AllowOrigins)
@@ -40,7 +43,17 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+
+
+
+
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<CoreContext>();
+    dbContext.Database.Migrate();
+}
 
 app.UseSwagger(opt=> { opt.RouteTemplate = "openapi/swagger/{documentName}/swagger.json"; });
 app.UseSwaggerUI(c =>

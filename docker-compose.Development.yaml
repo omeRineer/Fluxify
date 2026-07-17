@@ -22,6 +22,21 @@ services:
     volumes:
       - mongo_data:/data/db
 
+  db.postgres:
+    image: postgres:latest
+    container_name: fluxify.db.postgres
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=fluxify
+      - POSTGRES_PASSWORD=fluxify
+      - POSTGRES_DB=fluxify
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    networks:
+      - appnet
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
   rabbitmq:
     image: rabbitmq:management
     container_name: fluxify.rabbitmq
@@ -80,4 +95,4 @@ networks:
 
 volumes:
   mongo_data:
-    
+  postgres_data:

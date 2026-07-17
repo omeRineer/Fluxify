@@ -1,6 +1,6 @@
 ﻿using Fluxify.Application.Models.Common;
 using Fluxify.Application.Models.Rest.Notification;
-using Fluxify.Application.Services.Interfaces;
+using Fluxify.Application.Services.Interfaces.Mongo;
 using Fluxify.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;

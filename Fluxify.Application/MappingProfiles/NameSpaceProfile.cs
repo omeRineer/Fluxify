@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using Fluxify.Application.Models.Dto.NameSpace;
 using Fluxify.Application.Models.Rest.NameSpace;
-using Fluxify.Domain.Core;
+using Fluxify.Domain.Entities.Core;
 
 namespace Fluxify.Application.MappingProfiles
 {
@@ -14,7 +14,8 @@ namespace Fluxify.Application.MappingProfiles
             CreateMap<NameSpace, UpdateNameSpace.Response>().IncludeBase<NameSpace, NameSpaceDto.Detail>();
 
             CreateMap<CreateNameSpace.Request, NameSpace>();
-            CreateMap<UpdateNameSpace.Request, NameSpace>();
+            CreateMap<UpdateNameSpace.Request, NameSpace>()
+                .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
         }
     }
 }

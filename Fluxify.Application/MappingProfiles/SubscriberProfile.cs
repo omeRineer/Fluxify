@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using Fluxify.Application.Models.Dto.User;
 using Fluxify.Application.Models.Rest.Subscriber;
-using Fluxify.Domain.Core;
+using Fluxify.Domain.Entities.Core;
 
 namespace Fluxify.Application.MappingProfiles
 {
@@ -15,7 +15,8 @@ namespace Fluxify.Application.MappingProfiles
             CreateMap<User, UpdateUser.Response>().IncludeBase<User, UserDto.Detail>();
 
             CreateMap<CreateUser.Request, User>();
-            CreateMap<UpdateUser, User>();
+            CreateMap<UpdateUser.Request, User>()
+                .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
         }
     }
 }

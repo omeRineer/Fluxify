@@ -1,5 +1,5 @@
 ﻿using Fluxify.Application.Models.Common;
-using Fluxify.Application.Services.Interfaces;
+using Fluxify.Application.Services.Interfaces.Mongo;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

@@ -32,7 +32,7 @@ namespace Fluxify.Api.Hub.Auth
                 return AuthenticateResult.Fail("API Key is not provided.");
 
             var providedApiKey = headers.FirstOrDefault() ?? queries.FirstOrDefault();
-            var subscriber = await UserRepository.GetSingleOrDefaultAsync(f=> f.ApiKey == providedApiKey);
+            var subscriber = await UserRepository.GetSingleOrDefaultAsync(f => f.ApiKey == providedApiKey);
 
             if (subscriber == null)
                 return AuthenticateResult.Fail("Invalid API Key.");
@@ -40,24 +40,24 @@ namespace Fluxify.Api.Hub.Auth
             if (subscriber.ExpireDate != null && subscriber.ExpireDate < DateTime.Now)
                 return AuthenticateResult.Fail("API Key is expired.");
 
-            var nameSpace = await NameSpaceRepository.GetSingleAsync(f=> f.Id == subscriber.NameSpace);
+            var nameSpace = await NameSpaceRepository.GetSingleAsync(f => f.Id == subscriber.NameSpaceId);
 
             var claims = new List<Claim>
             {
                 new Claim(FluxifyClaims.Key, subscriber.Key),
                 new Claim(ClaimTypes.NameIdentifier, subscriber.Id.ToString()),
                 new Claim(FluxifyClaims.ApiKey, subscriber.ApiKey),
-                new Claim(FluxifyClaims.NameSpaceId, subscriber.NameSpace.ToString()),
+                new Claim(FluxifyClaims.NameSpaceId, subscriber.NameSpaceId.ToString()),
                 new Claim(FluxifyClaims.NameSpace, nameSpace.Signature),
                 new Claim(FluxifyClaims.Device, "undefined"),
                 new Claim(FluxifyClaims.Platform, "undefined"),
                 new Claim(ClaimTypes.Name, subscriber.Name)
             };
 
-            var userTopicsResult = await UserTopicRepository.GetListAsync(f=> f.UserId == subscriber.Id);
+            var userTopicsResult = await UserTopicRepository.GetProjectedListAsync(s=>s.Topic.Slug, f => f.UserId == subscriber.Id);
             if (userTopicsResult != null && userTopicsResult.Count > 0)
                 foreach (var topic in userTopicsResult)
-                    claims.Add(new Claim(FluxifyClaims.Topic, topic.TopicId));
+                    claims.Add(new Claim(FluxifyClaims.Topic, topic));
 
             var identity = new ClaimsIdentity(claims, Scheme.Name);
             var principal = new ClaimsPrincipal(identity);

@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using Fluxify.Application.Models.Dto.Channel;
 using Fluxify.Application.Models.Rest.Channel;
-using Fluxify.Domain.Core;
+using Fluxify.Domain.Entities.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +19,8 @@ namespace Fluxify.Application.MappingProfiles
             CreateMap<Channel, UpdateChannel.Response>().IncludeBase<Channel, ChannelDto.Detail>();
 
             CreateMap<CreateChannel.Request, Channel>();
-            CreateMap<UpdateChannel.Request, Channel>();
+            CreateMap<UpdateChannel.Request, Channel>()
+                .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
         }
     }
 }

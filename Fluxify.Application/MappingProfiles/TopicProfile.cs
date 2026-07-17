@@ -1,7 +1,8 @@
 ﻿using AutoMapper;
 using Fluxify.Application.Models.Dto.Topic;
+using Fluxify.Application.Models.Dto.User;
 using Fluxify.Application.Models.Rest.Topic;
-using Fluxify.Domain.Core;
+using Fluxify.Domain.Entities.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +16,7 @@ namespace Fluxify.Application.MappingProfiles
         public TopicProfile()
         {
             CreateMap<Topic, TopicDto.List>();
+            //CreateMap<Topic, UserDto.Detail.Topic>();
 
             CreateMap<CreateTopic.Request, Topic>();
         }
