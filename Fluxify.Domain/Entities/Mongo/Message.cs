@@ -1,4 +1,4 @@
-﻿namespace Fluxify.Domain.Core
+﻿namespace Fluxify.Domain.Entities.Mongo
 {
     public class Message : MongoEntity<Guid>
     {

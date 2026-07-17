@@ -5,6 +5,6 @@ namespace Fluxify.Application.Services.Interfaces
 {
     public interface IMessageService
     {
-       // Task<IResult> SendAsync(Guid senderId, SendMessage.Request req);
+       Task<IResult> SendAsync(Guid senderId, Guid nameSpaceId, Guid chatId, SendMessage.Request req);
     }
 }

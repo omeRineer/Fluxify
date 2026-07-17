@@ -10,9 +10,5 @@ namespace Fluxify.Application.Services
 {
     public class ChatUserService : IChatUserService
     {
-        public Task<IResult> AddUsersAsync(Guid chatId, Guid[] userIds)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

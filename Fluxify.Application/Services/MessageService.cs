@@ -1,5 +1,7 @@
-﻿using Fluxify.Application.Models.Rest.Message;
-using Fluxify.Application.Repositories;
+﻿using Fluxify.Application.Infrastructure;
+using Fluxify.Application.Models.Events;
+using Fluxify.Application.Models.Rest.Message;
+using Fluxify.Application.Repositories.Mongo;
 using Fluxify.Application.Services.Interfaces;
 using Fluxify.Application.Utilities.Result;
 using System;
@@ -12,14 +14,26 @@ namespace Fluxify.Application.Services
 {
     public class MessageService : IMessageService
     {
-        readonly IChatService _chatService;
-        readonly IMessageRepository _messageRepository;
+        readonly IEventPublisher _eventPublisher;
 
-        public MessageService(IMessageRepository messageRepository, IChatService chatService)
+        public MessageService(IEventPublisher eventPublisher)
         {
-            _messageRepository = messageRepository;
-            _chatService = chatService;
+            _eventPublisher = eventPublisher;
         }
 
+        public async Task<IResult> SendAsync(Guid senderId, Guid nameSpaceId, Guid chatId, SendMessage.Request req)
+        {
+            await _eventPublisher.PublishAsync("chat-direct",
+            new SendMessageEvent
+            {
+                SenderId = senderId,
+                NameSpaceId = nameSpaceId,
+                ChatId = chatId,
+                Text = req.Text
+            },
+            "message.send");
+
+            return new SuccessResult("Message is sent");
+        }
     }
 }

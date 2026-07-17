@@ -24,23 +24,16 @@ namespace Fluxify.Application.Services
 
         public async Task<IResult> CreateAsync(Guid nameSpaceId, CreateChat.Request req)
         {
-            var chatId = Guid.NewGuid();
-
             var newChat = new Chat
             {
-                Id = chatId,
-                NameSpaceId = nameSpaceId
+                NameSpaceId = nameSpaceId,
+                Users = req.UserIds.Select(userId => new ChatUser
+                {
+                    UserId = userId
+                }).ToList()
             };
 
             await _chatRepository.AddAsync(newChat);
-
-            var chatUsers = req.UserIds.Select(userId => new ChatUser
-            {
-                ChatId = chatId,
-                UserId = userId
-            }).ToList();
-
-            await _chatUserRepository.AddRangeAsync(chatUsers);
 
             return new SuccessResult("Chat is created");
         }

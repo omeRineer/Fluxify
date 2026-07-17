@@ -6,11 +6,11 @@ using Microsoft.AspNetCore.SignalR;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using Fluxify.Application.Repositories;
-using Fluxify.Application.Models.Queue;
+using Fluxify.Application.Models.Events;
 
-namespace Fluxify.Api.Hub.Workers
+namespace Fluxify.Api.Hub.Workers.Notification
 {
-    public class FirebaseNotificationWorker : ConsumerWorker<NotificationQueueModel>
+    public class FirebaseNotificationWorker : ConsumerWorker<SendNotificationEvent>
     {
         protected override string QueueName => "notification-firebase";
         protected override int RetryCount => 0;
@@ -28,7 +28,7 @@ namespace Fluxify.Api.Hub.Workers
         }
 
 
-        protected async override Task HandleAsync(NotificationQueueModel message, CancellationToken cancellationToken)
+        protected async override Task HandleAsync(SendNotificationEvent message, CancellationToken cancellationToken)
         {
             using var scope = _scopeFactory.CreateScope();
             var fireBaseNotificationService = scope.ServiceProvider.GetRequiredService<INF.IPushNotificationService>();
@@ -42,8 +42,8 @@ namespace Fluxify.Api.Hub.Workers
             var targetDevices = await userDeviceRepository.GetListAsync(f => targetUsers.Select(s => s.UserId).Contains(f.UserId));
 
             if (targetDevices != null && targetDevices.Any())
-                await fireBaseNotificationService.SendNotificationAsync(targetDevices.Select(s => s.Token), 
-                                                                        message.Title, 
+                await fireBaseNotificationService.SendNotificationAsync(targetDevices.Select(s => s.Token),
+                                                                        message.Title,
                                                                         message.Summary,
                                                                         message.Thumbnail,
                                                                         new()

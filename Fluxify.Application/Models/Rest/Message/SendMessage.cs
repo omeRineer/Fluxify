@@ -10,7 +10,6 @@ namespace Fluxify.Application.Models.Rest.Message
     {
         public class Request
         {
-            public Guid ChatId { get; set; }
             public string Text { get; set; }
         }
     }

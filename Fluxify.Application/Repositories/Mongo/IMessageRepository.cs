@@ -1,7 +1,7 @@
 ﻿using Fluxify.Application.Repositories.Base;
-using Fluxify.Domain.Core;
+using Fluxify.Domain.Entities.Mongo;
 
-namespace Fluxify.Application.Repositories
+namespace Fluxify.Application.Repositories.Mongo
 {
     public interface IMessageRepository : IMongoRepository<Message, Guid>
     {

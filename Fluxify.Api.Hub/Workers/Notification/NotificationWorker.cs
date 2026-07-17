@@ -1,7 +1,7 @@
 ﻿using Fluxify.Api.Hub.Workers.Main;
 using Fluxify.Application.Hubs;
 using Fluxify.Application.Models.Enums;
-using Fluxify.Application.Models.Queue;
+using Fluxify.Application.Models.Events;
 using Fluxify.Application.Models.SignalR;
 using Fluxify.Application.Services.Interfaces;
 using Fluxify.Application.Utilities.Helpers;
@@ -13,9 +13,9 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Channels;
 
-namespace Fluxify.Api.Hub.Workers
+namespace Fluxify.Api.Hub.Workers.Notification
 {
-    public class NotificationWorker : ConsumerWorker<NotificationQueueModel>
+    public class NotificationWorker : ConsumerWorker<SendNotificationEvent>
     {
         protected override string QueueName => "notification-socket";
         protected override int RetryCount => 3;
@@ -30,7 +30,7 @@ namespace Fluxify.Api.Hub.Workers
             _connectionManager = connectionManager;
         }
 
-        protected override async Task HandleAsync(NotificationQueueModel message, CancellationToken cancellationToken)
+        protected override async Task HandleAsync(SendNotificationEvent message, CancellationToken cancellationToken)
         {
             await _hubContext.Clients.Groups(message.Topics.Select(s => $"{message.NameSpaceId}:{s}"))
                                      .SendAsync(HubEvents.NotificationHub.ReceiveNotification,

@@ -22,5 +22,6 @@ namespace Fluxify.Domain.Entities.Core
         public virtual NameSpace NameSpace { get; set; }
         public virtual List<UserTopic>? Topics { get; set; }
         public virtual List<UserDevice>? Devices { get; set; }
+        public virtual List<ChatUser>? Chats { get; set; }
     }
 }

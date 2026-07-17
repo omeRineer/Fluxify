@@ -65,7 +65,7 @@ namespace Fluxify.Application.Services.Mongo
 
             await NotificationRepository.InsertAsync(newNotification);
             await EventPublisher.PublishAsync("notification-topic",
-                                              new NotificationQueueModel
+                                              new SendNotificationQueueModel
                                               {
                                                   Id = newNotification.Id,
                                                   NameSpaceId = nameSpaceId,
@@ -138,7 +138,7 @@ namespace Fluxify.Application.Services.Mongo
         public async Task<IResult> FireAsync(Guid nameSpaceId, FireNotification.Request req)
         {
             await EventPublisher.PublishAsync("notification-topic",
-                                              new NotificationQueueModel
+                                              new SendNotificationQueueModel
                                               {
                                                   NameSpaceId = nameSpaceId,
                                                   Level = (int)EnumHelper.Parse(req.Level, NotificationLevelType.Info),
