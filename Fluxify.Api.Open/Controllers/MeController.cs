@@ -2,7 +2,8 @@
 using Fluxify.Application.Models.Rest.UserDevice;
 using Fluxify.Application.Models.Rest.UserTopic;
 using Fluxify.Application.Services;
-using Fluxify.Application.Services.Interfaces;
+using Fluxify.Application.Services.Interfaces.Core;
+using Fluxify.Application.Services.Interfaces.Mongo;
 using Fluxify.Domain.Enums;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -15,12 +16,12 @@ namespace Fluxify.Api.Open.Controllers
         readonly IUserTopicService UserTopicService;
         readonly INotificationService NotificationService;
         readonly IUserDeviceService UserDeviceService;
-        public MeController(CurrentUser currentUser, IUserService UserService, INotificationService notificationService, IUserDeviceService userDeviceService, IUserTopicService userTopicService) : base(currentUser)
+        public MeController(CurrentUser currentUser, IUserService UserService, IUserDeviceService userDeviceService, IUserTopicService userTopicService, INotificationService notificationService) : base(currentUser)
         {
             this.UserService = UserService;
-            NotificationService = notificationService;
             UserDeviceService = userDeviceService;
             UserTopicService = userTopicService;
+            NotificationService = notificationService;
         }
 
         [HttpGet("Profile")]
@@ -38,8 +39,6 @@ namespace Fluxify.Api.Open.Controllers
         [HttpGet("Devices")]
         public async Task<IActionResult> GetDevicesAsync()
             => Response(await UserDeviceService.GetListAsync(CurrentUser.NameIdentifier));
-
-
 
         [HttpPost("Device/Set")]
         public async Task<IActionResult> SetDeviceAsync([FromBody] SetUserDevice.Request req)

@@ -5,7 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddApplication();
-builder.Services.AddPersistance();
+builder.Services.AddMongoContext();
 
 var app = builder.Build();
 

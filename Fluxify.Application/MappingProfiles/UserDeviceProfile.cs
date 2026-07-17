@@ -2,7 +2,7 @@
 using Fluxify.Application.Models.Dto.UserDevice;
 using Fluxify.Application.Models.Rest.UserDevice;
 using Fluxify.Application.Utilities.Helpers;
-using Fluxify.Domain.Core;
+using Fluxify.Domain.Entities.Core;
 using Fluxify.Domain.Enums;
 using System;
 using System.Collections.Generic;

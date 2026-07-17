@@ -1,6 +1,6 @@
 ﻿using Fluxify.Application.Models.Common;
 using Fluxify.Application.Models.Rest.Topic;
-using Fluxify.Application.Services.Interfaces;
+using Fluxify.Application.Services.Interfaces.Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 

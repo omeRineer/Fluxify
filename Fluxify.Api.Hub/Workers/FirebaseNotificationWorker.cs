@@ -35,8 +35,10 @@ namespace Fluxify.Api.Hub.Workers
             var userDeviceRepository = scope.ServiceProvider.GetRequiredService<IUserDeviceRepository>();
             var userTopicRepository = scope.ServiceProvider.GetRequiredService<IUserTopicRepository>();
             var userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
+            var topicRepository = scope.ServiceProvider.GetRequiredService<ITopicRepository>();
 
-            var targetUsers = await userTopicRepository.GetListAsync(f => message.Topics.Contains(f.TopicId) && f.NameSpaceId == message.NameSpaceId);
+            var topics = await topicRepository.GetProjectedListAsync(s => s.Id, f => message.Topics.Contains(f.Slug));
+            var targetUsers = await userTopicRepository.GetListAsync(f => topics.Contains(f.TopicId) && f.NameSpaceId == message.NameSpaceId);
             var targetDevices = await userDeviceRepository.GetListAsync(f => targetUsers.Select(s => s.UserId).Contains(f.UserId));
 
             if (targetDevices != null && targetDevices.Any())

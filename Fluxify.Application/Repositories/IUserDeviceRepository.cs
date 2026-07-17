@@ -1,9 +1,9 @@
 ﻿using Fluxify.Application.Repositories.Base;
-using Fluxify.Domain.Core;
+using Fluxify.Domain.Entities.Core;
 
 namespace Fluxify.Application.Repositories
 {
-    public interface IUserDeviceRepository : IMongoRepository<UserDevice, Guid>
+    public interface IUserDeviceRepository : IEfCoreRepository<UserDevice, Guid>
     {
     }
 }

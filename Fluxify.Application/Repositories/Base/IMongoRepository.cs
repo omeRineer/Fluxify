@@ -1,39 +1,133 @@
 ﻿using Fluxify.Domain;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using MongoDB.Driver;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fluxify.Application.Repositories.Base
 {
-    public interface IMongoRepository<TEntity, TKey>
-        where TEntity : MongoEntity<TKey>
+    public interface IMongoRepository<TDocument, TKey>
+        where TDocument : MongoEntity<TKey>
     {
-        Task<List<TEntity>> GetListAsync(Expression<Func<TEntity, bool>> filter = null,
-        Func<IEnumerable<TEntity>, IOrderedEnumerable<TEntity>> orderBy = null);
+        #region Query
 
-        Task<Dictionary<TK, TV>> GetDictionariesAsync<TK, TV>(Func<TEntity, TK> key,
-                                                                    Func<TEntity, TV> value,
-                                                                    Expression<Func<TEntity, bool>> filter = null);
-        Task<TEntity?> GetFirstOrDefaultAsync(Expression<Func<TEntity, bool>> filter);
+        IQueryable<TDocument> AsQueryable();
 
-        Task<TEntity?> GetSingleOrDefaultAsync(Expression<Func<TEntity, bool>> filter);
+        IAggregateFluent<TDocument> Aggregate();
 
-        Task<TEntity> GetFirstAsync(Expression<Func<TEntity, bool>> filter);
+        Task<long> CountAsync(
+            Expression<Func<TDocument, bool>> filter,
+            CancellationToken cancellationToken = default);
 
-        Task<TEntity> GetSingleAsync(Expression<Func<TEntity, bool>> filter);
-        Task<TEntity> FindAsync(TKey id);
-        Task<bool> IsExistAsync(Expression<Func<TEntity, bool>> expression);
+        Task<bool> AnyAsync(
+            Expression<Func<TDocument, bool>> filter,
+            CancellationToken cancellationToken = default);
 
-        Task AddAsync(TEntity entity);
-        Task AddRangeAsync(IEnumerable<TEntity> entities);
+        Task<bool> ExistsAsync(
+            Expression<Func<TDocument, bool>> filter,
+            CancellationToken cancellationToken = default);
 
-        Task DeleteAsync(TKey id);
-        Task DeleteRangeAsync(IEnumerable<TKey> ids);
+        Task<TDocument?> GetByIdAsync(
+            TKey id,
+            CancellationToken cancellationToken = default);
 
-        Task UpdateAsync(TEntity entity);
-        Task UpdateRangeAsync(IEnumerable<TEntity> entities);
+        Task<TDocument?> FirstOrDefaultAsync(
+            Expression<Func<TDocument, bool>> filter,
+            CancellationToken cancellationToken = default);
+
+        Task<List<TDocument>> FindAsync(
+            Expression<Func<TDocument, bool>> filter,
+            CancellationToken cancellationToken = default);
+
+        Task<List<TDocument>> GetListAsync(
+            Expression<Func<TDocument, bool>>? filter = null,
+            CancellationToken cancellationToken = default);
+
+        #endregion
+
+
+        #region Insert
+
+        Task InsertAsync(
+            TDocument document,
+            CancellationToken cancellationToken = default);
+
+        Task InsertManyAsync(
+            IEnumerable<TDocument> documents,
+            CancellationToken cancellationToken = default);
+
+        #endregion
+
+
+        #region Replace
+
+        Task ReplaceAsync(
+            TDocument document,
+            CancellationToken cancellationToken = default);
+
+        #endregion
+
+
+        #region Update
+
+        Task<UpdateResult> UpdateOneAsync(
+            Expression<Func<TDocument, bool>> filter,
+            UpdateDefinition<TDocument> update,
+            bool isUpsert = false,
+            CancellationToken cancellationToken = default);
+
+
+        Task<UpdateResult> UpdateManyAsync(
+            Expression<Func<TDocument, bool>> filter,
+            UpdateDefinition<TDocument> update,
+            bool isUpsert = false,
+            CancellationToken cancellationToken = default);
+
+
+        Task<TDocument?> FindOneAndUpdateAsync(
+            Expression<Func<TDocument, bool>> filter,
+            UpdateDefinition<TDocument> update,
+            bool returnUpdated = true,
+            CancellationToken cancellationToken = default);
+
+
+        Task<TDocument?> FindOneAndReplaceAsync(
+            Expression<Func<TDocument, bool>> filter,
+            TDocument document,
+            bool returnUpdated = true,
+            CancellationToken cancellationToken = default);
+
+        #endregion
+
+
+        #region Delete
+
+        Task DeleteByIdAsync(
+            TKey id,
+            CancellationToken cancellationToken = default);
+
+
+        Task DeleteOneAsync(
+            Expression<Func<TDocument, bool>> filter,
+            CancellationToken cancellationToken = default);
+
+
+        Task DeleteManyAsync(
+            Expression<Func<TDocument, bool>> filter,
+            CancellationToken cancellationToken = default);
+
+
+        Task<TDocument?> FindOneAndDeleteAsync(
+            Expression<Func<TDocument, bool>> filter,
+            CancellationToken cancellationToken = default);
+
+        #endregion
+
+
+        #region Bulk
+
+        Task<BulkWriteResult<TDocument>> BulkWriteAsync(
+            IEnumerable<WriteModel<TDocument>> operations,
+            CancellationToken cancellationToken = default);
+
+        #endregion
     }
 }

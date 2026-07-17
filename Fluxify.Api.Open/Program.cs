@@ -8,7 +8,8 @@ var builder = WebApplication.CreateBuilder(args);
 await builder.Services.AddRabbitMqAsync();
 builder.Services.AddControllers();
 builder.Services.AddApplication();
-builder.Services.AddPersistance();
+builder.Services.AddMongoContext();
+builder.Services.AddCoreContext();
 builder.Services.AddCors(options =>
                             options.AddDefaultPolicy(builder =>
                             builder.WithOrigins(AppConfiguration.AllowOrigins)
