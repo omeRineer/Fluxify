@@ -56,7 +56,11 @@ namespace Fluxify.Application.Services.Mongo
             newNotification.NameSpace = nameSpaceId;
             newNotification.Sender = userId;
 
-            var topics = await TopicRepository.GetListAsync(req.Topics);
+            var topics = await TopicRepository.GetListAsync(f => req.Topics.Contains(f.Slug));
+
+            if (topics.Count == 0)
+                return new ErrorResult("Topics are not found");
+
             newNotification.Topics = topics?.Select(s => s.Id)?.ToList() ?? new();
 
             await NotificationRepository.InsertAsync(newNotification);
@@ -69,7 +73,7 @@ namespace Fluxify.Application.Services.Mongo
                                                   Title = newNotification.Title,
                                                   Summary = newNotification.Summary,
                                                   Date = newNotification.CreateDate,
-                                                  Topics = newNotification.Topics,
+                                                  Topics = topics.Select(s => s.Slug).ToList(),
                                                   Url = req.Url,
                                                   Thumbnail = newNotification.Thumbnail
                                               },
