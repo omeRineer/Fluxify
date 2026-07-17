@@ -92,4 +92,5 @@ networks:
 
 volumes:
   mongo_data:
+  postgres_data:
     
