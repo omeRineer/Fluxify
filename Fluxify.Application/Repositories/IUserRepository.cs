@@ -5,7 +5,7 @@ using Fluxify.Domain.Entities.Core;
 
 namespace Fluxify.Application.Repositories
 {
-    public interface IUserRepository : IRepository<User, Guid>
+    public interface IUserRepository : IEfCoreRepository<User, Guid>
     {
     }
 }

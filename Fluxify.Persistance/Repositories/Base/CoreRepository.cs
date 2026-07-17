@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Fluxify.Persistance.Repositories.Base
 {
-    public class CoreRepository<TEntity, TKey> : IRepository<TEntity, TKey>
+    public class CoreRepository<TEntity, TKey> : IEfCoreRepository<TEntity, TKey>
         where TEntity : CoreEntity<TKey>, new()
     {
         protected readonly DbContext _context;

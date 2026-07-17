@@ -1,6 +1,9 @@
 ﻿using Fluxify.Application.Repositories;
+using Fluxify.Application.Repositories.Mongo;
 using Fluxify.Configuration;
+using Fluxify.Domain.Entities.Mongo;
 using Fluxify.Persistance.Context;
+using Fluxify.Persistance.Repositories.Base;
 using Fluxify.Persistance.Repositories.Core;
 using Fluxify.Persistance.Repositories.Mongo;
 using Microsoft.EntityFrameworkCore;
@@ -19,15 +22,14 @@ namespace Fluxify.Persistance
         public static void AddMongoContext(this IServiceCollection services)
         {
             //services.AddScoped<IDbSession, MongoDbSession>();
+            services.AddScoped<MongoContext>();
+
             services.AddScoped<INotificationRepository, NotificationRepository>();
             services.AddScoped<IUserNotificationRepository, UserNotificationRepository>();
 
-            services.AddSingleton<IMongoClient>(opt => new MongoClient(AppConfiguration.MongoDbOptions.ConnectionString));
-            services.AddScoped(opt =>
-            {
-                var client = opt.GetService<IMongoClient>();
-                return client.GetDatabase(AppConfiguration.MongoDbOptions.DataBase);
-            });
+            services.AddSingleton<IMongoClient>(_ =>
+                new MongoClient(AppConfiguration.MongoDbOptions.ConnectionString));
+
         }
 
         public static void AddCoreContext(this IServiceCollection services)

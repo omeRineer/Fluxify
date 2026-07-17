@@ -3,7 +3,7 @@ using Fluxify.Domain.Entities.Core;
 
 namespace Fluxify.Application.Repositories
 {
-    public interface INameSpaceRepository : IRepository<NameSpace, Guid>
+    public interface INameSpaceRepository : IEfCoreRepository<NameSpace, Guid>
     {
     }
 }

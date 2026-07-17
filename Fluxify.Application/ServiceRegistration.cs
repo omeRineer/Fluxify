@@ -27,10 +27,10 @@ namespace Fluxify.Application
     {
         public static void AddApplication(this IServiceCollection services)
         {
-            //services.AddScoped<INotificationService, NotificationService>();
+            services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<INameSpaceService, NameSpaceService>();
             services.AddScoped<IUserService, UserService>();
-            //services.AddScoped<IUserNotificationService, UserNotificationService>();
+            services.AddScoped<IUserNotificationService, UserNotificationService>();
             services.AddScoped<IUserDeviceService, UserDeviceService>();
             services.AddScoped<IUserTopicService, UserTopicService>();
             services.AddScoped<IChannelService, ChannelService>();

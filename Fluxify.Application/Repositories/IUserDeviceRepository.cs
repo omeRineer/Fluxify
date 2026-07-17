@@ -3,7 +3,7 @@ using Fluxify.Domain.Entities.Core;
 
 namespace Fluxify.Application.Repositories
 {
-    public interface IUserDeviceRepository : IRepository<UserDevice, Guid>
+    public interface IUserDeviceRepository : IEfCoreRepository<UserDevice, Guid>
     {
     }
 }

@@ -14,37 +14,33 @@ using Fluxify.Application.Models.Rest.Common;
 using AutoMapper;
 using Fluxify.Domain.Entities.Mongo;
 using Fluxify.Application.Services.Interfaces.Mongo;
+using Fluxify.Application.Repositories.Base;
+using Fluxify.Application.Repositories.Mongo;
 
 
 namespace Fluxify.Application.Services.Mongo
 {
-    public class UserNotificationService
+    public class UserNotificationService : IUserNotificationService
     {
-        //readonly IUserNotificationRepository UserNotificationRepository;
-        //readonly IMapper _mapper;
+        readonly IUserNotificationRepository UserNotificationRepository;
+        readonly IMapper _mapper;
 
-        //public UserNotificationService(IUserNotificationRepository userNotificationRepository, IMapper mapper)
-        //{
-        //    UserNotificationRepository = userNotificationRepository;
-        //    _mapper = mapper;
-        //}
+        public UserNotificationService(IUserNotificationRepository userNotificationRepository, IMapper mapper)
+        {
+            UserNotificationRepository = userNotificationRepository;
+            _mapper = mapper;
+        }
 
-        //public async Task<IResult> AddAsync(Guid userId, Guid notificationId)
-        //{
-        //    await UserNotificationRepository.AddAsync(new UserNotification
-        //    {
-        //        NotificationId = notificationId,
-        //        UserId = userId
-        //    });
+        public async Task<IResult> AddAsync(Guid userId, Guid notificationId)
+        {
+            await UserNotificationRepository.InsertAsync(new UserNotification
+            {
+                NotificationId = notificationId,
+                UserId = userId
+            });
 
-        //    return new SuccessResult();
-        //}
+            return new SuccessResult();
+        }
 
-        //public async Task<IResult> MarkAsStatusAsync(NotificationStatus status, Guid[] notificationIds, Guid[]? userIds = null)
-        //{
-        //    await UserNotificationRepository.MarkAsStatusAsync(status, notificationIds, userIds);
-
-        //    return new SuccessResult();
-        //}
     }
 }

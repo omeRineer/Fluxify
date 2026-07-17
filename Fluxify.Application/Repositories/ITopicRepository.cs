@@ -4,7 +4,7 @@ using Fluxify.Domain.Entities.Core;
 
 namespace Fluxify.Application.Repositories
 {
-    public interface ITopicRepository : IRepository<Topic, Guid>
+    public interface ITopicRepository : IEfCoreRepository<Topic, Guid>
     {
         Task<List<Topic>> GetListAsync(Guid channelId);
         Task<List<Topic>> GetListAsync(string[] topics);

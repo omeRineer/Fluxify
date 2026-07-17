@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Fluxify.Application.Repositories.Base
 {
-    public interface IRepository<TEntity, TKey>
+    public interface IEfCoreRepository<TEntity, TKey>
     {
         Task<List<TEntity>> GetListAsync(Expression<Func<TEntity, bool>> filter = null,
                                    Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>> includes = null,

@@ -3,7 +3,7 @@ using Fluxify.Domain.Entities.Core;
 
 namespace Fluxify.Application.Repositories
 {
-    public interface IUserTopicRepository : IRepository<UserTopic, Guid>
+    public interface IUserTopicRepository : IEfCoreRepository<UserTopic, Guid>
     {
     }
 }

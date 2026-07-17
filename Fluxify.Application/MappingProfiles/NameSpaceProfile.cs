@@ -14,7 +14,8 @@ namespace Fluxify.Application.MappingProfiles
             CreateMap<NameSpace, UpdateNameSpace.Response>().IncludeBase<NameSpace, NameSpaceDto.Detail>();
 
             CreateMap<CreateNameSpace.Request, NameSpace>();
-            CreateMap<UpdateNameSpace.Request, NameSpace>();
+            CreateMap<UpdateNameSpace.Request, NameSpace>()
+                .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
         }
     }
 }

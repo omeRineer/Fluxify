@@ -1,4 +1,6 @@
-﻿using Fluxify.Domain;
+﻿using Fluxify.Application.Repositories.Base;
+using Fluxify.Domain;
+using Fluxify.Persistance.Context;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
@@ -7,131 +9,240 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Fluxify.Application.Repositories.Base
+namespace Fluxify.Persistance.Repositories.Base
 {
-    public class MongoRepository<TEntity, TKey>
-        where TEntity : MongoEntity<TKey>, new()
+    public abstract class MongoRepository<TDocument, TKey> : IMongoRepository<TDocument, TKey>
+        where TDocument : MongoEntity<TKey>
     {
-        protected readonly IMongoCollection<TEntity> Collection;
+        protected IMongoCollection<TDocument> Collection { get; }
 
-
-        public MongoRepository(IMongoDatabase dataBase, string collectionName)
+        protected MongoRepository(MongoContext context)
         {
-            Collection = dataBase.GetCollection<TEntity>(collectionName);
+            Collection = context.Database.GetCollection<TDocument>(
+                GetCollectionName());
         }
 
+        protected abstract string GetCollectionName();
 
-        public async Task AddAsync(TEntity entity)
+        #region Query
+
+        public virtual IQueryable<TDocument> AsQueryable()
+            => Collection.AsQueryable();
+
+        public virtual IAggregateFluent<TDocument> Aggregate()
+            => Collection.Aggregate();
+
+        public virtual Task<long> CountAsync(
+            Expression<Func<TDocument, bool>> filter,
+            CancellationToken cancellationToken = default)
         {
-            await Collection.InsertOneAsync(entity, new InsertOneOptions
-            {
-                BypassDocumentValidation = true
-            });
+            return Collection.CountDocumentsAsync(filter, cancellationToken: cancellationToken);
         }
 
-
-        public async Task AddRangeAsync(IEnumerable<TEntity> entities)
+        public virtual async Task<bool> AnyAsync(
+            Expression<Func<TDocument, bool>> filter,
+            CancellationToken cancellationToken = default)
         {
-            var models = entities.Select(x => new InsertOneModel<TEntity>(x)).Cast<WriteModel<TEntity>>().ToList();
-
-
-            await Collection.BulkWriteAsync(models, new BulkWriteOptions
-            {
-                IsOrdered = false
-            });
+            return await Collection.Find(filter)
+                .Limit(1)
+                .AnyAsync(cancellationToken);
         }
 
+        public virtual Task<bool> ExistsAsync(
+            Expression<Func<TDocument, bool>> filter,
+            CancellationToken cancellationToken = default)
+            => AnyAsync(filter, cancellationToken);
 
-        public async Task DeleteAsync(TKey id)
+        public virtual Task<TDocument?> GetByIdAsync(
+            TKey id,
+            CancellationToken cancellationToken = default)
         {
-            await Collection.DeleteOneAsync(x => x.Id!.Equals(id));
+            return Collection.Find(x => x.Id!.Equals(id))
+                .FirstOrDefaultAsync(cancellationToken);
         }
 
-
-        public async Task DeleteRangeAsync(IEnumerable<TKey> ids)
+        public virtual Task<TDocument?> FirstOrDefaultAsync(
+            Expression<Func<TDocument, bool>> filter,
+            CancellationToken cancellationToken = default)
         {
-            await Collection.DeleteManyAsync(x => ids.Contains(x.Id));
+            return Collection.Find(filter)
+                .FirstOrDefaultAsync(cancellationToken);
         }
 
-        public Task<TEntity> FindAsync(TKey id)
+        public virtual Task<List<TDocument>> FindAsync(
+            Expression<Func<TDocument, bool>> filter,
+            CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            return Collection.Find(filter)
+                .ToListAsync(cancellationToken);
         }
 
-        public async Task<Dictionary<TK, TV>> GetDictionariesAsync<TK, TV>(Func<TEntity, TK> key, Func<TEntity, TV> value, Expression<Func<TEntity, bool>> filter = null)
+        public virtual Task<List<TDocument>> GetListAsync(
+            Expression<Func<TDocument, bool>>? filter = null,
+            CancellationToken cancellationToken = default)
         {
-            var data = filter == null
-            ? await Collection.Find(_ => true).ToListAsync()
-            : await Collection.Find(filter).ToListAsync();
+            filter ??= _ => true;
 
-
-            return data.ToDictionary(key, value);
+            return Collection
+                .Find(filter)
+                .ToListAsync(cancellationToken);
         }
 
+        #endregion
 
-        public async Task<TEntity> GetFirstAsync(Expression<Func<TEntity, bool>> filter)
-        => await Collection.Find(filter).FirstAsync();
+        #region Insert
 
-
-        public async Task<TEntity?> GetFirstOrDefaultAsync(Expression<Func<TEntity, bool>> filter)
-        => await Collection.Find(filter).FirstOrDefaultAsync();
-
-
-        public async Task<List<TEntity>> GetListAsync(
-        Expression<Func<TEntity, bool>> filter = null,
-        Func<IEnumerable<TEntity>, IOrderedEnumerable<TEntity>> orderBy = null)
+        public virtual Task InsertAsync(
+            TDocument document,
+            CancellationToken cancellationToken = default)
         {
-            var list = filter == null
-            ? await Collection.Find(_ => true).ToListAsync()
-            : await Collection.Find(filter).ToListAsync();
-
-
-            if (orderBy != null)
-                list = orderBy(list).ToList();
-
-
-
-            return list;
+            return Collection.InsertOneAsync(
+                document,
+                cancellationToken: cancellationToken);
         }
 
-
-        public async Task<TEntity> GetSingleAsync(Expression<Func<TEntity, bool>> filter)
-        => await Collection.Find(filter).SingleAsync();
-
-
-        public async Task<TEntity?> GetSingleOrDefaultAsync(Expression<Func<TEntity, bool>> filter)
-        => await Collection.Find(filter).SingleOrDefaultAsync();
-
-
-        public async Task<bool> IsExistAsync(Expression<Func<TEntity, bool>> expression)
+        public virtual Task InsertManyAsync(
+            IEnumerable<TDocument> documents,
+            CancellationToken cancellationToken = default)
         {
-            return await Collection.Find(expression).AnyAsync();
+            return Collection.InsertManyAsync(
+                documents,
+                cancellationToken: cancellationToken);
         }
 
-        public async Task SaveChangesAsync()
+        #endregion
+
+        #region Replace
+
+        public virtual Task ReplaceAsync(
+            TDocument document,
+            CancellationToken cancellationToken = default)
         {
-            await Task.CompletedTask;
+            return Collection.ReplaceOneAsync(
+                x => x.Id!.Equals(document.Id),
+                document,
+                cancellationToken: cancellationToken);
         }
 
-        public async Task UpdateAsync(TEntity entity)
+        #endregion
+
+        #region Update
+
+        public virtual Task<UpdateResult> UpdateOneAsync(
+            Expression<Func<TDocument, bool>> filter,
+            UpdateDefinition<TDocument> update,
+            bool isUpsert = false,
+            CancellationToken cancellationToken = default)
         {
-            await Collection.ReplaceOneAsync(x => x.Id!.Equals(entity.Id), entity);
+            return Collection.UpdateOneAsync(
+                filter,
+                update,
+                new UpdateOptions { IsUpsert = isUpsert },
+                cancellationToken);
         }
 
-
-        public async Task UpdateRangeAsync(IEnumerable<TEntity> entities)
+        public virtual Task<UpdateResult> UpdateManyAsync(
+            Expression<Func<TDocument, bool>> filter,
+            UpdateDefinition<TDocument> update,
+            bool isUpsert = false,
+            CancellationToken cancellationToken = default)
         {
-            var models = entities.Select(entity =>
-            new ReplaceOneModel<TEntity>(
-            Builders<TEntity>.Filter.Eq(x => x.Id, entity.Id),
-            entity
-            )
-            { IsUpsert = false }
-            ).Cast<WriteModel<TEntity>>().ToList();
-
-
-            if (models.Any())
-                await Collection.BulkWriteAsync(models);
+            return Collection.UpdateManyAsync(
+                filter,
+                update,
+                new UpdateOptions { IsUpsert = isUpsert },
+                cancellationToken);
         }
+
+        public virtual Task<TDocument?> FindOneAndUpdateAsync(
+            Expression<Func<TDocument, bool>> filter,
+            UpdateDefinition<TDocument> update,
+            bool returnUpdated = true,
+            CancellationToken cancellationToken = default)
+        {
+            return Collection.FindOneAndUpdateAsync(
+                filter,
+                update,
+                new FindOneAndUpdateOptions<TDocument>
+                {
+                    ReturnDocument = returnUpdated
+                        ? ReturnDocument.After
+                        : ReturnDocument.Before
+                },
+                cancellationToken);
+        }
+
+        public virtual Task<TDocument?> FindOneAndReplaceAsync(
+            Expression<Func<TDocument, bool>> filter,
+            TDocument document,
+            bool returnUpdated = true,
+            CancellationToken cancellationToken = default)
+        {
+            return Collection.FindOneAndReplaceAsync(
+                filter,
+                document,
+                new FindOneAndReplaceOptions<TDocument>
+                {
+                    ReturnDocument = returnUpdated
+                        ? ReturnDocument.After
+                        : ReturnDocument.Before
+                },
+                cancellationToken);
+        }
+
+        #endregion
+
+        #region Delete
+
+        public virtual Task DeleteByIdAsync(
+            TKey id,
+            CancellationToken cancellationToken = default)
+        {
+            return Collection.DeleteOneAsync(
+                x => x.Id!.Equals(id),
+                cancellationToken);
+        }
+
+        public virtual Task DeleteOneAsync(
+            Expression<Func<TDocument, bool>> filter,
+            CancellationToken cancellationToken = default)
+        {
+            return Collection.DeleteOneAsync(
+                filter,
+                cancellationToken);
+        }
+
+        public virtual Task DeleteManyAsync(
+            Expression<Func<TDocument, bool>> filter,
+            CancellationToken cancellationToken = default)
+        {
+            return Collection.DeleteManyAsync(
+                filter,
+                cancellationToken);
+        }
+
+        public virtual Task<TDocument?> FindOneAndDeleteAsync(
+            Expression<Func<TDocument, bool>> filter,
+            CancellationToken cancellationToken = default)
+        {
+            return Collection.FindOneAndDeleteAsync(
+                filter,
+                cancellationToken: cancellationToken);
+        }
+
+        #endregion
+
+        #region Bulk
+
+        public virtual Task<BulkWriteResult<TDocument>> BulkWriteAsync(
+            IEnumerable<WriteModel<TDocument>> operations,
+            CancellationToken cancellationToken = default)
+        {
+            return Collection.BulkWriteAsync(
+                operations,
+                cancellationToken: cancellationToken);
+        }
+
+        #endregion
     }
 }

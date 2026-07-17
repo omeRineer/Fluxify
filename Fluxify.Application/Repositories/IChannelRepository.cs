@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Fluxify.Application.Repositories
 {
-    public interface IChannelRepository : IRepository<Channel, Guid>
+    public interface IChannelRepository : IEfCoreRepository<Channel, Guid>
     {
     }
 }

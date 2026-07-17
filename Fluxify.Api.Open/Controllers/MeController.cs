@@ -14,23 +14,23 @@ namespace Fluxify.Api.Open.Controllers
     {
         readonly IUserService UserService;
         readonly IUserTopicService UserTopicService;
-        //readonly INotificationService NotificationService;
+        readonly INotificationService NotificationService;
         readonly IUserDeviceService UserDeviceService;
-        public MeController(CurrentUser currentUser, IUserService UserService, IUserDeviceService userDeviceService, IUserTopicService userTopicService) : base(currentUser)
+        public MeController(CurrentUser currentUser, IUserService UserService, IUserDeviceService userDeviceService, IUserTopicService userTopicService, INotificationService notificationService) : base(currentUser)
         {
             this.UserService = UserService;
-            //NotificationService = notificationService;
             UserDeviceService = userDeviceService;
             UserTopicService = userTopicService;
+            NotificationService = notificationService;
         }
 
         [HttpGet("Profile")]
         public async Task<IActionResult> GetProfileAsync()
             => Response(await UserService.GetDetailAsync(CurrentUser.NameIdentifier));
 
-        //[HttpGet("Notifications")]
-        //public async Task<IActionResult> GetNotificationsAsync()
-        //    => Response(await NotificationService.GetListAsync(CurrentUser.NameIdentifier));
+        [HttpGet("Notifications")]
+        public async Task<IActionResult> GetNotificationsAsync()
+            => Response(await NotificationService.GetListAsync(CurrentUser.NameIdentifier));
 
         [HttpGet("Topics")]
         public async Task<IActionResult> GetTopicsAsync()
@@ -39,8 +39,6 @@ namespace Fluxify.Api.Open.Controllers
         [HttpGet("Devices")]
         public async Task<IActionResult> GetDevicesAsync()
             => Response(await UserDeviceService.GetListAsync(CurrentUser.NameIdentifier));
-
-
 
         [HttpPost("Device/Set")]
         public async Task<IActionResult> SetDeviceAsync([FromBody] SetUserDevice.Request req)

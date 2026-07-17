@@ -19,7 +19,8 @@ namespace Fluxify.Application.MappingProfiles
             CreateMap<Channel, UpdateChannel.Response>().IncludeBase<Channel, ChannelDto.Detail>();
 
             CreateMap<CreateChannel.Request, Channel>();
-            CreateMap<UpdateChannel.Request, Channel>();
+            CreateMap<UpdateChannel.Request, Channel>()
+                .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
         }
     }
 }
