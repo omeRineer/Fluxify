@@ -4,7 +4,9 @@ using Fluxify.Api.Hub.Auth;
 using Fluxify.Application.Models.Common;
 using Fluxify.Application.Models.Enums;
 using Fluxify.Application.Repositories;
+using Fluxify.Application.Services;
 using Fluxify.Application.Services.Core;
+using Fluxify.Application.Services.Interfaces;
 using Fluxify.Application.Services.Interfaces.Core;
 using Fluxify.Application.Services.Interfaces.Mongo;
 using Fluxify.Application.Services.Mongo;
@@ -35,6 +37,7 @@ namespace Fluxify.Application
             services.AddScoped<IUserTopicService, UserTopicService>();
             services.AddScoped<IChannelService, ChannelService>();
             services.AddScoped<ITopicService, TopicService>();
+            services.AddScoped<IMessageService, MessageService>();
 
             services.AddHttpContextAccessor();
             services.AddAuthentication()

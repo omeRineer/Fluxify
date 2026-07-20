@@ -22,11 +22,11 @@ using Fluxify.Application.Models.Common;
 using Fluxify.Application.Models.Rest.Common;
 using AutoMapper;
 using Fluxify.Application.Infrastructure;
-using Fluxify.Application.Models.Queue;
 using Fluxify.Domain.Entities.Mongo;
 using Fluxify.Application.Services.Interfaces.Mongo;
 using Fluxify.Application.Repositories.Base;
 using Fluxify.Application.Repositories.Mongo;
+using Fluxify.Application.Models.Events;
 
 namespace Fluxify.Application.Services.Mongo
 {
@@ -65,7 +65,7 @@ namespace Fluxify.Application.Services.Mongo
 
             await NotificationRepository.InsertAsync(newNotification);
             await EventPublisher.PublishAsync("notification-topic",
-                                              new SendNotificationQueueModel
+                                              new SendNotificationEvent
                                               {
                                                   Id = newNotification.Id,
                                                   NameSpaceId = nameSpaceId,
@@ -138,7 +138,7 @@ namespace Fluxify.Application.Services.Mongo
         public async Task<IResult> FireAsync(Guid nameSpaceId, FireNotification.Request req)
         {
             await EventPublisher.PublishAsync("notification-topic",
-                                              new SendNotificationQueueModel
+                                              new SendNotificationEvent
                                               {
                                                   NameSpaceId = nameSpaceId,
                                                   Level = (int)EnumHelper.Parse(req.Level, NotificationLevelType.Info),

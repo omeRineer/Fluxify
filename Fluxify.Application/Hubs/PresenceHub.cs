@@ -2,6 +2,7 @@
 using Fluxify.Application.Models.Hub;
 using Fluxify.Application.Models.SignalR;
 using Fluxify.Application.Services.Interfaces;
+using Fluxify.Application.Utilities.Helpers;
 using Fluxify.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
@@ -35,13 +36,13 @@ namespace Fluxify.Application.Hubs
 
             if (connectionUser.Connections.Count == 1)
             {
-                await Clients.Group(connectionUser.NameSpace.Signature).SendAsync(HubEvents.PresenceHub.ReceiveUserStates, new PushToClientUserStateInfoModel
+                await Clients.Group(connectionUser.NameSpace.Signature).SendAsync(HubEvents.PresenceHub.ReceiveUserStates, new UserStateInfoMessage
                 {
                     UserId = Context.User.Claims.Single(f => f.Type == FluxifyClaims.Key).Value,
-                    Date = DateTime.UtcNow,
-                    Status = (int) UserAvailabilityStatus.Online
+                    Status = EnumHelper.ToEnumString<UserAvailabilityStatus>((int)UserAvailabilityStatus.Online),
+                    Date = DateTime.UtcNow
                 });
-                
+
             }
 
             await base.OnConnectedAsync();
@@ -52,13 +53,13 @@ namespace Fluxify.Application.Hubs
             ConnectionUser connectionUser = HubConnectionManager.GetConnection(Context.User.Claims.Single(f => f.Type == ClaimTypes.NameIdentifier).Value);
             int connectionCount = HubConnectionManager.RemoveConnection(Context);
 
-            if(connectionCount == 0)
+            if (connectionCount == 0)
             {
-                await Clients.Group(connectionUser.NameSpace.Signature).SendAsync(HubEvents.PresenceHub.ReceiveUserStates, new PushToClientUserStateInfoModel
+                await Clients.Group(connectionUser.NameSpace.Signature).SendAsync(HubEvents.PresenceHub.ReceiveUserStates, new UserStateInfoMessage
                 {
                     UserId = Context.User.Claims.Single(f => f.Type == FluxifyClaims.Key).Value,
                     Date = DateTime.UtcNow,
-                    Status = (int) UserAvailabilityStatus.Offline
+                    Status = EnumHelper.ToEnumString<UserAvailabilityStatus>((int)UserAvailabilityStatus.Offline)
                 });
             }
 
@@ -69,29 +70,30 @@ namespace Fluxify.Application.Hubs
         {
             ConnectionUser connectionUser = HubConnectionManager.GetConnection(Context.User.Claims.Single(f => f.Type == ClaimTypes.NameIdentifier).Value);
 
-            var onlineSubscribers = HubConnectionManager.GetAllConnections(connectionUser.NameSpace.Id).Select(s => new PushToClientUserStateInfoModel
+            var onlineSubscribers = HubConnectionManager.GetAllConnections(connectionUser.NameSpace.Id).Select(s => new UserStateInfoMessage
             {
                 UserId = s.Key,
                 Date = s.ConnectedDate,
-                Status = s.Status.Id,
-                Title = s.Status.Name
+                Status = s.Status
             }).ToList();
 
             await Clients.Caller.SendAsync(HubEvents.PresenceHub.ReceiveOnlineUsers, onlineSubscribers);
         }
 
-        public async Task SetAvailabilityStatus(int status)
+        public async Task SetAvailabilityStatus(string status)
         {
             ConnectionUser connectionUser = HubConnectionManager.GetConnection(Context.User.Claims.Single(f => f.Type == ClaimTypes.NameIdentifier).Value);
 
-            connectionUser.Status.Id = status;
-            await Clients.Group(connectionUser.NameSpace.Signature).SendAsync(HubEvents.PresenceHub.ReceiveUserStates, new PushToClientUserStateInfoModel
+            if (EnumHelper.HasValue<UserAvailabilityStatus>(status))
             {
-                UserId = Context.User.Claims.Single(f => f.Type == FluxifyClaims.Key).Value,
-                Status = status,
-                Title = connectionUser.Status.Name,
-                Date = DateTime.UtcNow
-            });
+                connectionUser.SetStatus(status);
+                await Clients.Group(connectionUser.NameSpace.Signature).SendAsync(HubEvents.PresenceHub.ReceiveUserStates, new UserStateInfoMessage
+                {
+                    UserId = connectionUser.Key,
+                    Status = status,
+                    Date = DateTime.UtcNow
+                });
+            }
         }
     }
 }

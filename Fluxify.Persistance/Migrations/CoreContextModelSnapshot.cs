@@ -47,6 +47,53 @@ namespace Fluxify.Persistance.Migrations
                     b.ToTable("Channels");
                 });
 
+            modelBuilder.Entity("Fluxify.Domain.Entities.Core.Chat", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("EditDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("NameSpaceId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Chat");
+                });
+
+            modelBuilder.Entity("Fluxify.Domain.Entities.Core.ChatUser", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ChatId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("EditDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChatId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ChatUser");
+                });
+
             modelBuilder.Entity("Fluxify.Domain.Entities.Core.NameSpace", b =>
                 {
                     b.Property<Guid>("Id")
@@ -223,6 +270,25 @@ namespace Fluxify.Persistance.Migrations
                     b.ToTable("UserTopics");
                 });
 
+            modelBuilder.Entity("Fluxify.Domain.Entities.Core.ChatUser", b =>
+                {
+                    b.HasOne("Fluxify.Domain.Entities.Core.Chat", "Chat")
+                        .WithMany("Users")
+                        .HasForeignKey("ChatId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Fluxify.Domain.Entities.Core.User", "User")
+                        .WithMany("Chats")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Chat");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Fluxify.Domain.Entities.Core.Topic", b =>
                 {
                     b.HasOne("Fluxify.Domain.Entities.Core.Channel", "Channel")
@@ -288,6 +354,11 @@ namespace Fluxify.Persistance.Migrations
                     b.Navigation("Topics");
                 });
 
+            modelBuilder.Entity("Fluxify.Domain.Entities.Core.Chat", b =>
+                {
+                    b.Navigation("Users");
+                });
+
             modelBuilder.Entity("Fluxify.Domain.Entities.Core.NameSpace", b =>
                 {
                     b.Navigation("Users");
@@ -300,6 +371,8 @@ namespace Fluxify.Persistance.Migrations
 
             modelBuilder.Entity("Fluxify.Domain.Entities.Core.User", b =>
                 {
+                    b.Navigation("Chats");
+
                     b.Navigation("Devices");
 
                     b.Navigation("Topics");

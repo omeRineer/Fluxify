@@ -14,5 +14,38 @@ namespace Fluxify.Api.Web.Controllers
         {
             UserService = userService;
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetListAsync()
+        {
+            var result = await UserService.GetListAsync(CurrentUser.NameSpace.Id);
+
+            return Response(result);
+        }
+
+
+        [HttpGet("{id:guid}")]
+        public async Task<IActionResult> GetDetailAsync([FromRoute] Guid id)
+        {
+            var result = await UserService.GetDetailAsync(id);
+
+            return Response(result);
+        }
+
+        [HttpPost("Create")]
+        public async Task<IActionResult> CreateAsync([FromBody] CreateUser.Request model)
+        {
+            var result = await UserService.CreateAsync(CurrentUser.NameSpace.Id, model);
+
+            return Response(result);
+        }
+
+        [HttpPost("{id}/Update")]
+        public async Task<IActionResult> UpdateAsync([FromRoute] Guid id, [FromBody] UpdateUser.Request model)
+        {
+            var result = await UserService.UpdateAsync(id, model);
+
+            return Response(result);
+        }
     }
 }

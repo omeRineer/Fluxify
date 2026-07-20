@@ -5,11 +5,13 @@ using System.Security.Claims;
 using Fluxify.Infrastructure;
 using Fluxify.Configuration;
 using Fluxify.Api.Hub.Workers.Notification;
+using Fluxify.Api.Hub.Workers.Chat;
 
 var builder = WebApplication.CreateBuilder(args);
 await builder.Services.AddRabbitMqAsync();
 builder.Services.AddHostedService<NotificationWorker>();
 builder.Services.AddHostedService<FirebaseNotificationWorker>();
+builder.Services.AddHostedService<SendMessageWorker>();
 builder.Services.AddApplication();
 builder.Services.AddMongoContext();
 builder.Services.AddCoreContext();

@@ -48,10 +48,6 @@ namespace Fluxify.Application.Hubs
                             Id = Guid.Parse(context.User.Claims.Single(f => f.Type == FluxifyClaims.NameSpaceId).Value),
                             Signature = context.User.Claims.Single(f => f.Type == FluxifyClaims.NameSpace).Value
                         },
-                        Status = new ConnectionUser.StatusInfo
-                        {
-                            Id = (int)UserAvailabilityStatus.Online
-                        },
                         ConnectedDate = DateTime.UtcNow,
                         Topics = context.User.Claims
                             .Where(f => f.Type == FluxifyClaims.Topic)

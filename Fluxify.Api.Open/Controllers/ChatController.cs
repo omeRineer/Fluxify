@@ -16,6 +16,11 @@ namespace Fluxify.Api.Open.Controllers
 
         [HttpPost("{chatId:guid}/message")]
         public async Task<IActionResult> SendMessageAsync([FromRoute] Guid chatId, [FromBody] SendMessage.Request req)
-            => Response(await _messageService.SendAsync(CurrentUser.NameIdentifier, chatId, CurrentUser.NameSpace.Id, req));
+            => Response(await _messageService.SendAsync(CurrentUser.NameIdentifier, CurrentUser.NameSpace.Id, chatId, req));
+
+        [HttpGet("{chatId:guid}/history")]
+        public async Task<IActionResult> GetHistoryAsync([FromRoute] Guid chatId)
+            => Response(await _messageService.GetHistoryAsync(CurrentUser.NameIdentifier, chatId));
+
     }
 }

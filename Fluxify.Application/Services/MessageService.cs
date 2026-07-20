@@ -1,5 +1,8 @@
-﻿using Fluxify.Application.Infrastructure;
+﻿using AutoMapper;
+using Fluxify.Application.Infrastructure;
+using Fluxify.Application.Models.Dto.Message;
 using Fluxify.Application.Models.Events;
+using Fluxify.Application.Models.Rest.Common;
 using Fluxify.Application.Models.Rest.Message;
 using Fluxify.Application.Repositories.Mongo;
 using Fluxify.Application.Services.Interfaces;
@@ -15,10 +18,23 @@ namespace Fluxify.Application.Services
     public class MessageService : IMessageService
     {
         readonly IEventPublisher _eventPublisher;
+        readonly IMessageRepository _messageRepository;
+        readonly IMapper _mapper;
 
-        public MessageService(IEventPublisher eventPublisher)
+        public MessageService(IEventPublisher eventPublisher, IMessageRepository messageRepository, IMapper mapper)
         {
             _eventPublisher = eventPublisher;
+            _messageRepository = messageRepository;
+            _mapper = mapper;
+        }
+
+        public async Task<IDataResult<DataListResponse<MessageDto.List>>> GetHistoryAsync(Guid nameSpaceId, Guid chatId)
+        {
+            var chatHistory = await _messageRepository.GetListAsync(f => f.ChatId == chatId);
+
+            var mappedList = _mapper.Map<List<MessageDto.List>>(chatHistory);
+
+            return new SuccessDataResult<DataListResponse<MessageDto.List>>(DataListResponse<MessageDto.List>.Load(mappedList));
         }
 
         public async Task<IResult> SendAsync(Guid senderId, Guid nameSpaceId, Guid chatId, SendMessage.Request req)

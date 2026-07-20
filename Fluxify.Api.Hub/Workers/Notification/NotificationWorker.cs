@@ -34,7 +34,7 @@ namespace Fluxify.Api.Hub.Workers.Notification
         {
             await _hubContext.Clients.Groups(message.Topics.Select(s => $"{message.NameSpaceId}:{s}"))
                                      .SendAsync(HubEvents.NotificationHub.ReceiveNotification,
-                                     new PushToClientNotificationModel
+                                     new NotificationMessage
                                      {
                                          Id = message.Id,
                                          Date = message.Date,

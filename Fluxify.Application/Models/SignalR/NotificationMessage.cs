@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Fluxify.Application.Models.SignalR
 {
-    public class PushToClientNotificationModel
+    public class NotificationMessage
     {
         public Guid? Id { get; set; }
         public string Level { get; set; }
