@@ -56,13 +56,24 @@ namespace Fluxify.Persistance.Migrations
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uuid");
+
                     b.Property<DateTime>("EditDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("NameSpaceId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Title")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedUserId");
 
                     b.ToTable("Chat");
                 });
@@ -268,6 +279,17 @@ namespace Fluxify.Persistance.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("UserTopics");
+                });
+
+            modelBuilder.Entity("Fluxify.Domain.Entities.Core.Chat", b =>
+                {
+                    b.HasOne("Fluxify.Domain.Entities.Core.User", "CreatedUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CreatedUser");
                 });
 
             modelBuilder.Entity("Fluxify.Domain.Entities.Core.ChatUser", b =>

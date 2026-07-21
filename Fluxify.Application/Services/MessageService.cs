@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
 using Fluxify.Application.Infrastructure;
+using Fluxify.Application.Models.Dto.Chat;
 using Fluxify.Application.Models.Dto.Message;
 using Fluxify.Application.Models.Events;
 using Fluxify.Application.Models.Rest.Common;
 using Fluxify.Application.Models.Rest.Message;
+using Fluxify.Application.Repositories;
 using Fluxify.Application.Repositories.Mongo;
 using Fluxify.Application.Services.Interfaces;
 using Fluxify.Application.Utilities.Result;
@@ -19,13 +21,15 @@ namespace Fluxify.Application.Services
     {
         readonly IEventPublisher _eventPublisher;
         readonly IMessageRepository _messageRepository;
+        readonly IChatRepository _chatRepository;
         readonly IMapper _mapper;
 
-        public MessageService(IEventPublisher eventPublisher, IMessageRepository messageRepository, IMapper mapper)
+        public MessageService(IEventPublisher eventPublisher, IMessageRepository messageRepository, IMapper mapper, IChatRepository chatRepository)
         {
             _eventPublisher = eventPublisher;
             _messageRepository = messageRepository;
             _mapper = mapper;
+            _chatRepository = chatRepository;
         }
 
         public async Task<IDataResult<DataListResponse<MessageDto.List>>> GetHistoryAsync(Guid nameSpaceId, Guid chatId)

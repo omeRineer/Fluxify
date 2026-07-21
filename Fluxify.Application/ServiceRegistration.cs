@@ -38,6 +38,8 @@ namespace Fluxify.Application
             services.AddScoped<IChannelService, ChannelService>();
             services.AddScoped<ITopicService, TopicService>();
             services.AddScoped<IMessageService, MessageService>();
+            services.AddScoped<IChatService, ChatService>();
+            services.AddScoped<IChatUserService, ChatUserService>();
 
             services.AddHttpContextAccessor();
             services.AddAuthentication()

@@ -1,4 +1,6 @@
-﻿using Fluxify.Application.Models.Rest.Chat;
+﻿using Fluxify.Application.Models.Dto.Chat;
+using Fluxify.Application.Models.Rest.Chat;
+using Fluxify.Application.Models.Rest.Common;
 using Fluxify.Application.Utilities.Result;
 using System;
 using System.Collections.Generic;
@@ -10,6 +12,7 @@ namespace Fluxify.Application.Services.Interfaces
 {
     public interface IChatService
     {
-        Task<IResult> CreateAsync(Guid nameSpaceId, CreateChat.Request req);
+        Task<IDataResult<Guid>> CreateAsync(Guid nameSpaceId, Guid userId, CreateChat.Request req);
+        Task<IDataResult<DataListResponse<ChatDto.List>>> GetListAsync(Guid nameSpaceId, Guid userId);
     }
 }

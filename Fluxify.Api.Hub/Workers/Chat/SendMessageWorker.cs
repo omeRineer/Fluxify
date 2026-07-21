@@ -38,20 +38,21 @@ namespace Fluxify.Api.Hub.Workers.Chat
             var chatUserRepository = scope.ServiceProvider.GetRequiredService<IChatUserRepository>();
             var messageRepository = scope.ServiceProvider.GetRequiredService<IMessageRepository>();
 
-            //var chat = await chatRepository.FindAsync(message.ChatId);
+            var chat = await chatRepository.FindAsync(message.ChatId);
 
-            //if (chat == null)
-            //    throw new Exception("Chat not found");
+            if (chat == null)
+                throw new Exception("Chat not found");
 
-            //var newMessage = new Domain.Entities.Mongo.Message
-            //{
-            //    ChatId = message.ChatId,
-            //    UserId = message.SenderId,
-            //    Text = message.Text
-            //};
-            //await messageRepository.InsertAsync(newMessage);
 
-            //var chatUsers = await chatUserRepository.GetProjectedListAsync(s => s.User.Id, f => f.ChatId == message.ChatId);
+            var newMessage = new Domain.Entities.Mongo.Message
+            {
+                ChatId = message.ChatId,
+                UserId = message.SenderId,
+                Text = message.Text
+            };
+            await messageRepository.InsertAsync(newMessage);
+
+            var chatUsers = await chatUserRepository.GetProjectedListAsync(s => s.User.Id, f => f.ChatId == message.ChatId);
 
             await _hubContext.Clients.All.SendAsync("ReceiveMessage", new ChatMessageMessage
             {

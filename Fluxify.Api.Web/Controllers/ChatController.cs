@@ -1,4 +1,5 @@
 ﻿using Fluxify.Application.Models.Common;
+using Fluxify.Application.Models.Rest.Chat;
 using Fluxify.Application.Models.Rest.Message;
 using Fluxify.Application.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
@@ -9,10 +10,20 @@ namespace Fluxify.Api.Web.Controllers
     public class ChatController : BaseController
     {
         readonly IMessageService _messageService;
-        public ChatController(CurrentUser currentUser, IMessageService messageService) : base(currentUser)
+        readonly IChatService _chatService;
+        public ChatController(CurrentUser currentUser, IMessageService messageService, IChatService chatService) : base(currentUser)
         {
             _messageService = messageService;
+            _chatService = chatService;
         }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateAsync(CreateChat.Request req)
+            => Response(await _chatService.CreateAsync(CurrentUser.NameSpace.Id, CurrentUser.NameIdentifier, req));
+
+        [HttpGet]
+        public async Task<IActionResult> GetListAsync()
+            => Response(await _chatService.GetListAsync(CurrentUser.NameSpace.Id, CurrentUser.NameIdentifier));
 
         [HttpPost("{chatId:guid}/message")]
         public async Task<IActionResult> SendMessageAsync([FromRoute] Guid chatId, [FromBody] SendMessage.Request req)
