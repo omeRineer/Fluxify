@@ -8,6 +8,7 @@ using R = Fluxify.Application.Utilities.Result;
 namespace Fluxify.Api.Web.Controllers
 {
     [Route("webapi/[controller]")]
+    [Authorize]
     public class BaseController : ControllerBase
     {
         protected readonly CurrentUser CurrentUser;

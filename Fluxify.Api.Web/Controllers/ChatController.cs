@@ -1,7 +1,8 @@
 ﻿using Fluxify.Application.Models.Common;
 using Fluxify.Application.Models.Rest.Chat;
 using Fluxify.Application.Models.Rest.Message;
-using Fluxify.Application.Services.Interfaces;
+using Fluxify.Application.Services.Interfaces.Core;
+using Fluxify.Application.Services.Interfaces.Mongo;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 

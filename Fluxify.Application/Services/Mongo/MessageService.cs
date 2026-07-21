@@ -7,7 +7,7 @@ using Fluxify.Application.Models.Rest.Common;
 using Fluxify.Application.Models.Rest.Message;
 using Fluxify.Application.Repositories;
 using Fluxify.Application.Repositories.Mongo;
-using Fluxify.Application.Services.Interfaces;
+using Fluxify.Application.Services.Interfaces.Mongo;
 using Fluxify.Application.Utilities.Result;
 using System;
 using System.Collections.Generic;
@@ -15,7 +15,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Fluxify.Application.Services
+namespace Fluxify.Application.Services.Mongo
 {
     public class MessageService : IMessageService
     {

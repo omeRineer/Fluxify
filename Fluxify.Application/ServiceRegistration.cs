@@ -4,16 +4,17 @@ using Fluxify.Api.Hub.Auth;
 using Fluxify.Application.Models.Common;
 using Fluxify.Application.Models.Enums;
 using Fluxify.Application.Repositories;
-using Fluxify.Application.Services;
 using Fluxify.Application.Services.Core;
-using Fluxify.Application.Services.Interfaces;
 using Fluxify.Application.Services.Interfaces.Core;
 using Fluxify.Application.Services.Interfaces.Mongo;
 using Fluxify.Application.Services.Mongo;
 using Fluxify.Application.Utilities.Helpers;
+using Fluxify.Application.Utilities.Token;
 using Fluxify.Configuration;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
@@ -42,10 +43,42 @@ namespace Fluxify.Application
             services.AddScoped<IChatUserService, ChatUserService>();
 
             services.AddHttpContextAccessor();
+
+            services.AddAutoMapper(opt => { }, Assembly.GetExecutingAssembly());
+        }
+
+        public static void AddFluxifyAuthentication(this IServiceCollection services)
+        {
             services.AddAuthentication()
                 .AddScheme<FluxifyHubAuthenticationOptions, FluxifyHubAuthenticationHandler>("FluxifySecurityScheme", null);
+        }
 
+        public static void AddTokenAuthentication(this IServiceCollection services)
+        {
+            services.AddSingleton<ITokenService, JwtService>();
+            services.AddScoped<IAuthService, AuthService>();
 
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                            .AddJwtBearer(opt =>
+                            {
+                                opt.TokenValidationParameters = new TokenValidationParameters
+                                {
+                                    ValidateIssuer = true,
+                                    ValidateAudience = true,
+                                    ValidateLifetime = true,
+                                    ValidateIssuerSigningKey = true,
+
+                                    ValidIssuer = AppConfiguration.TokenOptions.Issuer,
+                                    ValidAudience = AppConfiguration.TokenOptions.Audience,
+                                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(AppConfiguration.TokenOptions.SecurityKey))
+
+                                };
+                            });
+
+        }
+
+        public static void AddCurrentUserInfo(this IServiceCollection services)
+        {
             services.AddScoped<CurrentUser>(i =>
             {
                 var httpContextAccessor = i.GetService<IHttpContextAccessor>();
@@ -69,13 +102,7 @@ namespace Fluxify.Application
 
                 return new CurrentUser();
             });
-
-            services.AddAutoMapper(opt =>
-            {
-                
-            }, Assembly.GetExecutingAssembly());
         }
-
 
     }
 }

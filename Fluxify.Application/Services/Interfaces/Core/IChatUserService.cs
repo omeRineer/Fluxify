@@ -1,6 +1,6 @@
 ﻿using Fluxify.Application.Utilities.Result;
 
-namespace Fluxify.Application.Services.Interfaces
+namespace Fluxify.Application.Services.Interfaces.Core
 {
     public interface IChatUserService
     {

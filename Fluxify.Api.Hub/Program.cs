@@ -13,6 +13,8 @@ builder.Services.AddHostedService<NotificationWorker>();
 builder.Services.AddHostedService<FirebaseNotificationWorker>();
 builder.Services.AddHostedService<SendMessageWorker>();
 builder.Services.AddApplication();
+builder.Services.AddFluxifyAuthentication();
+builder.Services.AddCurrentUserInfo();
 builder.Services.AddMongoContext();
 builder.Services.AddCoreContext();
 builder.Services.AddInfrastructure();

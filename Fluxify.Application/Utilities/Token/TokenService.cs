@@ -1,0 +1,76 @@
+﻿using Fluxify.Application.Models.Dto.Auth;
+using Fluxify.Domain.Entities.Core;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Security.Claims;
+using System.Security;
+using System.Text;
+using System.Threading.Tasks;
+using Fluxify.Application.Utilities.Helpers;
+using Fluxify.Application.Models.Enums;
+using System.IdentityModel.Tokens.Jwt;
+using Fluxify.Configuration.Options;
+using Fluxify.Configuration;
+
+namespace Fluxify.Application.Utilities.Token
+{
+    public interface ITokenService
+    {
+        AccessToken GenerateToken(User user);
+    }
+    public class JwtService : ITokenService
+    {
+        private readonly TokenOptions TokenOptions;
+        public JwtService()
+        {
+            TokenOptions = AppConfiguration.TokenOptions;
+        }
+
+        public AccessToken GenerateToken(User user)
+        {
+            var symetricSecurityKey = SecurityKeyHelper.GetSecurityKey(TokenOptions.SecurityKey);
+            var signingCredentials = new SigningCredentials(symetricSecurityKey, SecurityAlgorithms.HmacSha256);
+            var claims = GetClaims(user);
+            var expireDate = DateTime.Now.AddDays(TokenOptions.Expire);
+
+            var securityToken = new JwtSecurityToken
+            (
+                issuer: TokenOptions.Issuer,
+                audience: TokenOptions.Audience,
+                claims: claims,
+                expires: expireDate,
+                notBefore: DateTime.Now,
+                signingCredentials: signingCredentials
+
+            );
+            var token = new JwtSecurityTokenHandler().WriteToken(securityToken);
+
+            return new AccessToken
+            {
+                Token = token,
+                ExpireDate = expireDate
+            };
+        }
+
+        private List<Claim> GetClaims(User user)
+        {
+            var claims = new List<Claim>
+            {
+                new Claim(FluxifyClaims.Key, user.Key),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(FluxifyClaims.ApiKey, user.ApiKey),
+                new Claim(FluxifyClaims.NameSpaceId, user.NameSpaceId.ToString()),
+                new Claim(FluxifyClaims.NameSpace, user.NameSpace.Signature),
+                new Claim(FluxifyClaims.Device, "undefined"),
+                new Claim(FluxifyClaims.Platform, "undefined"),
+                new Claim(ClaimTypes.Name, user.Name)
+            };
+
+            return claims;
+        }
+    }
+}

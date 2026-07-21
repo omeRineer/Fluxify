@@ -5,9 +5,11 @@ using Fluxify.Persistance;
 
 var builder = WebApplication.CreateBuilder(args);
 
-await builder.Services.AddRabbitMqAsync();
+//await builder.Services.AddRabbitMqAsync();
 builder.Services.AddControllers();
 builder.Services.AddApplication();
+builder.Services.AddCurrentUserInfo();
+builder.Services.AddTokenAuthentication();
 builder.Services.AddMongoContext();
 builder.Services.AddCoreContext();
 builder.Services.AddCors(options =>
@@ -24,9 +26,10 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 
+app.UseAuthentication();
+
 app.UseAuthorization();
 
-app.Map("/health", () => "Healthy!");
 app.MapControllers();
 
 app.Run();
