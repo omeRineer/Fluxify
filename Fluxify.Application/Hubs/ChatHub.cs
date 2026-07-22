@@ -34,5 +34,8 @@ namespace Fluxify.Application.Hubs
 
             await base.OnDisconnectedAsync(exception);
         }
+
+        //public async Task OnTyping(Guid chatId, bool isTyping)
+        //    => Clients.
     }
 }

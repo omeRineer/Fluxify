@@ -61,13 +61,15 @@ namespace Fluxify.Application.Utilities.Token
             var claims = new List<Claim>
             {
                 new Claim(FluxifyClaims.Key, user.Key),
+                new Claim(FluxifyClaims.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Name, user.Name),
                 new Claim(FluxifyClaims.ApiKey, user.ApiKey),
                 new Claim(FluxifyClaims.NameSpaceId, user.NameSpaceId.ToString()),
                 new Claim(FluxifyClaims.NameSpace, user.NameSpace.Signature),
                 new Claim(FluxifyClaims.Device, "undefined"),
                 new Claim(FluxifyClaims.Platform, "undefined"),
-                new Claim(ClaimTypes.Name, user.Name)
+                new Claim(FluxifyClaims.Name, user.Name)
             };
 
             return claims;
