@@ -11,5 +11,6 @@
         public DateTime Date { get; set; }
         public string? Url { get; set; }
         public List<string> Topics { get; set; }
+        public string? FcmToken { get; set; }
     }
 }

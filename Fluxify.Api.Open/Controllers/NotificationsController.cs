@@ -41,6 +41,15 @@ namespace Fluxify.Api.Open.Controllers
             return Response(result);
         }
 
+        [HttpPost("FireSingle")]
+        public async Task<IActionResult> FireSingleAsync([FromBody] FireNotification.Request request)
+        {
+            var result = await NotificationService.FireAsync(CurrentUser.NameSpace.Id,
+                                                             request);
+
+            return Response(result);
+        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetDetailAsync([FromRoute] Guid id)
         {

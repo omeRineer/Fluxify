@@ -147,11 +147,14 @@ namespace Fluxify.Application.Services.Mongo
                                                   Date = DateTime.UtcNow,
                                                   Topics = req.Topics,
                                                   Url = req.Url,
-                                                  Thumbnail = req.Thumbnail
+                                                  Thumbnail = req.Thumbnail,
+                                                  FcmToken = req.FcmToken
                                               },
                                               "notification.created");
 
             return new SuccessResult("Notification is fired");
         }
+
+       
     }
 }

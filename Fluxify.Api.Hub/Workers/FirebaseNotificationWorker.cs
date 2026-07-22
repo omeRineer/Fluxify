@@ -30,6 +30,7 @@ namespace Fluxify.Api.Hub.Workers
 
         protected async override Task HandleAsync(NotificationQueueModel message, CancellationToken cancellationToken)
         {
+
             using var scope = _scopeFactory.CreateScope();
             var fireBaseNotificationService = scope.ServiceProvider.GetRequiredService<INF.IPushNotificationService>();
             var userDeviceRepository = scope.ServiceProvider.GetRequiredService<IUserDeviceRepository>();
@@ -50,6 +51,18 @@ namespace Fluxify.Api.Hub.Workers
                                                                         {
                                                                             { "url", message.Url }
                                                                         });
+            else if (!string.IsNullOrEmpty(message.FcmToken))
+            {
+
+                await fireBaseNotificationService.SendNotificationAsync(message.FcmToken,
+                                                                        message.Title,
+                                                                        message.Summary,
+                                                                        message.Thumbnail,
+                                                                        new()
+                                                                        {
+                                                                            { "url", message.Url }
+                                                                        });
+            }
 
         }
     }
