@@ -2,6 +2,7 @@
 using Fluxify.Application.Hubs;
 using Fluxify.Application.Infrastructure;
 using Fluxify.Application.Models.Events;
+using Fluxify.Application.Models.Hub;
 using Fluxify.Application.Models.SignalR;
 using Fluxify.Application.Repositories;
 using Fluxify.Application.Repositories.Mongo;
@@ -19,10 +20,10 @@ namespace Fluxify.Api.Hub.Workers.Chat
 
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly IHubContext<ChatHub> _hubContext;
-        readonly HubConnectionManager<PresenceHub> _presenceHubConnectionManager;
-        readonly HubConnectionManager<ChatHub> _chatHubConnectionManager;
+        readonly HubConnectionManager<PresenceHubUser> _presenceHubConnectionManager;
+        readonly HubConnectionManager<ChatHubUser> _chatHubConnectionManager;
 
-        public SendMessageWorker(IChannel channel, IServiceScopeFactory scopeFactory, IHubContext<ChatHub> hubContext, HubConnectionManager<PresenceHub> presenceHubConnectionManager, HubConnectionManager<ChatHub> chatHubConnectionManager) : base(channel)
+        public SendMessageWorker(IChannel channel, IServiceScopeFactory scopeFactory, IHubContext<ChatHub> hubContext, HubConnectionManager<PresenceHubUser> presenceHubConnectionManager, HubConnectionManager<ChatHubUser> chatHubConnectionManager) : base(channel)
         {
             _scopeFactory = scopeFactory;
             _hubContext = hubContext;
@@ -48,7 +49,8 @@ namespace Fluxify.Api.Hub.Workers.Chat
             {
                 ChatId = message.ChatId,
                 UserId = message.SenderId,
-                Text = message.Text
+                Text = message.Text,
+                CreateDate = message.Date
             };
             await messageRepository.InsertAsync(newMessage);
 
@@ -59,7 +61,7 @@ namespace Fluxify.Api.Hub.Workers.Chat
                 ChatId = message.ChatId,
                 UserId = message.SenderId,
                 Text = message.Text,
-                Date = DateTime.UtcNow
+                Date = message.Date
             });
         }
     }

@@ -49,6 +49,13 @@ namespace Fluxify.Application.Services.Core
             return new SuccessDataResult<DataListResponse<UserTopicDto.List>>(result);
         }
 
+        public async Task<List<string>> GetTopicsByUser(Guid userId)
+        {
+            var topics = await UserTopicRepository.GetProjectedListAsync(s=>s.Topic.Slug, f=>f.UserId == userId);
+
+            return topics;
+        }
+
         public async Task<IResult> SetAsync(Guid userId, Guid nameSpaceId, SetUserTopics.Request req)
         {
             var topics = await TopicRepository.GetListAsync(f => req.Topics.Contains(f.Slug));

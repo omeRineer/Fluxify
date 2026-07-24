@@ -2,6 +2,7 @@
 using Fluxify.Application.Hubs;
 using Fluxify.Application.Models.Enums;
 using Fluxify.Application.Models.Events;
+using Fluxify.Application.Models.Hub;
 using Fluxify.Application.Models.SignalR;
 using Fluxify.Application.Services.Interfaces;
 using Fluxify.Application.Utilities.Helpers;
@@ -21,9 +22,9 @@ namespace Fluxify.Api.Hub.Workers.Notification
         protected override int RetryCount => 3;
 
         private readonly IHubContext<PresenceHub> _hubContext;
-        readonly HubConnectionManager<PresenceHub> _connectionManager;
+        readonly HubConnectionManager<PresenceHubUser> _connectionManager;
 
-        public NotificationWorker(IChannel channel, IHubContext<PresenceHub> hubContext, HubConnectionManager<PresenceHub> connectionManager)
+        public NotificationWorker(IChannel channel, IHubContext<PresenceHub> hubContext, HubConnectionManager<PresenceHubUser> connectionManager)
             : base(channel)
         {
             _hubContext = hubContext;

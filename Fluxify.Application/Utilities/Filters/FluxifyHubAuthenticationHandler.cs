@@ -54,11 +54,6 @@ namespace Fluxify.Api.Hub.Auth
                 new Claim(ClaimTypes.Name, subscriber.Name)
             };
 
-            var userTopicsResult = await UserTopicRepository.GetProjectedListAsync(s=>s.Topic.Slug, f => f.UserId == subscriber.Id);
-            if (userTopicsResult != null && userTopicsResult.Count > 0)
-                foreach (var topic in userTopicsResult)
-                    claims.Add(new Claim(FluxifyClaims.Topic, topic));
-
             var identity = new ClaimsIdentity(claims, Scheme.Name);
             var principal = new ClaimsPrincipal(identity);
             var ticket = new AuthenticationTicket(principal, Scheme.Name);

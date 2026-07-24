@@ -14,7 +14,6 @@ namespace Fluxify.Application.Models.Enums
         public const string Name = "Name";
         public const string NameIdentifier = "NameIdentifier";
         public const string ApiKey = "ApiKey";
-        public const string Topic = "Topic";
         public const string Device = "Device";
         public const string Platform = "Platform";
     }

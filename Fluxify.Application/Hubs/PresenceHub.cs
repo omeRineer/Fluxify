@@ -2,6 +2,7 @@
 using Fluxify.Application.Models.Hub;
 using Fluxify.Application.Models.SignalR;
 using Fluxify.Application.Services.Interfaces;
+using Fluxify.Application.Services.Interfaces.Core;
 using Fluxify.Application.Utilities.Helpers;
 using Fluxify.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
@@ -19,24 +20,29 @@ namespace Fluxify.Application.Hubs
     [Authorize(AuthenticationSchemes = "FluxifySecurityScheme")]
     public class PresenceHub : Hub
     {
-        readonly HubConnectionManager<PresenceHub> HubConnectionManager;
-        public PresenceHub(HubConnectionManager<PresenceHub> hubConnectionManager)
+        readonly HubConnectionManager<PresenceHubUser> HubConnectionManager;
+        readonly IUserTopicService _userTopicService;
+        public PresenceHub(HubConnectionManager<PresenceHubUser> hubConnectionManager, IUserTopicService userTopicService)
         {
             HubConnectionManager = hubConnectionManager;
+            _userTopicService = userTopicService;
         }
 
         public override async Task OnConnectedAsync()
         {
-            ConnectionUser connectionUser = HubConnectionManager.AddConnection(Context);
+            // TODO : Race condition riski
+            PresenceHubUser hubUser = HubConnectionManager.AddConnection(Context);
+            if (hubUser.Topics == null)
+                hubUser.Topics = await _userTopicService.GetTopicsByUser(hubUser.Id);
 
-            foreach (var topic in Context.User.Claims.Where(f => f.Type == FluxifyClaims.Topic))
-                await Groups.AddToGroupAsync(Context.ConnectionId, $"{connectionUser.NameSpace.Id}:{topic.Value}");
+            foreach (var topic in hubUser.Topics)
+                await Groups.AddToGroupAsync(Context.ConnectionId, $"{hubUser.NameSpace.Id}:{topic}");
 
-            await Groups.AddToGroupAsync(Context.ConnectionId, connectionUser.NameSpace.Signature);
+            await Groups.AddToGroupAsync(Context.ConnectionId, hubUser.NameSpace.Signature);
 
-            if (connectionUser.Connections.Count == 1)
+            if (hubUser.Connections.Count == 1)
             {
-                await Clients.Group(connectionUser.NameSpace.Signature).SendAsync(HubEvents.PresenceHub.ReceiveUserStates, new UserStateInfoMessage
+                await Clients.Group(hubUser.NameSpace.Signature).SendAsync(HubEvents.PresenceHub.ReceiveUserStates, new UserStateInfoMessage
                 {
                     UserId = Context.User.Claims.Single(f => f.Type == FluxifyClaims.Key).Value,
                     Status = EnumHelper.ToEnumString<UserAvailabilityStatus>((int)UserAvailabilityStatus.Online),
@@ -50,7 +56,7 @@ namespace Fluxify.Application.Hubs
 
         public override async Task OnDisconnectedAsync(Exception exception)
         {
-            ConnectionUser connectionUser = HubConnectionManager.GetConnection(Context.User.Claims.Single(f => f.Type == ClaimTypes.NameIdentifier).Value);
+            HubUser connectionUser = HubConnectionManager.GetConnection(Guid.Parse(Context.User.Claims.Single(f => f.Type == ClaimTypes.NameIdentifier).Value));
             int connectionCount = HubConnectionManager.RemoveConnection(Context);
 
             if (connectionCount == 0)
@@ -66,23 +72,9 @@ namespace Fluxify.Application.Hubs
             await base.OnDisconnectedAsync(exception);
         }
 
-        public async Task GetOnlineUsers()
-        {
-            ConnectionUser connectionUser = HubConnectionManager.GetConnection(Context.User.Claims.Single(f => f.Type == ClaimTypes.NameIdentifier).Value);
-
-            var onlineSubscribers = HubConnectionManager.GetAllConnections(connectionUser.NameSpace.Id).Select(s => new UserStateInfoMessage
-            {
-                UserId = s.Key,
-                Date = s.ConnectedDate,
-                Status = s.Status
-            }).ToList();
-
-            await Clients.Caller.SendAsync(HubEvents.PresenceHub.ReceiveOnlineUsers, onlineSubscribers);
-        }
-
         public async Task SetAvailabilityStatus(string status)
         {
-            ConnectionUser connectionUser = HubConnectionManager.GetConnection(Context.User.Claims.Single(f => f.Type == ClaimTypes.NameIdentifier).Value);
+            PresenceHubUser connectionUser = HubConnectionManager.GetConnection(Guid.Parse(Context.User.Claims.Single(f => f.Type == ClaimTypes.NameIdentifier).Value));
 
             if (EnumHelper.HasValue<UserAvailabilityStatus>(status))
             {

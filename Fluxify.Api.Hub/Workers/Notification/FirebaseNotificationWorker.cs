@@ -7,6 +7,7 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using Fluxify.Application.Repositories;
 using Fluxify.Application.Models.Events;
+using Fluxify.Application.Models.Hub;
 
 namespace Fluxify.Api.Hub.Workers.Notification
 {
@@ -17,9 +18,9 @@ namespace Fluxify.Api.Hub.Workers.Notification
 
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly IHubContext<PresenceHub> _hubContext;
-        readonly HubConnectionManager<PresenceHub> _connectionManager;
+        readonly HubConnectionManager<PresenceHubUser> _connectionManager;
 
-        public FirebaseNotificationWorker(IChannel channel, IServiceScopeFactory scopeFactory, IHubContext<PresenceHub> hubContext, HubConnectionManager<PresenceHub> connectionManager)
+        public FirebaseNotificationWorker(IChannel channel, IServiceScopeFactory scopeFactory, IHubContext<PresenceHub> hubContext, HubConnectionManager<PresenceHubUser> connectionManager)
             : base(channel)
         {
             _scopeFactory = scopeFactory;

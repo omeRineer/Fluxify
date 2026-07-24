@@ -6,6 +6,7 @@ using Fluxify.Infrastructure;
 using Fluxify.Configuration;
 using Fluxify.Api.Hub.Workers.Notification;
 using Fluxify.Api.Hub.Workers.Chat;
+using Fluxify.Application.Models.Hub;
 
 var builder = WebApplication.CreateBuilder(args);
 await builder.Services.AddRabbitMqAsync();
@@ -19,8 +20,8 @@ builder.Services.AddMongoContext();
 builder.Services.AddCoreContext();
 builder.Services.AddInfrastructure();
 builder.Services.AddSignalR();
-builder.Services.AddSingleton<HubConnectionManager<PresenceHub>>();
-builder.Services.AddSingleton<HubConnectionManager<ChatHub>>();
+builder.Services.AddSingleton<HubConnectionManager<PresenceHubUser>>();
+builder.Services.AddSingleton<HubConnectionManager<ChatHubUser>>();
 builder.Services.AddCors(options =>
                             options.AddDefaultPolicy(policy =>
                             {

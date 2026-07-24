@@ -13,7 +13,8 @@ namespace Fluxify.Application.MappingProfiles
     {
         public MessageProfile()
         {
-            CreateMap<Message, MessageDto.List>();
+            CreateMap<Message, MessageDto.List>()
+                .ForMember(dest => dest.Date, opt => opt.MapFrom(src => src.CreateDate));
         }
     }
 }

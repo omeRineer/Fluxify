@@ -1,34 +1,17 @@
-﻿using Fluxify.Application.Models.Enums;
-using Fluxify.Application.Utilities.Helpers;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Fluxify.Application.Models.Hub
 {
-    public class ConnectionUser
+    public abstract class HubUser
     {
-        public ConnectionUser()
-        {
-            Status = EnumHelper.ToEnumString<UserAvailabilityStatus>((int)UserAvailabilityStatus.Online);
-        }
-
         public Guid Id { get; set; }
         public string Key { get; set; }
         public NameSpaceInfo NameSpace { get; init; }
-        public string Status { get; private set; }
-        public DateTime ConnectedDate { get; set; }
-        public List<string> Topics { get; set; } = new();
-
         public Dictionary<string, DeviceInfo> Connections { get; } = new();
-
-        public void SetStatus(string status)
-        {
-            Status = EnumHelper.Parse<UserAvailabilityStatus>(status).ToString().ToLower(new CultureInfo("en-EN"));
-        }
 
 
         public class DeviceInfo
@@ -37,9 +20,11 @@ namespace Fluxify.Application.Models.Hub
             {
                 Device = device;
                 Platform = platform;
+                Date = DateTime.UtcNow;
             }
             public string Device { get; }
             public string Platform { get; }
+            public DateTime Date { get; }
 
         }
         public class NameSpaceInfo

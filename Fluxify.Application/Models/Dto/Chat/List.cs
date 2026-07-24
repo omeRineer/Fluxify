@@ -15,6 +15,7 @@ namespace Fluxify.Application.Models.Dto.Chat
             public Guid CreatedUserId { get; set; }
             public string? Title { get; set; }
             public string Type { get; set; }
+            public DateTime CreateDate { get; set; }
         }
     }
 }

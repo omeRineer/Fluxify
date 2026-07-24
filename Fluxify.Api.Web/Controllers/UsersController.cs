@@ -22,13 +22,5 @@ namespace Fluxify.Api.Web.Controllers
         [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetDetailAsync([FromRoute] Guid id)
             => Response(await UserService.GetDetailAsync(id));
-
-        [HttpPost("create")]
-        public async Task<IActionResult> CreateAsync([FromBody] CreateUser.Request model)
-            => Response(await UserService.CreateAsync(CurrentUser.NameSpace.Id, model));
-
-        [HttpPost("{id:guid}/update")]
-        public async Task<IActionResult> UpdateAsync([FromRoute] Guid id, [FromBody] UpdateUser.Request model)
-            => Response(await UserService.UpdateAsync(id, model));
     }
 }

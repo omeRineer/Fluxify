@@ -22,21 +22,25 @@ namespace Fluxify.Application.Services.Mongo
         readonly IEventPublisher _eventPublisher;
         readonly IMessageRepository _messageRepository;
         readonly IChatRepository _chatRepository;
+        readonly IChatUserRepository _chatUserRepository;
         readonly IMapper _mapper;
 
-        public MessageService(IEventPublisher eventPublisher, IMessageRepository messageRepository, IMapper mapper, IChatRepository chatRepository)
+        public MessageService(IEventPublisher eventPublisher, IMessageRepository messageRepository, IMapper mapper, IChatRepository chatRepository, IChatUserRepository chatUserRepository)
         {
             _eventPublisher = eventPublisher;
             _messageRepository = messageRepository;
             _mapper = mapper;
             _chatRepository = chatRepository;
+            _chatUserRepository = chatUserRepository;
         }
 
         public async Task<IDataResult<DataListResponse<MessageDto.List>>> GetHistoryAsync(Guid nameSpaceId, Guid chatId)
         {
+            var chatUsers = await _chatUserRepository.GetProjectedListAsync(s => new { s.UserId, s.User.Name }, f => f.ChatId == chatId);
             var chatHistory = await _messageRepository.GetListAsync(f => f.ChatId == chatId);
 
             var mappedList = _mapper.Map<List<MessageDto.List>>(chatHistory);
+            mappedList.ForEach(item => item.Name = chatUsers.First(f => f.UserId == item.UserId).Name);
 
             return new SuccessDataResult<DataListResponse<MessageDto.List>>(DataListResponse<MessageDto.List>.Load(mappedList));
         }

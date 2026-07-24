@@ -19,12 +19,8 @@ namespace Fluxify.Api.Web.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateAsync(CreateChat.Request req)
+        public async Task<IActionResult> CreateAsync([FromBody] CreateChat.Request req)
             => Response(await _chatService.CreateAsync(CurrentUser.NameSpace.Id, CurrentUser.NameIdentifier, req));
-
-        [HttpGet]
-        public async Task<IActionResult> GetListAsync()
-            => Response(await _chatService.GetListAsync(CurrentUser.NameSpace.Id, CurrentUser.NameIdentifier));
 
         [HttpPost("{chatId:guid}/message")]
         public async Task<IActionResult> SendMessageAsync([FromRoute] Guid chatId, [FromBody] SendMessage.Request req)
