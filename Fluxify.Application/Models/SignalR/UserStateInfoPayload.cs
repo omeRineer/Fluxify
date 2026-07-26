@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Fluxify.Application.Models.SignalR
 {
-    public class UserStateInfoMessage
+    public class UserStateInfoPayload
     {
         public string UserId { get; set; }
         public string Status { get; set; }

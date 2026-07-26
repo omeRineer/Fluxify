@@ -11,7 +11,7 @@ using Fluxify.Application.Models.Hub;
 
 namespace Fluxify.Api.Hub.Workers.Notification
 {
-    public class FirebaseNotificationWorker : ConsumerWorker<SendNotificationEvent>
+    public class PushFirebaseNotificationWorker : ConsumerWorker<SendNotificationEvent>
     {
         protected override string QueueName => "notification-firebase";
         protected override int RetryCount => 0;
@@ -20,7 +20,7 @@ namespace Fluxify.Api.Hub.Workers.Notification
         private readonly IHubContext<PresenceHub> _hubContext;
         readonly HubConnectionManager<PresenceHubUser> _connectionManager;
 
-        public FirebaseNotificationWorker(IChannel channel, IServiceScopeFactory scopeFactory, IHubContext<PresenceHub> hubContext, HubConnectionManager<PresenceHubUser> connectionManager)
+        public PushFirebaseNotificationWorker(IChannel channel, IServiceScopeFactory scopeFactory, IHubContext<PresenceHub> hubContext, HubConnectionManager<PresenceHubUser> connectionManager)
             : base(channel)
         {
             _scopeFactory = scopeFactory;

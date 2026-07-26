@@ -50,7 +50,7 @@ namespace Fluxify.Application.Services.Mongo
             await _eventPublisher.PublishAsync("chat-direct",
             new SendMessageEvent
             {
-                SenderId = senderId,
+                UserId = senderId,
                 NameSpaceId = nameSpaceId,
                 ChatId = chatId,
                 Text = req.Text

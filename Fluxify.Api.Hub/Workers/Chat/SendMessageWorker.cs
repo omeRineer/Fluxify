@@ -1,12 +1,15 @@
-﻿using Fluxify.Api.Hub.Workers.Main;
+﻿using AutoMapper;
+using Fluxify.Api.Hub.Workers.Main;
 using Fluxify.Application.Hubs;
 using Fluxify.Application.Infrastructure;
+using Fluxify.Application.Models.Enums;
 using Fluxify.Application.Models.Events;
 using Fluxify.Application.Models.Hub;
 using Fluxify.Application.Models.SignalR;
 using Fluxify.Application.Repositories;
 using Fluxify.Application.Repositories.Mongo;
 using Fluxify.Domain.Entities.Core;
+using Fluxify.Domain.Entities.Mongo;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.IdentityModel.Tokens;
 using RabbitMQ.Client;
@@ -36,30 +39,25 @@ namespace Fluxify.Api.Hub.Workers.Chat
             using var scope = _scopeFactory.CreateScope();
             var eventPublisher = scope.ServiceProvider.GetRequiredService<IEventPublisher>();
             var chatRepository = scope.ServiceProvider.GetRequiredService<IChatRepository>();
-            var chatUserRepository = scope.ServiceProvider.GetRequiredService<IChatUserRepository>();
+            var userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
             var messageRepository = scope.ServiceProvider.GetRequiredService<IMessageRepository>();
+            var _mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
 
             var chat = await chatRepository.FindAsync(message.ChatId);
 
             if (chat == null)
                 throw new Exception("Chat not found");
 
-
-            var newMessage = new Domain.Entities.Mongo.Message
-            {
-                ChatId = message.ChatId,
-                UserId = message.SenderId,
-                Text = message.Text,
-                CreateDate = message.Date
-            };
+            var newMessage = _mapper.Map<Message>(message);
             await messageRepository.InsertAsync(newMessage);
 
-            var chatUsers = await chatUserRepository.GetProjectedListAsync(s => s.User.Id, f => f.ChatId == message.ChatId);
+            var senderName = await userRepository.GetProjectedSingleOrDefaultAsync(s => s.Name, f => f.Id == message.UserId);
 
-            await _hubContext.Clients.All.SendAsync("ReceiveMessage", new ChatMessageMessage
+            await _hubContext.Clients.Group($"chat:{message.ChatId}").SendAsync(HubEvents.ChatHub.ReceiveMessage, new ChatMessagePayload
             {
                 ChatId = message.ChatId,
-                UserId = message.SenderId,
+                UserId = message.UserId,
+                Name = senderName,
                 Text = message.Text,
                 Date = message.Date
             });

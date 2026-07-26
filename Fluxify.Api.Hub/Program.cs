@@ -10,8 +10,8 @@ using Fluxify.Application.Models.Hub;
 
 var builder = WebApplication.CreateBuilder(args);
 await builder.Services.AddRabbitMqAsync();
-builder.Services.AddHostedService<NotificationWorker>();
-builder.Services.AddHostedService<FirebaseNotificationWorker>();
+builder.Services.AddHostedService<PushSocketNotificationWorker>();
+builder.Services.AddHostedService<PushFirebaseNotificationWorker>();
 builder.Services.AddHostedService<SendMessageWorker>();
 builder.Services.AddApplication();
 builder.Services.AddFluxifyAuthentication();

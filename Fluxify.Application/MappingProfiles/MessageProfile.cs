@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Fluxify.Application.Models.Dto.Message;
+using Fluxify.Application.Models.Events;
 using Fluxify.Domain.Entities.Mongo;
 using System;
 using System.Collections.Generic;
@@ -15,6 +16,8 @@ namespace Fluxify.Application.MappingProfiles
         {
             CreateMap<Message, MessageDto.List>()
                 .ForMember(dest => dest.Date, opt => opt.MapFrom(src => src.CreateDate));
+
+            CreateMap<SendMessageEvent, Message>();
         }
     }
 }

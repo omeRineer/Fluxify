@@ -1,6 +1,6 @@
 ﻿namespace Fluxify.Application.Models.SignalR
 {
-    public class ChatMessageMessage
+    public class ChatMessagePayload
     {
         public Guid ChatId { get; set; }
         public Guid UserId { get; set; }

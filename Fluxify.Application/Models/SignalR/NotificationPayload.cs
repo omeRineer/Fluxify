@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Fluxify.Application.Models.SignalR
 {
-    public class NotificationMessage
+    public class NotificationPayload
     {
         public Guid? Id { get; set; }
         public string Level { get; set; }
