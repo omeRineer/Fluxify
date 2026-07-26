@@ -12,12 +12,13 @@ namespace Fluxify.Application.Models.Enums
         {
             public const string ReceiveUserStates = "ReceiveUserStates";
             public const string ReceiveOnlineUsers = "ReceiveOnlineUsers";
-        }
-
-        public static class NotificationHub
-        {
             public const string ReceivePendingNotifications = "ReceivePendingNotifications";
             public const string ReceiveNotification = "ReceiveNotification";
+        }
+
+        public static class ChatHub
+        {
+            public const string ReceiveMessage = "ReceiveMessage";
         }
     }
 }

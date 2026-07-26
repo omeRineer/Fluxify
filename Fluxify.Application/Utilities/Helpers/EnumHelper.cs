@@ -9,6 +9,8 @@ namespace Fluxify.Application.Utilities.Helpers
 {
     public static class EnumHelper
     {
+        public static bool HasValue<TEnum>(string value)
+            => Enum.IsDefined(typeof(TEnum), value);
         public static TEnum Parse<TEnum>(string? value, TEnum defaultValue = default(TEnum))
             where TEnum : struct, Enum
         {

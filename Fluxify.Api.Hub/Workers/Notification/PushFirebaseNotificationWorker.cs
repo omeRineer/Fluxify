@@ -6,20 +6,21 @@ using Microsoft.AspNetCore.SignalR;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using Fluxify.Application.Repositories;
-using Fluxify.Application.Models.Queue;
+using Fluxify.Application.Models.Events;
+using Fluxify.Application.Models.Hub;
 
-namespace Fluxify.Api.Hub.Workers
+namespace Fluxify.Api.Hub.Workers.Notification
 {
-    public class FirebaseNotificationWorker : ConsumerWorker<NotificationQueueModel>
+    public class PushFirebaseNotificationWorker : ConsumerWorker<SendNotificationEvent>
     {
         protected override string QueueName => "notification-firebase";
         protected override int RetryCount => 0;
 
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly IHubContext<PresenceHub> _hubContext;
-        readonly HubConnectionManager<PresenceHub> _connectionManager;
+        readonly HubConnectionManager<PresenceHubUser> _connectionManager;
 
-        public FirebaseNotificationWorker(IChannel channel, IServiceScopeFactory scopeFactory, IHubContext<PresenceHub> hubContext, HubConnectionManager<PresenceHub> connectionManager)
+        public PushFirebaseNotificationWorker(IChannel channel, IServiceScopeFactory scopeFactory, IHubContext<PresenceHub> hubContext, HubConnectionManager<PresenceHubUser> connectionManager)
             : base(channel)
         {
             _scopeFactory = scopeFactory;
@@ -28,7 +29,7 @@ namespace Fluxify.Api.Hub.Workers
         }
 
 
-        protected async override Task HandleAsync(NotificationQueueModel message, CancellationToken cancellationToken)
+        protected async override Task HandleAsync(SendNotificationEvent message, CancellationToken cancellationToken)
         {
             using var scope = _scopeFactory.CreateScope();
             var fireBaseNotificationService = scope.ServiceProvider.GetRequiredService<INF.IPushNotificationService>();
@@ -42,8 +43,8 @@ namespace Fluxify.Api.Hub.Workers
             var targetDevices = await userDeviceRepository.GetListAsync(f => targetUsers.Select(s => s.UserId).Contains(f.UserId));
 
             if (targetDevices != null && targetDevices.Any())
-                await fireBaseNotificationService.SendNotificationAsync(targetDevices.Select(s => s.Token), 
-                                                                        message.Title, 
+                await fireBaseNotificationService.SendNotificationAsync(targetDevices.Select(s => s.Token),
+                                                                        message.Title,
                                                                         message.Summary,
                                                                         message.Thumbnail,
                                                                         new()

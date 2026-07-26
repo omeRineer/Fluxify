@@ -14,5 +14,13 @@ namespace Fluxify.Api.Web.Controllers
         {
             UserService = userService;
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetListAsync()
+            => Response(await UserService.GetListAsync(CurrentUser.NameSpace.Id));
+
+        [HttpGet("{id:guid}")]
+        public async Task<IActionResult> GetDetailAsync([FromRoute] Guid id)
+            => Response(await UserService.GetDetailAsync(id));
     }
 }

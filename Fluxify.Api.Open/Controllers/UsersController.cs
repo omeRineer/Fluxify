@@ -25,7 +25,7 @@ namespace Fluxify.Api.Open.Controllers
         }
 
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetDetailAsync([FromRoute] Guid id)
         {
             var result = await UserService.GetDetailAsync(id);

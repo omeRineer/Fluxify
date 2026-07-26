@@ -10,6 +10,8 @@ var builder = WebApplication.CreateBuilder(args);
 await builder.Services.AddRabbitMqAsync();
 builder.Services.AddControllers();
 builder.Services.AddApplication();
+builder.Services.AddFluxifyAuthentication();
+builder.Services.AddCurrentUserInfo();
 builder.Services.AddMongoContext();
 builder.Services.AddCoreContext();
 builder.Services.AddCors(options =>
@@ -70,7 +72,6 @@ app.UseAuthentication();
 
 app.UseAuthorization();
 
-app.Map("/health", () => "Healthy!");
 app.MapControllers();
 
 app.Run();

@@ -1,6 +1,6 @@
-﻿namespace Fluxify.Application.Models.Queue
+﻿namespace Fluxify.Application.Models.Events
 {
-    public class NotificationQueueModel
+    public class SendNotificationEvent
     {
         public Guid? Id { get; set; }
         public Guid NameSpaceId { get; set; }

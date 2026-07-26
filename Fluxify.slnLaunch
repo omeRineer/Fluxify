@@ -7,6 +7,10 @@
         "Action": "Start"
       },
       {
+        "Path": "Fluxify.Api.Web\\Fluxify.Api.Web.csproj",
+        "Action": "Start"
+      },
+      {
         "Path": "Fluxify.Api.Open\\Fluxify.Api.Open.csproj",
         "Action": "Start"
       }

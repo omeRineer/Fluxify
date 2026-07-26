@@ -1,7 +1,8 @@
 ﻿using Fluxify.Api.Hub.Workers.Main;
 using Fluxify.Application.Hubs;
 using Fluxify.Application.Models.Enums;
-using Fluxify.Application.Models.Queue;
+using Fluxify.Application.Models.Events;
+using Fluxify.Application.Models.Hub;
 using Fluxify.Application.Models.SignalR;
 using Fluxify.Application.Services.Interfaces;
 using Fluxify.Application.Utilities.Helpers;
@@ -13,28 +14,28 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Channels;
 
-namespace Fluxify.Api.Hub.Workers
+namespace Fluxify.Api.Hub.Workers.Notification
 {
-    public class NotificationWorker : ConsumerWorker<NotificationQueueModel>
+    public class PushSocketNotificationWorker : ConsumerWorker<SendNotificationEvent>
     {
         protected override string QueueName => "notification-socket";
         protected override int RetryCount => 3;
 
         private readonly IHubContext<PresenceHub> _hubContext;
-        readonly HubConnectionManager<PresenceHub> _connectionManager;
+        readonly HubConnectionManager<PresenceHubUser> _connectionManager;
 
-        public NotificationWorker(IChannel channel, IHubContext<PresenceHub> hubContext, HubConnectionManager<PresenceHub> connectionManager)
+        public PushSocketNotificationWorker(IChannel channel, IHubContext<PresenceHub> hubContext, HubConnectionManager<PresenceHubUser> connectionManager)
             : base(channel)
         {
             _hubContext = hubContext;
             _connectionManager = connectionManager;
         }
 
-        protected override async Task HandleAsync(NotificationQueueModel message, CancellationToken cancellationToken)
+        protected override async Task HandleAsync(SendNotificationEvent message, CancellationToken cancellationToken)
         {
             await _hubContext.Clients.Groups(message.Topics.Select(s => $"{message.NameSpaceId}:{s}"))
-                                     .SendAsync(HubEvents.NotificationHub.ReceiveNotification,
-                                     new PushToClientNotificationModel
+                                     .SendAsync(HubEvents.PresenceHub.ReceiveNotification,
+                                     new NotificationPayload
                                      {
                                          Id = message.Id,
                                          Date = message.Date,
