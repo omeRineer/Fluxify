@@ -43,6 +43,9 @@ namespace Fluxify.Application.Hubs
             await base.OnDisconnectedAsync(exception);
         }
 
+
+
+        #region Events
         public async Task OnTyping(Guid chatId, bool isTyping)
         {
             var userConnections = HubConnectionManager.GetConnection(Guid.Parse(Context.User.Claims.Single(f => f.Type == ClaimTypes.NameIdentifier).Value)).Connections.Keys.AsEnumerable();
@@ -52,5 +55,6 @@ namespace Fluxify.Application.Hubs
                 isTyping
             });
         }
+        #endregion
     }
 }

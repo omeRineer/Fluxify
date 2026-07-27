@@ -19,7 +19,7 @@ namespace Fluxify.Application.MappingProfiles
             CreateMap<UserDevice, UserDeviceDto.List>()
                 .ForMember(dest => dest.Platform, opt => opt.MapFrom(src => EnumHelper.ToEnumString<DeviceType>(src.Platform, true)));
 
-            CreateMap<SetUserDevice.Request, UserDevice>()
+            CreateMap<SetUserDevice, UserDevice>()
                 .ForMember(dest => dest.Platform, opt => opt.MapFrom(src => EnumHelper.Parse<DeviceType>(src.Platform, DeviceType.Android)))
                 .ForMember(dest => dest.UserId, opt => opt.Ignore())
                 .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => true));

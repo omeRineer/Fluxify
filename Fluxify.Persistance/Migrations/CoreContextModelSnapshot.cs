@@ -264,7 +264,6 @@ namespace Fluxify.Persistance.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("Token")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<Guid>("UserId")

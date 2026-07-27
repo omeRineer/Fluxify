@@ -25,7 +25,7 @@ namespace Fluxify.Api.Open.Controllers
         [HttpPost("create")]
         public async Task<IActionResult> CreateAsync([FromBody] CreateNotification.Request request)
             => Response(await NotificationService.CreateAsync(CurrentUser.NameSpace.Id,
-                                                               CurrentUser.NameIdentifier,
+                                                              CurrentUser.NameIdentifier,
                                                                request));
 
         [HttpPost("fire")]

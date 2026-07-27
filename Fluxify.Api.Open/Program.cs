@@ -2,6 +2,7 @@ using Fluxify.Application;
 using Fluxify.Application.Models.Common;
 using Fluxify.Application.Models.Enums;
 using Fluxify.Configuration;
+using Fluxify.Domain.Enums;
 using Fluxify.Infrastructure;
 using Fluxify.Persistance;
 using Fluxify.Persistance.Context;
@@ -32,8 +33,7 @@ builder.Services.AddSessionContext<CurrentUser>(httpContext =>
             Key = userClaims[FluxifyClaims.Key],
             NameSpace = new CurrentUser.NameSpaceInfo(Guid.Parse(userClaims[FluxifyClaims.NameSpaceId]),
                                                       userClaims[FluxifyClaims.NameSpace]),
-            Name = userClaims[ClaimTypes.Name],
-            Device = new CurrentUser.DeviceInfo(userClaims[FluxifyClaims.Device], userClaims[FluxifyClaims.Platform])
+            Name = userClaims[ClaimTypes.Name]
         };
 
     return new CurrentUser();
@@ -45,9 +45,6 @@ builder.Services.AddCors(options =>
                             builder.WithOrigins(AppConfiguration.AllowOrigins)
                                    .AllowAnyHeader()
                                    .AllowAnyMethod()));
-
-
-
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Fluxify.Api.Open", Version = "v1" });

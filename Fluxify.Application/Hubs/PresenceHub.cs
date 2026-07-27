@@ -1,5 +1,6 @@
 ﻿using Fluxify.Application.Models.Enums;
 using Fluxify.Application.Models.Hub;
+using Fluxify.Application.Models.Rest.UserDevice;
 using Fluxify.Application.Models.SignalR;
 using Fluxify.Application.Services.Interfaces;
 using Fluxify.Application.Services.Interfaces.Core;
@@ -22,10 +23,12 @@ namespace Fluxify.Application.Hubs
     {
         readonly HubConnectionManager<PresenceHubUser> HubConnectionManager;
         readonly IUserTopicService _userTopicService;
-        public PresenceHub(HubConnectionManager<PresenceHubUser> hubConnectionManager, IUserTopicService userTopicService)
+        readonly IUserDeviceService _userDeviceService;
+        public PresenceHub(HubConnectionManager<PresenceHubUser> hubConnectionManager, IUserTopicService userTopicService, IUserDeviceService userDeviceService)
         {
             HubConnectionManager = hubConnectionManager;
             _userTopicService = userTopicService;
+            _userDeviceService = userDeviceService;
         }
 
         public override async Task OnConnectedAsync()
@@ -51,6 +54,17 @@ namespace Fluxify.Application.Hubs
 
             }
 
+            var httpContext = Context.GetHttpContext();
+            var platform = httpContext?.Request?.Query[FluxifyHeaders.Device.Platform].FirstOrDefault();
+            await _userDeviceService.RegisterAsync(hubUser.Id, hubUser.NameSpace.Id, new SetUserDevice
+            {
+                DeviceId = httpContext?.Request?.Query[FluxifyHeaders.Device.DeviceId],
+                Platform = string.IsNullOrWhiteSpace(platform)
+                    ? EnumHelper.ToEnumString<DeviceType>((int)DeviceType.Web)
+                    : platform,
+                Token = httpContext?.Request?.Query[FluxifyHeaders.Device.Token].FirstOrDefault()
+            });
+
             await base.OnConnectedAsync();
         }
 
@@ -72,6 +86,9 @@ namespace Fluxify.Application.Hubs
             await base.OnDisconnectedAsync(exception);
         }
 
+
+
+        #region Events
         public async Task SetAvailabilityStatus(string status)
         {
             PresenceHubUser connectionUser = HubConnectionManager.GetConnection(Guid.Parse(Context.User.Claims.Single(f => f.Type == ClaimTypes.NameIdentifier).Value));
@@ -87,5 +104,7 @@ namespace Fluxify.Application.Hubs
                 });
             }
         }
+        #endregion
+
     }
 }

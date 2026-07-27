@@ -46,12 +46,6 @@ namespace Fluxify.Api.Open.Controllers
         public async Task<IActionResult> GetDevicesAsync()
             => Response(await UserDeviceService.GetListAsync(CurrentUser.NameIdentifier));
 
-        [HttpPost("device/Set")]
-        public async Task<IActionResult> SetDeviceAsync([FromBody] SetUserDevice.Request req)
-            => Response(await UserDeviceService.SetAsync(CurrentUser.NameIdentifier,
-                                                   CurrentUser.NameSpace.Id,
-                                                   req));
-
 
     }
 }

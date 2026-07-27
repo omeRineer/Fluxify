@@ -63,8 +63,6 @@ namespace Fluxify.Application.Utilities.Token
                 new Claim(ClaimTypes.Name, user.Name),
                 new Claim(FluxifyClaims.NameSpaceId, user.NameSpaceId.ToString()),
                 new Claim(FluxifyClaims.NameSpace, user.NameSpace.Signature),
-                new Claim(FluxifyClaims.Device, "undefined"),
-                new Claim(FluxifyClaims.Platform, "undefined"),
                 new Claim(FluxifyClaims.Name, user.Name)
             };
 

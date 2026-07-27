@@ -38,9 +38,6 @@ builder.Services.AddCors(options =>
                             builder.AllowAnyOrigin()
                                    .AllowAnyHeader()
                                    .AllowAnyMethod()));
-
-
-
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Fluxify.Api.Integration", Version = "v1" });
@@ -63,6 +60,9 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
+
+
+
 
 var app = builder.Build();
 

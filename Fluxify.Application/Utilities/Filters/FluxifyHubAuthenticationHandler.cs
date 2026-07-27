@@ -16,13 +16,9 @@ namespace Fluxify.Api.Hub.Auth
     {
         const string ApiKeyHeaderName = "Fluxify-Api-Key";
         readonly INameSpaceRepository NameSpaceRepository;
-        readonly IUserTopicRepository UserTopicRepository;
-        readonly IUserRepository UserRepository;
-        public FluxifyHubAuthenticationHandler(IOptionsMonitor<FluxifyHubAuthenticationOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock, INameSpaceRepository nameSpaceRepository, IUserTopicRepository userTopicRepository, IUserRepository userRepository) : base(options, logger, encoder, clock)
+        public FluxifyHubAuthenticationHandler(IOptionsMonitor<FluxifyHubAuthenticationOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock, INameSpaceRepository nameSpaceRepository) : base(options, logger, encoder, clock)
         {
             NameSpaceRepository = nameSpaceRepository;
-            UserTopicRepository = userTopicRepository;
-            UserRepository = userRepository;
         }
 
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()

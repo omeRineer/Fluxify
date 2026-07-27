@@ -13,8 +13,9 @@ namespace Fluxify.Application.Models.Dto.User
             public Guid Id { get; set; }
             public Guid NameSpaceId { get; set; }
             public string Name { get; set; }
-            public string Email { get; set; }
+            public string? Email { get; set; }
             public string Key { get; set; }
+            public string Token { get; set; }
             public DateTime CreateDate { get; set; }
             public DateTime EditDate { get; set; }
         }

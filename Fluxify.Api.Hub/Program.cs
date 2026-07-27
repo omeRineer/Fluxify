@@ -10,6 +10,7 @@ using Fluxify.Application.Models.Hub;
 using Fluxify.Application.Models.Common;
 using Fluxify.Application.Models.Enums;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Fluxify.Domain.Enums;
 
 var builder = WebApplication.CreateBuilder(args);
 await builder.Services.AddRabbitMqAsync();
@@ -19,7 +20,7 @@ builder.Services.AddHostedService<SendMessageWorker>();
 builder.Services.AddApplication();
 builder.Services.AddTokenAuthentication(new JwtBearerEvents
 {
-    OnMessageReceived = context =>
+    OnMessageReceived = (context) =>
     {
         if (!context.Request.Query.TryGetValue("access_token", out var queries))
             return Task.CompletedTask;
@@ -30,28 +31,30 @@ builder.Services.AddTokenAuthentication(new JwtBearerEvents
             context.Token = token;
 
         return Task.CompletedTask;
-    }
-});
-builder.Services.AddSessionContext<CurrentUser>(httpContext =>
-{
-    var user = httpContext?.User;
-    var userClaims = user.Claims
-        .GroupBy(k => k.Type)
-        .ToDictionary(g => g.Key, g => g.First().Value);
+    },
+    OnTokenValidated = (context) =>
+    {
+        var deviceId =
+        context.Request.Query[FluxifyHeaders.Device.DeviceId].FirstOrDefault();
 
-
-    if (user != null && user.Identity.IsAuthenticated)
-        return new CurrentUser
+        if (string.IsNullOrWhiteSpace(deviceId))
         {
-            NameIdentifier = Guid.Parse(userClaims[ClaimTypes.NameIdentifier]),
-            Key = userClaims[FluxifyClaims.Key],
-            NameSpace = new CurrentUser.NameSpaceInfo(Guid.Parse(userClaims[FluxifyClaims.NameSpaceId]),
-                                                      userClaims[FluxifyClaims.NameSpace]),
-            Name = userClaims[ClaimTypes.Name],
-            Device = new CurrentUser.DeviceInfo(userClaims[FluxifyClaims.Device], userClaims[FluxifyClaims.Platform])
-        };
+            context.Fail($"{FluxifyHeaders.Device.DeviceId} is required.");
+            return Task.CompletedTask;
+        }
 
-    return new CurrentUser();
+        var platform =
+            context.Request.Query[FluxifyHeaders.Device.Platform].FirstOrDefault();
+
+        if (!string.IsNullOrWhiteSpace(platform) &&
+            !Enum.TryParse<DeviceType>(platform, true, out _))
+        {
+            context.Fail($"Invalid {FluxifyHeaders.Device.Platform}.");
+            return Task.CompletedTask;
+        }
+
+        return Task.CompletedTask;
+    }
 });
 builder.Services.AddMongoContext();
 builder.Services.AddCoreContext();
