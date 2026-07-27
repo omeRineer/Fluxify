@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 
 namespace Fluxify.Application.Hubs
 {
-    [Authorize(AuthenticationSchemes = "FluxifySecurityScheme")]
+    [Authorize]
     public class PresenceHub : Hub
     {
         readonly HubConnectionManager<PresenceHubUser> HubConnectionManager;

@@ -10,6 +10,8 @@ using System.Threading.Channels;
 using Fluxify.Application.Models.Dto.NameSpace;
 using Fluxify.Domain.Entities.Core;
 using Fluxify.Application.Services.Interfaces.Core;
+using Fluxify.Application.Utilities.Helpers;
+using System.Xml.Linq;
 
 namespace Fluxify.Application.Services.Core
 {

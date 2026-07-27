@@ -24,32 +24,34 @@ namespace Fluxify.Api.Open.Controllers
             NotificationService = notificationService;
         }
 
-        [HttpGet("Profile")]
+        [HttpGet("profile")]
         public async Task<IActionResult> GetProfileAsync()
             => Response(await UserService.GetDetailAsync(CurrentUser.NameIdentifier));
 
-        [HttpGet("Notifications")]
+        [HttpGet("notifications")]
         public async Task<IActionResult> GetNotificationsAsync()
             => Response(await NotificationService.GetListAsync(CurrentUser.NameIdentifier));
 
-        [HttpGet("Topics")]
+        [HttpGet("topics")]
         public async Task<IActionResult> GetTopicsAsync()
             => Response(await UserTopicService.GetListAsync(CurrentUser.NameIdentifier));
 
-        [HttpGet("Devices")]
+        [HttpPost("topic/set")]
+        public async Task<IActionResult> SetTopicsAsync([FromBody] SetUserTopics.Request req)
+            => Response(await UserTopicService.SetAsync(CurrentUser.NameIdentifier,
+                                                  CurrentUser.NameSpace.Id,
+                                                  req));
+
+        [HttpGet("devices")]
         public async Task<IActionResult> GetDevicesAsync()
             => Response(await UserDeviceService.GetListAsync(CurrentUser.NameIdentifier));
 
-        [HttpPost("Device/Set")]
+        [HttpPost("device/Set")]
         public async Task<IActionResult> SetDeviceAsync([FromBody] SetUserDevice.Request req)
             => Response(await UserDeviceService.SetAsync(CurrentUser.NameIdentifier,
                                                    CurrentUser.NameSpace.Id,
                                                    req));
 
-        [HttpPost("Topic/Set")]
-        public async Task<IActionResult> SetTopicsAsync([FromBody] SetUserTopics.Request req)
-            => Response(await UserTopicService.SetAsync(CurrentUser.NameIdentifier,
-                                                  CurrentUser.NameSpace.Id,
-                                                  req));
+
     }
 }

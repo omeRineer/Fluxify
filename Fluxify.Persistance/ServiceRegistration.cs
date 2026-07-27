@@ -50,6 +50,7 @@ namespace Fluxify.Persistance
             services.AddScoped<IUserTopicRepository, UserTopicRepository>();
             services.AddScoped<IChatRepository, ChatRepository>();
             services.AddScoped<IChatUserRepository, ChatUserRepository>();
+            services.AddScoped<ICredentialRepository, CredentialRepository>();
 
         }
     }

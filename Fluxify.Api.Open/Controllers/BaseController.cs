@@ -8,7 +8,7 @@ using Fluxify.Application.Models.Common;
 namespace Fluxify.Api.Open.Controllers
 {
     [Route("openapi/[controller]")]
-    [Authorize(AuthenticationSchemes = "FluxifySecurityScheme")]
+    [Authorize]
     public class BaseController : ControllerBase
     {
         protected readonly CurrentUser CurrentUser;

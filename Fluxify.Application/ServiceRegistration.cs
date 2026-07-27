@@ -11,6 +11,7 @@ using Fluxify.Application.Services.Mongo;
 using Fluxify.Application.Utilities.Helpers;
 using Fluxify.Application.Utilities.Token;
 using Fluxify.Configuration;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -42,22 +43,22 @@ namespace Fluxify.Application
             services.AddScoped<IChatService, ChatService>();
             services.AddScoped<IChatUserService, ChatUserService>();
 
-            services.AddHttpContextAccessor();
+
+            services.AddScoped<IAuthService, AuthService>();
+            services.AddSingleton<ITokenService, JwtService>();
+
 
             services.AddAutoMapper(opt => { }, Assembly.GetExecutingAssembly());
         }
 
-        public static void AddFluxifyAuthentication(this IServiceCollection services)
+        public static void AddApiKeyAuthentication(this IServiceCollection services)
         {
             services.AddAuthentication()
                 .AddScheme<FluxifyHubAuthenticationOptions, FluxifyHubAuthenticationHandler>("FluxifySecurityScheme", null);
         }
 
-        public static void AddTokenAuthentication(this IServiceCollection services)
+        public static void AddTokenAuthentication(this IServiceCollection services, JwtBearerEvents events = null)
         {
-            services.AddSingleton<ITokenService, JwtService>();
-            services.AddScoped<IAuthService, AuthService>();
-
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                             .AddJwtBearer(opt =>
                             {
@@ -65,7 +66,7 @@ namespace Fluxify.Application
                                 {
                                     ValidateIssuer = true,
                                     ValidateAudience = true,
-                                    ValidateLifetime = true,
+                                    ValidateLifetime = false,
                                     ValidateIssuerSigningKey = true,
 
                                     ValidIssuer = AppConfiguration.TokenOptions.Issuer,
@@ -73,34 +74,22 @@ namespace Fluxify.Application
                                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(AppConfiguration.TokenOptions.SecurityKey))
 
                                 };
+
+                                if (events != null)
+                                    opt.Events = events;
                             });
 
         }
 
-        public static void AddCurrentUserInfo(this IServiceCollection services)
+        public static void AddSessionContext<TSession>(this IServiceCollection services, Func<HttpContext, TSession> func)
+            where TSession : class, new()
         {
-            services.AddScoped<CurrentUser>(i =>
+            services.AddHttpContextAccessor();
+            services.AddScoped<TSession>(i =>
             {
                 var httpContextAccessor = i.GetService<IHttpContextAccessor>();
-                var user = httpContextAccessor?.HttpContext?.User;
-                var userClaims = user.Claims
-                    .GroupBy(k => k.Type)
-                    .ToDictionary(g => g.Key, g => g.First().Value);
 
-
-                if (user != null && user.Identity.IsAuthenticated)
-                    return new CurrentUser
-                    {
-                        NameIdentifier = Guid.Parse(userClaims[ClaimTypes.NameIdentifier]),
-                        ApiKey = userClaims[FluxifyClaims.ApiKey],
-                        Key = userClaims[FluxifyClaims.Key],
-                        NameSpace = new CurrentUser.NameSpaceInfo(Guid.Parse(userClaims[FluxifyClaims.NameSpaceId]),
-                                                                  userClaims[FluxifyClaims.NameSpace]),
-                        Name = userClaims[ClaimTypes.Name],
-                        Device = new CurrentUser.DeviceInfo(userClaims[FluxifyClaims.Device], userClaims[FluxifyClaims.Platform])
-                    };
-
-                return new CurrentUser();
+                return func(httpContextAccessor.HttpContext);
             });
         }
 

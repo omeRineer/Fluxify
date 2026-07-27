@@ -1,17 +1,43 @@
 using Fluxify.Application;
+using Fluxify.Application.Models.Common;
+using Fluxify.Application.Models.Enums;
 using Fluxify.Configuration;
 using Fluxify.Infrastructure;
 using Fluxify.Persistance;
 using Fluxify.Persistance.Context;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
+using System.Security.Claims;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 await builder.Services.AddRabbitMqAsync();
 builder.Services.AddControllers();
 builder.Services.AddApplication();
-builder.Services.AddFluxifyAuthentication();
-builder.Services.AddCurrentUserInfo();
+builder.Services.AddTokenAuthentication();
+builder.Services.AddSessionContext<CurrentUser>(httpContext =>
+{
+    var user = httpContext?.User;
+    var userClaims = user.Claims
+        .GroupBy(k => k.Type)
+        .ToDictionary(g => g.Key, g => g.First().Value);
+
+
+    if (user != null && user.Identity.IsAuthenticated)
+        return new CurrentUser
+        {
+            NameIdentifier = Guid.Parse(userClaims[ClaimTypes.NameIdentifier]),
+            Key = userClaims[FluxifyClaims.Key],
+            NameSpace = new CurrentUser.NameSpaceInfo(Guid.Parse(userClaims[FluxifyClaims.NameSpaceId]),
+                                                      userClaims[FluxifyClaims.NameSpace]),
+            Name = userClaims[ClaimTypes.Name],
+            Device = new CurrentUser.DeviceInfo(userClaims[FluxifyClaims.Device], userClaims[FluxifyClaims.Platform])
+        };
+
+    return new CurrentUser();
+});
 builder.Services.AddMongoContext();
 builder.Services.AddCoreContext();
 builder.Services.AddCors(options =>
@@ -27,19 +53,20 @@ builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Fluxify.Api.Open", Version = "v1" });
     c.CustomSchemaIds(s => s.FullName?.Replace('+', '_'));
 
-    c.AddSecurityDefinition("ApiKey", new OpenApiSecurityScheme
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Description = "API eriþimi için geçerli anahtarý buraya girin.",
+        Description = "Yöneticinizden aldýðýnýz tokeni giriniz",
         In = ParameterLocation.Header,
-        Name = "Fluxify-Api-Key",
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "FluxifySecurityScheme"
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT"
     });
 
     c.AddSecurityRequirement(document => new OpenApiSecurityRequirement
     {
         {
-            new OpenApiSecuritySchemeReference("ApiKey", document),
+            new OpenApiSecuritySchemeReference("Bearer", document),
             new List<string>()
         }
     });

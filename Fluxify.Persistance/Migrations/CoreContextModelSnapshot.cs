@@ -105,11 +105,49 @@ namespace Fluxify.Persistance.Migrations
                     b.ToTable("ChatUser");
                 });
 
+            modelBuilder.Entity("Fluxify.Domain.Entities.Core.Credential", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("EditDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Image")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("Credential");
+                });
+
             modelBuilder.Entity("Fluxify.Domain.Entities.Core.NameSpace", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
+
+                    b.Property<string>("ApiKey")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("timestamp with time zone");
@@ -169,10 +207,6 @@ namespace Fluxify.Persistance.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("ApiKey")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -181,12 +215,6 @@ namespace Fluxify.Persistance.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("ExpireDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Image")
                         .HasColumnType("text");
 
                     b.Property<string>("Key")
@@ -311,6 +339,17 @@ namespace Fluxify.Persistance.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Fluxify.Domain.Entities.Core.Credential", b =>
+                {
+                    b.HasOne("Fluxify.Domain.Entities.Core.User", "User")
+                        .WithOne("Credential")
+                        .HasForeignKey("Fluxify.Domain.Entities.Core.Credential", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Fluxify.Domain.Entities.Core.Topic", b =>
                 {
                     b.HasOne("Fluxify.Domain.Entities.Core.Channel", "Channel")
@@ -394,6 +433,8 @@ namespace Fluxify.Persistance.Migrations
             modelBuilder.Entity("Fluxify.Domain.Entities.Core.User", b =>
                 {
                     b.Navigation("Chats");
+
+                    b.Navigation("Credential");
 
                     b.Navigation("Devices");
 

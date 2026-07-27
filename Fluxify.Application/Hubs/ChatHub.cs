@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace Fluxify.Application.Hubs
 {
-    [Authorize(AuthenticationSchemes = "FluxifySecurityScheme")]
+    [Authorize]
     public class ChatHub : Hub
     {
         readonly HubConnectionManager<ChatHubUser> HubConnectionManager;
