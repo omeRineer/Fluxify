@@ -33,9 +33,13 @@ namespace Fluxify.Api.Open.Controllers
             => Response(await NotificationService.FireAsync(CurrentUser.NameSpace.Id,
                                                              request));
 
+
+        // TODO : Owner check
         [HttpGet("{id}")]
         public async Task<IActionResult> GetDetailAsync([FromRoute] Guid id)
-            => Response(await NotificationService.GetDetailAsync(id, CurrentUser.NameIdentifier));
+            => Response(await NotificationService.GetDetailAsync(CurrentUser.NameSpace.Id, 
+                                                                 CurrentUser.NameIdentifier, 
+                                                                 id));
 
         [HttpPut("{id}/read")]
         public async Task<IActionResult> ReadAsync([FromRoute] Guid id)

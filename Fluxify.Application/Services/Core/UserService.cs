@@ -15,6 +15,7 @@ using Fluxify.Domain.Entities.Core;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Threading.Channels;
+using System.Xml.Linq;
 
 namespace Fluxify.Application.Services.Core
 {
@@ -54,41 +55,24 @@ namespace Fluxify.Application.Services.Core
                 NameSpaceId = nameSpaceE.Id,
                 Key = model.Key,
                 Email = model.Email,
-                Name = model.Name,
+                Name = model.Name
             };
 
             if (model.Topics != null && model.Topics.Count > 0)
-            {
-                var topics = await TopicRepository.GetListAsync(f => model.Topics.Contains(f.Slug));
-                subscriber.Topics = topics.Select(s => new UserTopic { TopicId = s.Id }).ToList();
-            }
+                subscriber.Topics = await TopicRepository.GetProjectedListAsync(s => new UserTopic { TopicId = s.Id },
+                                                                                f => model.Topics.Contains(f.Slug));
 
             await UserRepository.AddAsync(subscriber);
             await UserRepository.SaveChangesAsync();
 
             var result = Mapper.Map<CreateUser.Response>(subscriber);
+            subscriber.NameSpace = nameSpaceE;
+            result.Token = _tokenService.GenerateToken(subscriber).Token;
+
 
             return new SuccessDataResult<CreateUser.Response>(result, "Subscriber is created.");
         }
 
-        public async Task<IDataResult<UpdateUser.Response>> UpdateAsync(Guid id, UpdateUser.Request model)
-        {
-            var subscriber = await UserRepository.GetSingleOrDefaultAsync(f => f.Id == id);
-            var businessResult = await BusinessRuleEngine.Run(
-                    new DataMustBeFoundRule(subscriber, "Subscriber is not found.")
-            );
-            if (!businessResult.IsSuccess)
-                return new ErrorDataResult<UpdateUser.Response>(message: businessResult.Message);
-
-            subscriber = Mapper.Map(model, subscriber);
-
-            await UserRepository.UpdateAsync(subscriber);
-            await UserRepository.SaveChangesAsync();
-
-            var result = Mapper.Map<UpdateUser.Response>(subscriber);
-
-            return new SuccessDataResult<UpdateUser.Response>(result, "Subscriber is updated.");
-        }
 
         public async Task<IDataResult<UserDto.Detail>> GetDetailAsync(Guid id)
         {
@@ -124,13 +108,6 @@ namespace Fluxify.Application.Services.Core
             var result = DataListResponse<UserDto.List>.Load(mappedList);
             return new SuccessDataResult<DataListResponse<UserDto.List>>(result);
 
-        }
-
-        public async Task<IDataResult<User>> GetAsync(Guid id)
-        {
-            var subscriber = await UserRepository.GetSingleAsync(f => f.Id == id);
-
-            return new SuccessDataResult<User>(subscriber);
         }
 
         public async Task<IDataResult<UpdateUser.Response>> UpdateAsync(Guid nameSpaceId, string key, UpdateUser.Request model)

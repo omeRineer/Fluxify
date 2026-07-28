@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Fluxify.Application.Models.Dto.Chat;
 using Fluxify.Application.Models.Dto.User;
 using Fluxify.Application.Models.Rest.Subscriber;
 using Fluxify.Domain.Entities.Core;
@@ -13,6 +14,7 @@ namespace Fluxify.Application.MappingProfiles
             CreateMap<User, UserDto.Detail>();
             CreateMap<User, CreateUser.Response>().IncludeBase<User, UserDto.Detail>();
             CreateMap<User, UpdateUser.Response>().IncludeBase<User, UserDto.Detail>();
+            CreateMap<User, ChatDto.Detail.User>();
 
             CreateMap<CreateUser.Request, User>();
             CreateMap<UpdateUser.Request, User>()

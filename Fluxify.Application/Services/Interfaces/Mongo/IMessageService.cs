@@ -9,7 +9,7 @@ namespace Fluxify.Application.Services.Interfaces.Mongo
     public interface IMessageService
     {
         Task<IResult> SendAsync(Guid senderId, Guid nameSpaceId, Guid chatId, SendMessage.Request req);
-        Task<IDataResult<DataListResponse<MessageDto.List>>> GetHistoryAsync(Guid nameSpaceId, Guid chatId);
+        Task<IDataResult<DataListResponse<MessageDto.List>>> GetHistoryAsync(Guid userId, Guid chatId);
 
     }
 }

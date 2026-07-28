@@ -34,8 +34,12 @@ namespace Fluxify.Application.Services.Mongo
             _chatUserRepository = chatUserRepository;
         }
 
-        public async Task<IDataResult<DataListResponse<MessageDto.List>>> GetHistoryAsync(Guid nameSpaceId, Guid chatId)
+        public async Task<IDataResult<DataListResponse<MessageDto.List>>> GetHistoryAsync(Guid userId, Guid chatId)
         {
+            var isChatMember = await _chatUserRepository.IsExistAsync(f => f.ChatId == chatId && f.UserId == userId);
+            if (!isChatMember)
+                return new SuccessDataResult<DataListResponse<MessageDto.List>>("Chat not found");
+
             var chatUsers = await _chatUserRepository.GetProjectedListAsync(s => new { s.UserId, s.User.Name }, f => f.ChatId == chatId);
             var chatHistory = await _messageRepository.GetListAsync(f => f.ChatId == chatId);
 

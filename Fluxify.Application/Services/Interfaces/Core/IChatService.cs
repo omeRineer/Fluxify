@@ -14,5 +14,6 @@ namespace Fluxify.Application.Services.Interfaces.Core
     {
         Task<IDataResult<Guid>> CreateAsync(Guid nameSpaceId, Guid userId, CreateChat.Request req);
         Task<IDataResult<DataListResponse<ChatDto.List>>> GetListAsync(Guid nameSpaceId, Guid userId);
+        Task<IDataResult<ChatDto.Detail>> GetDetailAsync(Guid userId, Guid chatId);
     }
 }

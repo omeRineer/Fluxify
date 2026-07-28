@@ -7,6 +7,7 @@ using Fluxify.Application.Services.Interfaces.Core;
 using Fluxify.Application.Utilities.Result;
 using Fluxify.Domain.Entities.Core;
 using Fluxify.Domain.Enums;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,23 +31,25 @@ namespace Fluxify.Application.Services.Core
 
         public async Task<IDataResult<Guid>> CreateAsync(Guid nameSpaceId, Guid userId, CreateChat.Request req)
         {
-            var newChat = new Chat
-            {
-                Id = Guid.NewGuid(),
-                NameSpaceId = nameSpaceId,
-                CreatedUserId = userId,
-                Users = req.UserIds.Append(userId).Select(s => new ChatUser
-                {
-                    UserId = s
-                }).ToList(),
-                Type = ChatType.Direct,
-                Title = req.Title
-            };
+            var mappedEntity = _mapper.Map<Chat>(req);
+            mappedEntity.Users.Add(new ChatUser { UserId = userId });
+            mappedEntity.NameSpaceId = nameSpaceId;
+            mappedEntity.CreatedUserId = userId;
 
-            await _chatRepository.AddAsync(newChat);
+            await _chatRepository.AddAsync(mappedEntity);
             await _chatRepository.SaveChangesAsync();
 
-            return new SuccessDataResult<Guid>(newChat.Id);
+            return new SuccessDataResult<Guid>(mappedEntity.Id);
+        }
+
+        public async Task<IDataResult<ChatDto.Detail>> GetDetailAsync(Guid userId, Guid chatId)
+        {
+            var chat = await _chatRepository.GetSingleOrDefaultAsync(f => f.Users.Any(x => x.UserId == userId) && f.Id == chatId,
+                                                                     i => i.Include(x => x.CreatedUser).Include(i => i.Users));
+
+            var mappedEntity = _mapper.Map<ChatDto.Detail>(chat);
+
+            return new SuccessDataResult<ChatDto.Detail>(mappedEntity);
         }
 
         public async Task<IDataResult<DataListResponse<ChatDto.List>>> GetListAsync(Guid nameSpaceId, Guid userId)

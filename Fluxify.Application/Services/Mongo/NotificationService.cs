@@ -40,7 +40,7 @@ namespace Fluxify.Application.Services.Mongo
         readonly IUserTopicRepository UserTopicRepository;
         readonly IEventPublisher EventPublisher;
         readonly IMapper _mapper;
-        public NotificationService(INotificationRepository notifications, IUserNotificationRepository userNotificationRepository, ITopicRepository topicRepository, IMapper mapper, IUserTopicRepository userTopicRepository, IEventPublisher eventPublisher)
+        public NotificationService(INotificationRepository notifications, IUserNotificationRepository userNotificationRepository, ITopicRepository topicRepository, IMapper mapper, IUserTopicRepository userTopicRepository, IEventPublisher eventPublisher, IUserRepository userRepository)
         {
             NotificationRepository = notifications;
             UserNotificationRepository = userNotificationRepository;
@@ -48,6 +48,7 @@ namespace Fluxify.Application.Services.Mongo
             _mapper = mapper;
             UserTopicRepository = userTopicRepository;
             EventPublisher = eventPublisher;
+            UserRepository = userRepository;
         }
 
         public async Task<IResult> CreateAsync(Guid nameSpaceId, Guid userId, CreateNotification.Request req)
@@ -56,12 +57,11 @@ namespace Fluxify.Application.Services.Mongo
             newNotification.NameSpace = nameSpaceId;
             newNotification.Sender = userId;
 
-            var topics = await TopicRepository.GetListAsync(f => req.Topics.Contains(f.Slug));
-
-            if (topics.Count == 0)
-                return new ErrorResult("Topics are not found");
-
-            newNotification.Topics = topics?.Select(s => s.Id)?.ToList() ?? new();
+            if (req.To?.Users != null)
+            {
+                var targetUsers = await UserRepository.GetProjectedListAsync(s => s.Id, f => f.NameSpaceId == nameSpaceId && req.To.Users.Contains(f.Key));
+                newNotification.To!.Users = targetUsers;
+            }
 
             await NotificationRepository.InsertAsync(newNotification);
             await EventPublisher.PublishAsync("notification-topic",
@@ -73,20 +73,26 @@ namespace Fluxify.Application.Services.Mongo
                                                   Title = newNotification.Title,
                                                   Summary = newNotification.Summary,
                                                   Date = newNotification.CreateDate,
-                                                  Topics = topics.Select(s => s.Slug).ToList(),
-                                                  Url = req.Url,
+                                                  Topics = newNotification.To?.Topics,
+                                                  Users = newNotification.To?.Users,
+                                                  Url = newNotification.Url,
                                                   Thumbnail = newNotification.Thumbnail
                                               },
                                               "notification.created");
 
             return new SuccessResult("Notification is created");
         }
-        public async Task<IDataResult<DataListResponse<NotificationDto.List>>> GetListAsync(Guid userId)
+        public async Task<IDataResult<DataListResponse<NotificationDto.List>>> GetListAsync(Guid nameSpaceId, Guid userId)
         {
-            var userTopics = await UserTopicRepository.GetListAsync(x => x.UserId == userId);
+            var userTopics = await UserTopicRepository.GetProjectedListAsync(s => s.Topic.Slug,
+                                                                             x => x.UserId == userId);
             var userNotifications = await UserNotificationRepository.GetListAsync(x => x.UserId == userId);
 
-            var notifications = await NotificationRepository.GetListAsync(x => x.Topics.Any(o => userTopics.Select(s => s.TopicId).Contains(o)));
+            var notifications = await NotificationRepository.GetListAsync(x => x.NameSpace == nameSpaceId &&
+                                                                               (
+                                                                                 x.To == null ||
+                                                                                 (x.To != null && (x.To.Topics.Any(o => userTopics.Contains(o)) || x.To.Users.Contains(userId)))
+                                                                               ));
 
             var mappedList = _mapper.Map<List<NotificationDto.List>>(notifications);
             mappedList.ForEach(x =>
@@ -101,7 +107,7 @@ namespace Fluxify.Application.Services.Mongo
 
             return new SuccessDataResult<DataListResponse<NotificationDto.List>>(result);
         }
-        public async Task<IDataResult<NotificationDto.Detail>> GetDetailAsync(Guid id, Guid userId)
+        public async Task<IDataResult<NotificationDto.Detail>> GetDetailAsync(Guid nameSpaceId, Guid userId, Guid id)
         {
             var isRead = await UserNotificationRepository.ExistsAsync(f => f.NotificationId == id &&
                                                                            f.UserId == userId);
@@ -120,7 +126,6 @@ namespace Fluxify.Application.Services.Mongo
                 Content = notification.Content,
                 IsRead = isRead,
                 CreateDate = notification.CreateDate,
-                Topics = notification.Topics,
                 Properties = notification.Properties,
                 Thumbnail = notification.Thumbnail
             };
@@ -128,27 +133,28 @@ namespace Fluxify.Application.Services.Mongo
             return new SuccessDataResult<NotificationDto.Detail>(result);
         }
 
-        public async Task<IDataResult<Notification>> GetAsync(Guid id)
-        {
-            var notification = await NotificationRepository.GetByIdAsync(id);
-
-            return new SuccessDataResult<Notification>(notification);
-        }
-
         public async Task<IResult> FireAsync(Guid nameSpaceId, FireNotification.Request req)
         {
+            var message = new SendNotificationEvent
+            {
+                NameSpaceId = nameSpaceId,
+                Level = (int)EnumHelper.Parse(req.Level, NotificationLevelType.Info),
+                Title = req.Title,
+                Summary = req.Summary,
+                Date = DateTime.UtcNow,
+                Topics = req.To?.Topics,
+                Url = req.Url,
+                Thumbnail = req.Thumbnail
+            };
+
+            if (req.To?.Users != null)
+            {
+                var targetUsers = await UserRepository.GetProjectedListAsync(s => s.Id, f => f.NameSpaceId == nameSpaceId && req.To.Users.Contains(f.Key));
+                message.Users = targetUsers;
+            }
+
             await EventPublisher.PublishAsync("notification-topic",
-                                              new SendNotificationEvent
-                                              {
-                                                  NameSpaceId = nameSpaceId,
-                                                  Level = (int)EnumHelper.Parse(req.Level, NotificationLevelType.Info),
-                                                  Title = req.Title,
-                                                  Summary = req.Summary,
-                                                  Date = DateTime.UtcNow,
-                                                  Topics = req.Topics,
-                                                  Url = req.Url,
-                                                  Thumbnail = req.Thumbnail
-                                              },
+                                              message,
                                               "notification.created");
 
             return new SuccessResult("Notification is fired");

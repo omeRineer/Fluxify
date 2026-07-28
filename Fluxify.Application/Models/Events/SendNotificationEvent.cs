@@ -10,6 +10,7 @@
         public string? Thumbnail { get; set; }
         public DateTime Date { get; set; }
         public string? Url { get; set; }
-        public List<string> Topics { get; set; }
+        public List<Guid>? Users { get; set; }
+        public List<string>? Topics { get; set; }
     }
 }
