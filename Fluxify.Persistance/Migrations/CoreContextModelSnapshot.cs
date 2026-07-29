@@ -136,7 +136,7 @@ namespace Fluxify.Persistance.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("Credential");
+                    b.ToTable("Credentials");
                 });
 
             modelBuilder.Entity("Fluxify.Domain.Entities.Core.NameSpace", b =>
