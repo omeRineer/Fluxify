@@ -1,4 +1,5 @@
 ﻿using Fluxify.Application.Models.Common;
+using Fluxify.Application.Models.Rest.Auth;
 using Fluxify.Application.Services.Core;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -15,9 +16,9 @@ namespace Fluxify.Api.Web.Controllers
             _authService = authService;
         }
 
-        [HttpPost("api-key/token")]
-        public async Task<IActionResult> GetTokenAsync([FromBody] string apiKey)
-            => Response(await _authService.GetTokenByApiKeyAsync(apiKey));
+        [HttpPost("login")]
+        public async Task<IActionResult> LoginAsync([FromBody] Login.Request req)
+            => Response(await _authService.LoginAsync(req));
             
     }
 }

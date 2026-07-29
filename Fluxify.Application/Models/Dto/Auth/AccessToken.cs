@@ -9,6 +9,6 @@ namespace Fluxify.Application.Models.Dto.Auth
     public class AccessToken
     {
         public string Token { get; set; }
-        public DateTime ExpireDate { get; set; }
+        public DateTime? ExpireDate { get; set; }
     }
 }

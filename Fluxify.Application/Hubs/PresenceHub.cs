@@ -1,5 +1,6 @@
 ﻿using Fluxify.Application.Models.Enums;
 using Fluxify.Application.Models.Hub;
+using Fluxify.Application.Models.Rest.UserDevice;
 using Fluxify.Application.Models.SignalR;
 using Fluxify.Application.Services.Interfaces;
 using Fluxify.Application.Services.Interfaces.Core;
@@ -17,15 +18,17 @@ using System.Threading.Tasks;
 
 namespace Fluxify.Application.Hubs
 {
-    [Authorize(AuthenticationSchemes = "FluxifySecurityScheme")]
+    [Authorize]
     public class PresenceHub : Hub
     {
         readonly HubConnectionManager<PresenceHubUser> HubConnectionManager;
         readonly IUserTopicService _userTopicService;
-        public PresenceHub(HubConnectionManager<PresenceHubUser> hubConnectionManager, IUserTopicService userTopicService)
+        readonly IUserDeviceService _userDeviceService;
+        public PresenceHub(HubConnectionManager<PresenceHubUser> hubConnectionManager, IUserTopicService userTopicService, IUserDeviceService userDeviceService)
         {
             HubConnectionManager = hubConnectionManager;
             _userTopicService = userTopicService;
+            _userDeviceService = userDeviceService;
         }
 
         public override async Task OnConnectedAsync()
@@ -44,12 +47,23 @@ namespace Fluxify.Application.Hubs
             {
                 await Clients.Group(hubUser.NameSpace.Signature).SendAsync(HubEvents.PresenceHub.ReceiveUserStates, new UserStateInfoPayload
                 {
-                    UserId = Context.User.Claims.Single(f => f.Type == FluxifyClaims.Key).Value,
+                    Key = Context.User.Claims.Single(f => f.Type == FluxifyClaims.Key).Value,
                     Status = EnumHelper.ToEnumString<UserAvailabilityStatus>((int)UserAvailabilityStatus.Online),
                     Date = DateTime.UtcNow
                 });
 
             }
+
+            var httpContext = Context.GetHttpContext();
+            var platform = httpContext?.Request?.Query[FluxifyHeaders.Device.Platform].FirstOrDefault();
+            await _userDeviceService.RegisterAsync(hubUser.Id, hubUser.NameSpace.Id, new SetUserDevice
+            {
+                DeviceId = httpContext?.Request?.Query[FluxifyHeaders.Device.DeviceId],
+                Platform = string.IsNullOrWhiteSpace(platform)
+                    ? EnumHelper.ToEnumString<DeviceType>((int)DeviceType.Web)
+                    : platform,
+                Token = httpContext?.Request?.Query[FluxifyHeaders.Device.Token].FirstOrDefault()
+            });
 
             await base.OnConnectedAsync();
         }
@@ -63,7 +77,7 @@ namespace Fluxify.Application.Hubs
             {
                 await Clients.Group(connectionUser.NameSpace.Signature).SendAsync(HubEvents.PresenceHub.ReceiveUserStates, new UserStateInfoPayload
                 {
-                    UserId = Context.User.Claims.Single(f => f.Type == FluxifyClaims.Key).Value,
+                    Key = Context.User.Claims.Single(f => f.Type == FluxifyClaims.Key).Value,
                     Date = DateTime.UtcNow,
                     Status = EnumHelper.ToEnumString<UserAvailabilityStatus>((int)UserAvailabilityStatus.Offline)
                 });
@@ -72,6 +86,9 @@ namespace Fluxify.Application.Hubs
             await base.OnDisconnectedAsync(exception);
         }
 
+
+
+        #region Events
         public async Task SetAvailabilityStatus(string status)
         {
             PresenceHubUser connectionUser = HubConnectionManager.GetConnection(Guid.Parse(Context.User.Claims.Single(f => f.Type == ClaimTypes.NameIdentifier).Value));
@@ -81,11 +98,13 @@ namespace Fluxify.Application.Hubs
                 connectionUser.SetStatus(status);
                 await Clients.Group(connectionUser.NameSpace.Signature).SendAsync(HubEvents.PresenceHub.ReceiveUserStates, new UserStateInfoPayload
                 {
-                    UserId = connectionUser.Key,
+                    Key = connectionUser.Key,
                     Status = status,
                     Date = DateTime.UtcNow
                 });
             }
         }
+        #endregion
+
     }
 }

@@ -24,12 +24,8 @@ namespace Fluxify.Api.Web.Controllers
         public async Task<IActionResult> GetProfileAsync()
             => Response(await _userService.GetDetailAsync(CurrentUser.NameIdentifier));
 
-        [HttpGet("chat-rooms")]
-        public async Task<IActionResult> GetChatRoomsAsync()
-            => Response(await _chatService.GetListAsync(CurrentUser.NameSpace.Id, CurrentUser.NameIdentifier));
-
         [HttpGet("notifications")]
         public async Task<IActionResult> GetNotificationsAsync()
-            => Response(await _notificationService.GetListAsync(CurrentUser.NameIdentifier));
+            => Response(await _notificationService.GetListAsync(CurrentUser.NameSpace.Id, CurrentUser.NameIdentifier));
     }
 }

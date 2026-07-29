@@ -8,6 +8,7 @@ using RabbitMQ.Client.Events;
 using Fluxify.Application.Repositories;
 using Fluxify.Application.Models.Events;
 using Fluxify.Application.Models.Hub;
+using System.Linq;
 
 namespace Fluxify.Api.Hub.Workers.Notification
 {
@@ -33,17 +34,20 @@ namespace Fluxify.Api.Hub.Workers.Notification
         {
             using var scope = _scopeFactory.CreateScope();
             var fireBaseNotificationService = scope.ServiceProvider.GetRequiredService<INF.IPushNotificationService>();
-            var userDeviceRepository = scope.ServiceProvider.GetRequiredService<IUserDeviceRepository>();
-            var userTopicRepository = scope.ServiceProvider.GetRequiredService<IUserTopicRepository>();
             var userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
-            var topicRepository = scope.ServiceProvider.GetRequiredService<ITopicRepository>();
 
-            var topics = await topicRepository.GetProjectedListAsync(s => s.Id, f => message.Topics.Contains(f.Slug));
-            var targetUsers = await userTopicRepository.GetListAsync(f => topics.Contains(f.TopicId) && f.NameSpaceId == message.NameSpaceId);
-            var targetDevices = await userDeviceRepository.GetListAsync(f => targetUsers.Select(s => s.UserId).Contains(f.UserId));
+            var targets = await userRepository.GetProjectedListAsync(
+                s => new { s.Id, s.Devices },
+                f => f.NameSpaceId == message.NameSpaceId &&
+                     (
+                         (f.Topics != null && message.Topics != null && f.Topics.Any(topic => message.Topics.Contains(topic.Topic.Slug))) ||
+                         (message.Users != null && message.Users.Contains(f.Id))
+                     )
+            );
+            var devices = targets.SelectMany(s => s.Devices);
 
-            if (targetDevices != null && targetDevices.Any())
-                await fireBaseNotificationService.SendNotificationAsync(targetDevices.Select(s => s.Token),
+            if (devices != null && devices.Any())
+                await fireBaseNotificationService.SendNotificationAsync(devices?.Select(s=> s.Token),
                                                                         message.Title,
                                                                         message.Summary,
                                                                         message.Thumbnail,

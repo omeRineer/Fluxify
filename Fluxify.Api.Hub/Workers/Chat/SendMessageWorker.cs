@@ -37,15 +37,13 @@ namespace Fluxify.Api.Hub.Workers.Chat
         protected override async Task HandleAsync(SendMessageEvent message, CancellationToken cancellationToken)
         {
             using var scope = _scopeFactory.CreateScope();
-            var eventPublisher = scope.ServiceProvider.GetRequiredService<IEventPublisher>();
-            var chatRepository = scope.ServiceProvider.GetRequiredService<IChatRepository>();
+            var chatUserRepository = scope.ServiceProvider.GetRequiredService<IChatUserRepository>();
             var userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
             var messageRepository = scope.ServiceProvider.GetRequiredService<IMessageRepository>();
             var _mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
 
-            var chat = await chatRepository.FindAsync(message.ChatId);
-
-            if (chat == null)
+            var isChatMember = await chatUserRepository.IsExistAsync(f => f.ChatId == message.ChatId && f.UserId == message.UserId);
+            if (!isChatMember)
                 throw new Exception("Chat not found");
 
             var newMessage = _mapper.Map<Message>(message);

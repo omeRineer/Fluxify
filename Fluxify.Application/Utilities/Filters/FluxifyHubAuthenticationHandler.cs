@@ -16,13 +16,9 @@ namespace Fluxify.Api.Hub.Auth
     {
         const string ApiKeyHeaderName = "Fluxify-Api-Key";
         readonly INameSpaceRepository NameSpaceRepository;
-        readonly IUserTopicRepository UserTopicRepository;
-        readonly IUserRepository UserRepository;
-        public FluxifyHubAuthenticationHandler(IOptionsMonitor<FluxifyHubAuthenticationOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock, INameSpaceRepository nameSpaceRepository, IUserTopicRepository userTopicRepository, IUserRepository userRepository) : base(options, logger, encoder, clock)
+        public FluxifyHubAuthenticationHandler(IOptionsMonitor<FluxifyHubAuthenticationOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock, INameSpaceRepository nameSpaceRepository) : base(options, logger, encoder, clock)
         {
             NameSpaceRepository = nameSpaceRepository;
-            UserTopicRepository = userTopicRepository;
-            UserRepository = userRepository;
         }
 
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
@@ -32,26 +28,20 @@ namespace Fluxify.Api.Hub.Auth
                 return AuthenticateResult.Fail("API Key is not provided.");
 
             var providedApiKey = headers.FirstOrDefault() ?? queries.FirstOrDefault();
-            var subscriber = await UserRepository.GetSingleOrDefaultAsync(f => f.ApiKey == providedApiKey);
+            var nameSpace = await NameSpaceRepository.GetSingleAsync(f => f.ApiKey == providedApiKey);
 
-            if (subscriber == null)
+            if (nameSpace == null)
                 return AuthenticateResult.Fail("Invalid API Key.");
 
-            if (subscriber.ExpireDate != null && subscriber.ExpireDate < DateTime.Now)
+            if (nameSpace.ExpireDate != null && nameSpace.ExpireDate < DateTime.Now)
                 return AuthenticateResult.Fail("API Key is expired.");
-
-            var nameSpace = await NameSpaceRepository.GetSingleAsync(f => f.Id == subscriber.NameSpaceId);
 
             var claims = new List<Claim>
             {
-                new Claim(FluxifyClaims.Key, subscriber.Key),
-                new Claim(ClaimTypes.NameIdentifier, subscriber.Id.ToString()),
-                new Claim(FluxifyClaims.ApiKey, subscriber.ApiKey),
-                new Claim(FluxifyClaims.NameSpaceId, subscriber.NameSpaceId.ToString()),
-                new Claim(FluxifyClaims.NameSpace, nameSpace.Signature),
-                new Claim(FluxifyClaims.Device, "undefined"),
-                new Claim(FluxifyClaims.Platform, "undefined"),
-                new Claim(ClaimTypes.Name, subscriber.Name)
+                new Claim(ClaimTypes.NameIdentifier, nameSpace.Id.ToString()),
+                new Claim(FluxifyClaims.Name, nameSpace.Name),
+                new Claim(FluxifyClaims.Signature, nameSpace.Signature)
+
             };
 
             var identity = new ClaimsIdentity(claims, Scheme.Name);

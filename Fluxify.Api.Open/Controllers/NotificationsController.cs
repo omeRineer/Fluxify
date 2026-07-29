@@ -22,39 +22,31 @@ namespace Fluxify.Api.Open.Controllers
             UserNotificationService = userNotificationService;
         }
 
-        [HttpPost("Create")]
+        [HttpPost("create")]
         public async Task<IActionResult> CreateAsync([FromBody] CreateNotification.Request request)
-        {
-            var result = await NotificationService.CreateAsync(CurrentUser.NameSpace.Id,
-                                                               CurrentUser.NameIdentifier,                                     
-                                                               request);
+            => Response(await NotificationService.CreateAsync(CurrentUser.NameSpace.Id,
+                                                              CurrentUser.NameIdentifier,
+                                                               request));
 
-            return Response(result);
-        }
-
-        [HttpPost("Fire")]
+        [HttpPost("fire")]
         public async Task<IActionResult> FireAsync([FromBody] FireNotification.Request request)
-        {
-            var result = await NotificationService.FireAsync(CurrentUser.NameSpace.Id,
-                                                             request);
+            => Response(await NotificationService.FireAsync(CurrentUser.NameSpace.Id,
+                                                             request));
 
-            return Response(result);
-        }
+        [HttpGet]
+        public async Task<IActionResult> GetNotificationsAsync()
+            => Response(await NotificationService.GetListAsync(CurrentUser.NameSpace.Id, CurrentUser.NameIdentifier));
 
+
+        // TODO : Owner check
         [HttpGet("{id}")]
         public async Task<IActionResult> GetDetailAsync([FromRoute] Guid id)
-        {
-            var result = await NotificationService.GetDetailAsync(id, CurrentUser.NameIdentifier);
+            => Response(await NotificationService.GetDetailAsync(CurrentUser.NameSpace.Id, 
+                                                                 CurrentUser.NameIdentifier, 
+                                                                 id));
 
-            return Response(result);
-        }
-
-        [HttpPut("{id}/Read")]
+        [HttpPut("{id}/read")]
         public async Task<IActionResult> ReadAsync([FromRoute] Guid id)
-        {
-            var result = await UserNotificationService.AddAsync(CurrentUser.NameIdentifier, id);
-
-            return Response(result);
-        }
+            => Response(await UserNotificationService.AddAsync(CurrentUser.NameIdentifier, id));
     }
 }

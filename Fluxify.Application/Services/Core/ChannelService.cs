@@ -31,7 +31,7 @@ namespace Fluxify.Application.Services.Core
 
         public async Task<IDataResult<CreateChannel.Response>> CreateAsync(CreateChannel.Request model)
         {
-            var channel = await channelRepository.GetSingleOrDefaultAsync(f => f.Slug == model.Key);
+            var channel = await channelRepository.GetSingleOrDefaultAsync(f => f.Slug == model.Slug);
             var businessResult = await BusinessRuleEngine.Run(
                     new DataMustBeAvaibleRule(channel, "Channel is avaible")
             );

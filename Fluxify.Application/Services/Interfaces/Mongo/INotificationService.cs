@@ -15,13 +15,9 @@ namespace Fluxify.Application.Services.Interfaces.Mongo
 {
     public interface INotificationService
     {
-        Task<IDataResult<NotificationDto.Detail>> GetDetailAsync(Guid id, Guid userId);
-        Task<IDataResult<DataListResponse<NotificationDto.List>>> GetListAsync(Guid userId);
+        Task<IDataResult<NotificationDto.Detail>> GetDetailAsync(Guid nameSpaceId, Guid userId, Guid id);
+        Task<IDataResult<DataListResponse<NotificationDto.List>>> GetListAsync(Guid nameSpaceId, Guid userId);
         Task<IResult> CreateAsync(Guid nameSpaceId, Guid userId, CreateNotification.Request req);
         Task<IResult> FireAsync(Guid nameSpaceId, FireNotification.Request req);
-
-        #region Internal
-        Task<IDataResult<Notification>> GetAsync(Guid id);
-        #endregion
     }
 }

@@ -33,7 +33,18 @@ namespace Fluxify.Api.Hub.Workers.Notification
 
         protected override async Task HandleAsync(SendNotificationEvent message, CancellationToken cancellationToken)
         {
-            await _hubContext.Clients.Groups(message.Topics.Select(s => $"{message.NameSpaceId}:{s}"))
+            var targets = _connectionManager.GetAllConnections(message.NameSpaceId).AsEnumerable();
+
+            if (message.Topics != null || message.Users != null)
+                targets = targets.Where(f =>
+                (
+                     (f.Topics != null && message.Topics != null && f.Topics.Any(topic => message.Topics.Contains(topic))) ||
+                     (message.Users != null && message.Users.Contains(f.Id))
+                ));
+
+            var targetConnections = targets.SelectMany(s => s.Connections).Select(s => s.Key);
+
+            await _hubContext.Clients.Clients(targetConnections)
                                      .SendAsync(HubEvents.PresenceHub.ReceiveNotification,
                                      new NotificationPayload
                                      {
@@ -45,6 +56,19 @@ namespace Fluxify.Api.Hub.Workers.Notification
                                          Url = message.Url,
                                          Thumbnail = message.Thumbnail
                                      });
+
+            //await _hubContext.Clients.Groups(message.Topics.Select(s => $"{message.NameSpaceId}:{s}"))
+            //                         .SendAsync(HubEvents.PresenceHub.ReceiveNotification,
+            //                         new NotificationPayload
+            //                         {
+            //                             Id = message.Id,
+            //                             Date = message.Date,
+            //                             Level = EnumHelper.ToEnumString<NotificationLevelType>(message.Level),
+            //                             Title = message.Title,
+            //                             Summary = message.Summary,
+            //                             Url = message.Url,
+            //                             Thumbnail = message.Thumbnail
+            //                         });
         }
     }
 }

@@ -1,5 +1,7 @@
 ﻿using Fluxify.Application.Models.Enums;
 using Fluxify.Application.Models.Hub;
+using Fluxify.Application.Utilities.Helpers;
+using Fluxify.Domain.Enums;
 using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Generic;
@@ -38,6 +40,7 @@ namespace Fluxify.Application.Hubs
         {
             lock (Connections)
             {
+                var httpContext = context.GetHttpContext();
                 if (!Connections.TryGetValue(context.UserIdentifier, out THubUser user))
                 {
                     user = new THubUser
@@ -55,8 +58,8 @@ namespace Fluxify.Application.Hubs
                 }
 
                 user.Connections.Add(context.ConnectionId,
-                                     new HubUser.DeviceInfo(context.User.Claims.Single(f => f.Type == FluxifyClaims.Device).Value,
-                                                            context.User.Claims.Single(f => f.Type == FluxifyClaims.Platform).Value));
+                                     new HubUser.DeviceInfo(httpContext?.Request?.Query[FluxifyHeaders.Device.DeviceId],
+                                                            httpContext?.Request?.Query[FluxifyHeaders.Device.Platform].FirstOrDefault() ?? EnumHelper.ToEnumString<DeviceType>((int)DeviceType.Web)));
 
                 return user;
             }

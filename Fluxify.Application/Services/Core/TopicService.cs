@@ -31,21 +31,6 @@ namespace Fluxify.Application.Services.Core
             this.channelRepository = channelRepository;
         }
 
-        public async Task<IResult> CreateAsync(CreateTopic.Request req)
-        {
-            var channel = await channelRepository.GetSingleAsync(f => f.Slug == req.Channel);
-
-            var newTopic = new Topic
-            {
-                ChannelId = channel.Id,
-                Name = req.Name
-            };
-
-            await topicRepository.AddAsync(newTopic);
-            await topicRepository.SaveChangesAsync();
-
-            return new SuccessResult("Topic is created");
-        }
 
         public async Task<IDataResult<DataListResponse<TopicDto.List>>> GetListAsync()
         {

@@ -13,43 +13,14 @@ namespace Fluxify.Api.Open.Controllers
     public class MeController : BaseController
     {
         readonly IUserService UserService;
-        readonly IUserTopicService UserTopicService;
-        readonly INotificationService NotificationService;
-        readonly IUserDeviceService UserDeviceService;
-        public MeController(CurrentUser currentUser, IUserService UserService, IUserDeviceService userDeviceService, IUserTopicService userTopicService, INotificationService notificationService) : base(currentUser)
+        public MeController(CurrentUser currentUser, IUserService UserService) : base(currentUser)
         {
             this.UserService = UserService;
-            UserDeviceService = userDeviceService;
-            UserTopicService = userTopicService;
-            NotificationService = notificationService;
         }
 
-        [HttpGet("Profile")]
+        [HttpGet("profile")]
         public async Task<IActionResult> GetProfileAsync()
             => Response(await UserService.GetDetailAsync(CurrentUser.NameIdentifier));
 
-        [HttpGet("Notifications")]
-        public async Task<IActionResult> GetNotificationsAsync()
-            => Response(await NotificationService.GetListAsync(CurrentUser.NameIdentifier));
-
-        [HttpGet("Topics")]
-        public async Task<IActionResult> GetTopicsAsync()
-            => Response(await UserTopicService.GetListAsync(CurrentUser.NameIdentifier));
-
-        [HttpGet("Devices")]
-        public async Task<IActionResult> GetDevicesAsync()
-            => Response(await UserDeviceService.GetListAsync(CurrentUser.NameIdentifier));
-
-        [HttpPost("Device/Set")]
-        public async Task<IActionResult> SetDeviceAsync([FromBody] SetUserDevice.Request req)
-            => Response(await UserDeviceService.SetAsync(CurrentUser.NameIdentifier,
-                                                   CurrentUser.NameSpace.Id,
-                                                   req));
-
-        [HttpPost("Topic/Set")]
-        public async Task<IActionResult> SetTopicsAsync([FromBody] SetUserTopics.Request req)
-            => Response(await UserTopicService.SetAsync(CurrentUser.NameIdentifier,
-                                                  CurrentUser.NameSpace.Id,
-                                                  req));
     }
 }
