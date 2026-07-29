@@ -22,6 +22,7 @@ namespace Fluxify.Persistance.Context
         public DbSet<User> Users { get; set; }
         public DbSet<UserDevice> UserDevices { get; set; }
         public DbSet<UserTopic> UserTopics { get; set; }
+        public DbSet<Credential> Credentials { get; set; }
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
