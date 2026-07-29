@@ -33,7 +33,7 @@ builder.Services.AddSessionContext<CurrentUser>(httpContext =>
             Key = userClaims[FluxifyClaims.Key],
             NameSpace = new CurrentUser.NameSpaceInfo(Guid.Parse(userClaims[FluxifyClaims.NameSpaceId]),
                                                       userClaims[FluxifyClaims.NameSpace]),
-            Name = userClaims[ClaimTypes.Name]
+            Name = userClaims[FluxifyClaims.Name]
         };
 
     return new CurrentUser();
