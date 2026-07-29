@@ -8,7 +8,7 @@ namespace Fluxify.Domain.Enums
 {
     public enum ChatType
     {
-        Direct = 0,
+        Direct,
         Group
     }
 }

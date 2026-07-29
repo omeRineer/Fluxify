@@ -33,6 +33,8 @@ namespace Fluxify.Domain.Entities.Mongo
         public class Target
         {
             public List<string> Topics { get; set; } = new();
+
+            [BsonRepresentation(BsonType.String)]
             public List<Guid> Users { get; set; } = new();
         }
 

@@ -13,33 +13,14 @@ namespace Fluxify.Api.Open.Controllers
     public class MeController : BaseController
     {
         readonly IUserService UserService;
-        readonly IUserTopicService UserTopicService;
-        readonly INotificationService NotificationService;
-        readonly IUserDeviceService UserDeviceService;
-        public MeController(CurrentUser currentUser, IUserService UserService, IUserDeviceService userDeviceService, IUserTopicService userTopicService, INotificationService notificationService) : base(currentUser)
+        public MeController(CurrentUser currentUser, IUserService UserService) : base(currentUser)
         {
             this.UserService = UserService;
-            UserDeviceService = userDeviceService;
-            UserTopicService = userTopicService;
-            NotificationService = notificationService;
         }
 
         [HttpGet("profile")]
         public async Task<IActionResult> GetProfileAsync()
             => Response(await UserService.GetDetailAsync(CurrentUser.NameIdentifier));
-
-        [HttpGet("notifications")]
-        public async Task<IActionResult> GetNotificationsAsync()
-            => Response(await NotificationService.GetListAsync(CurrentUser.NameSpace.Id, CurrentUser.NameIdentifier));
-
-        [HttpGet("topics")]
-        public async Task<IActionResult> GetTopicsAsync()
-            => Response(await UserTopicService.GetListAsync(CurrentUser.NameIdentifier));
-
-        [HttpGet("devices")]
-        public async Task<IActionResult> GetDevicesAsync()
-            => Response(await UserDeviceService.GetListAsync(CurrentUser.NameIdentifier));
-
 
     }
 }

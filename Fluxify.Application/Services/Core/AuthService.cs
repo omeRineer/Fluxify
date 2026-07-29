@@ -41,7 +41,7 @@ namespace Fluxify.Application.Services.Core
             if (credentialUser == null)
                 return new ErrorDataResult<AccessToken>("User not found!");
 
-            AccessToken token = _tokenService.GenerateToken(credentialUser.User);
+            AccessToken token = _tokenService.GenerateToken(credentialUser.User, credentialUser.User.NameSpace);
 
             return new SuccessDataResult<AccessToken>(token);
 

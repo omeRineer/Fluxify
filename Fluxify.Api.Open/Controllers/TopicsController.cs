@@ -17,11 +17,15 @@ namespace Fluxify.Api.Open.Controllers
             _userTopicService = userTopicService;
         }
 
-        [HttpGet]
+        [HttpGet("all")]
         public async Task<IActionResult> GetListAsync()
             => Response(await TopicService.GetListAsync());
 
-        [HttpPost("topic/set")]
+        [HttpGet]
+        public async Task<IActionResult> GetTopicsAsync()
+            => Response(await _userTopicService.GetListAsync(CurrentUser.NameIdentifier));
+
+        [HttpPost("set")]
         public async Task<IActionResult> SetTopicsAsync([FromBody] SetUserTopics.Request req)
             => Response(await _userTopicService.SetAsync(CurrentUser.NameIdentifier,
                                                   CurrentUser.NameSpace.Id,

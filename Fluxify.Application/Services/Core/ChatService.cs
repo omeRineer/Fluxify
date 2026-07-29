@@ -29,7 +29,7 @@ namespace Fluxify.Application.Services.Core
             _mapper = mapper;
         }
 
-        public async Task<IDataResult<Guid>> CreateAsync(Guid nameSpaceId, Guid userId, CreateChat.Request req)
+        public async Task<IDataResult<ChatDto.Detail>> CreateAsync(Guid nameSpaceId, Guid userId, CreateChat.Request req)
         {
             var mappedEntity = _mapper.Map<Chat>(req);
             mappedEntity.Users.Add(new ChatUser { UserId = userId });
@@ -39,7 +39,9 @@ namespace Fluxify.Application.Services.Core
             await _chatRepository.AddAsync(mappedEntity);
             await _chatRepository.SaveChangesAsync();
 
-            return new SuccessDataResult<Guid>(mappedEntity.Id);
+            var mappedResult = _mapper.Map<ChatDto.Detail>(mappedEntity);
+
+            return new SuccessDataResult<ChatDto.Detail>(mappedResult);
         }
 
         public async Task<IDataResult<ChatDto.Detail>> GetDetailAsync(Guid userId, Guid chatId)

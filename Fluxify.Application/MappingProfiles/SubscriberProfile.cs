@@ -16,8 +16,13 @@ namespace Fluxify.Application.MappingProfiles
             CreateMap<User, UpdateUser.Response>().IncludeBase<User, UserDto.Detail>();
             CreateMap<User, ChatDto.Detail.User>();
 
-            CreateMap<CreateUser.Request, User>();
+            CreateMap<CreateUser.Request, User>()
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => string.IsNullOrEmpty(src.Name) ? $"USR:{src.Key}" : src.Name));
             CreateMap<UpdateUser.Request, User>()
+                .AfterMap((src, dest) =>
+                {
+                    dest.Name = string.IsNullOrEmpty(src.Name) ? $"USR:{dest.Key}" : src.Name;
+                })
                 .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
         }
     }

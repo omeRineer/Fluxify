@@ -19,7 +19,7 @@ namespace Fluxify.Application.Models.Rest.Subscriber
 
         public class Response : UserDto.Detail
         {
-
+            public string Token { get; set; }
         }
     }
 }

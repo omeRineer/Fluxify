@@ -20,21 +20,22 @@ namespace Fluxify.Application.Utilities.Token
 {
     public interface ITokenService
     {
-        AccessToken GenerateToken(User user);
+        AccessToken GenerateToken(User user, NameSpace nameSpace);
     }
     public class JwtService : ITokenService
     {
+        // TODO : Add tenantInfo
         private readonly TokenOptions TokenOptions;
         public JwtService()
         {
             TokenOptions = AppConfiguration.TokenOptions;
         }
 
-        public AccessToken GenerateToken(User user)
+        public AccessToken GenerateToken(User user, NameSpace nameSpace)
         {
             var symetricSecurityKey = SecurityKeyHelper.GetSecurityKey(TokenOptions.SecurityKey);
             var signingCredentials = new SigningCredentials(symetricSecurityKey, SecurityAlgorithms.HmacSha256);
-            var claims = GetClaims(user);
+            var claims = GetClaims(user, nameSpace);
 
             var securityToken = new JwtSecurityToken
             (
@@ -53,16 +54,15 @@ namespace Fluxify.Application.Utilities.Token
             };
         }
 
-        private List<Claim> GetClaims(User user)
+        private List<Claim> GetClaims(User user, NameSpace nameSpace)
         {
             var claims = new List<Claim>
             {
                 new Claim(FluxifyClaims.Key, user.Key),
                 new Claim(FluxifyClaims.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.Name),
-                new Claim(FluxifyClaims.NameSpaceId, user.NameSpaceId.ToString()),
-                new Claim(FluxifyClaims.NameSpace, user.NameSpace.Signature),
+                new Claim(FluxifyClaims.NameSpaceId, nameSpace.Id.ToString()),
+                new Claim(FluxifyClaims.NameSpace, nameSpace.Signature),
                 new Claim(FluxifyClaims.Name, user.Name)
             };
 

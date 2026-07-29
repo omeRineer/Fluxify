@@ -47,7 +47,7 @@ namespace Fluxify.Application.Hubs
             {
                 await Clients.Group(hubUser.NameSpace.Signature).SendAsync(HubEvents.PresenceHub.ReceiveUserStates, new UserStateInfoPayload
                 {
-                    UserId = Context.User.Claims.Single(f => f.Type == FluxifyClaims.Key).Value,
+                    Key = Context.User.Claims.Single(f => f.Type == FluxifyClaims.Key).Value,
                     Status = EnumHelper.ToEnumString<UserAvailabilityStatus>((int)UserAvailabilityStatus.Online),
                     Date = DateTime.UtcNow
                 });
@@ -77,7 +77,7 @@ namespace Fluxify.Application.Hubs
             {
                 await Clients.Group(connectionUser.NameSpace.Signature).SendAsync(HubEvents.PresenceHub.ReceiveUserStates, new UserStateInfoPayload
                 {
-                    UserId = Context.User.Claims.Single(f => f.Type == FluxifyClaims.Key).Value,
+                    Key = Context.User.Claims.Single(f => f.Type == FluxifyClaims.Key).Value,
                     Date = DateTime.UtcNow,
                     Status = EnumHelper.ToEnumString<UserAvailabilityStatus>((int)UserAvailabilityStatus.Offline)
                 });
@@ -98,7 +98,7 @@ namespace Fluxify.Application.Hubs
                 connectionUser.SetStatus(status);
                 await Clients.Group(connectionUser.NameSpace.Signature).SendAsync(HubEvents.PresenceHub.ReceiveUserStates, new UserStateInfoPayload
                 {
-                    UserId = connectionUser.Key,
+                    Key = connectionUser.Key,
                     Status = status,
                     Date = DateTime.UtcNow
                 });

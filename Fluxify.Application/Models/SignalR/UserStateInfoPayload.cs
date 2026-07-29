@@ -8,7 +8,7 @@ namespace Fluxify.Application.Models.SignalR
 {
     public class UserStateInfoPayload
     {
-        public string UserId { get; set; }
+        public string Key { get; set; }
         public string Status { get; set; }
         public DateTime Date { get; set; }
     }
