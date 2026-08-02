@@ -77,6 +77,7 @@ namespace Fluxify.Application.Services.Core
         {
             var userDevice = await UserDeviceRepository.GetSingleOrDefaultAsync(
                 x => x.User.Key == key &&
+                     x.NameSpaceId == nameSpaceId &&
                      x.DeviceId == model.DeviceId,
                 i => i.Include(x => x.User));
 
