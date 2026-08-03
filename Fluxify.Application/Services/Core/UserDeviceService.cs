@@ -19,12 +19,14 @@ namespace Fluxify.Application.Services.Core
     public class UserDeviceService : IUserDeviceService
     {
         readonly IUserDeviceRepository UserDeviceRepository;
+        readonly IUserRepository _userRepository;
         readonly IMapper _mapper;
 
-        public UserDeviceService(IUserDeviceRepository userDeviceRepository, IMapper mapper)
+        public UserDeviceService(IUserDeviceRepository userDeviceRepository, IMapper mapper, IUserRepository userRepository)
         {
             UserDeviceRepository = userDeviceRepository;
             _mapper = mapper;
+            _userRepository = userRepository;
         }
 
         public async Task<IDataResult<DataListResponse<UserDeviceDto.List>>> GetListAsync(Guid userId)
@@ -75,6 +77,10 @@ namespace Fluxify.Application.Services.Core
 
         public async Task<IResult> RegisterAsync(string key, Guid nameSpaceId, SetUserDevice model)
         {
+            var user = await _userRepository.GetProjectedSingleOrDefaultAsync(s => s.Id, f => f.Key == key);
+            if (user == null)
+                return new ErrorResult("User not found");
+
             var userDevice = await UserDeviceRepository.GetSingleOrDefaultAsync(
                 x => x.User.Key == key &&
                      x.NameSpaceId == nameSpaceId &&
@@ -91,7 +97,7 @@ namespace Fluxify.Application.Services.Core
             if (userDevice == null)
             {
                 userDevice = _mapper.Map<UserDevice>(model);
-                userDevice.UserId = userDevice.UserId;
+                userDevice.UserId = user;
                 userDevice.NameSpaceId = nameSpaceId;
                 userDevice.IsActive = true;
 
