@@ -10,7 +10,8 @@ namespace Fluxify.Application.Models.Rest.UserTopic
     {
         public class Request
         {
-            public List<string> Topics { get; set; }
+            public List<string> Removes { get; set; } = new();
+            public List<string> News { get; set; } = new();
         }
 
         public class Response

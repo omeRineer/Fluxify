@@ -17,6 +17,7 @@ var builder = WebApplication.CreateBuilder(args);
 await builder.Services.AddRabbitMqAsync();
 builder.Services.AddControllers();
 builder.Services.AddApplication();
+builder.Services.AddGlobalExceptionHandler();
 builder.Services.AddTokenAuthentication();
 builder.Services.AddSessionContext<CurrentUser>(httpContext =>
 {
@@ -87,6 +88,8 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = "openapi/swagger";
     c.SwaggerEndpoint("/openapi/swagger/v1/swagger.json", "Fluxify Open API v1");
 });
+
+app.UseExceptionHandler();
 
 app.UseCors();
 

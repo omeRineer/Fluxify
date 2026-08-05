@@ -29,11 +29,9 @@ namespace Fluxify.Application.Services.Core
         public async Task<IDataResult<CreateNameSpace.Response>> CreateAsync(CreateNameSpace.Request model)
         {
             var nameSpace = await NameSpaceRepository.GetSingleOrDefaultAsync(f => f.Signature == model.Signature);
-            var businessResult = await BusinessRuleEngine.Run(
-                    new DataMustBeAvaibleRule(nameSpace, "Namespace is avaible. Please, set a difference signature value")
+            await BusinessRuleEngine.RunAndThrow(
+                    new MustNotExistRule<NameSpace>(nameSpace, "Namespace is avaible. Please, set a difference signature value")
             );
-            if (!businessResult.IsSuccess)
-                return new ErrorDataResult<CreateNameSpace.Response>(message: businessResult.Message);
 
             var newNameSpace = Mapper.Map<NameSpace>(model);
 
@@ -48,11 +46,9 @@ namespace Fluxify.Application.Services.Core
         public async Task<IDataResult<UpdateNameSpace.Response>> UpdateAsync(Guid id, UpdateNameSpace.Request model)
         {
             var nameSpace = await NameSpaceRepository.GetSingleOrDefaultAsync(f => f.Id == id);
-            var businessResult = await BusinessRuleEngine.Run(
-                    new DataMustBeFoundRule(nameSpace, "Namespace is not found")
+            await BusinessRuleEngine.RunAndThrow(
+                    new MustExistRule<NameSpace>(nameSpace, "Namespace is not found")
             );
-            if (!businessResult.IsSuccess)
-                return new ErrorDataResult<UpdateNameSpace.Response>(message: businessResult.Message);
 
 
             nameSpace = Mapper.Map(model, nameSpace);
@@ -68,11 +64,9 @@ namespace Fluxify.Application.Services.Core
         public async Task<IDataResult<NameSpaceDto.Detail>> GetDetailAsync(Guid id)
         {
             var nameSpace = await NameSpaceRepository.GetSingleOrDefaultAsync(f => f.Id == id);
-            var businessResult = await BusinessRuleEngine.Run(
-                    new DataMustBeFoundRule(nameSpace, "Namespace is not found")
+            await BusinessRuleEngine.RunAndThrow(
+                    new MustExistRule<NameSpace>(nameSpace, "Namespace is not found")
             );
-            if (!businessResult.IsSuccess)
-                return new ErrorDataResult<NameSpaceDto.Detail>(message: businessResult.Message);
 
             var result = Mapper.Map<NameSpaceDto.Detail>(nameSpace);
 

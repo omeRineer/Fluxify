@@ -34,7 +34,7 @@ namespace Fluxify.Application.Services.Core
         public async Task<IDataResult<AccessToken>> LoginAsync(Login.Request req)
         {
             var credentialUser = await _credentialRepository.GetSingleOrDefaultAsync(f => f.UserName == req.UserName &&
-                                                                                f.Password == req.Password,
+                                                                                            f.Password == req.Password,
                                                                            i => i.Include(x => x.User)
                                                                                  .ThenInclude(x => x.NameSpace));
 

@@ -43,41 +43,37 @@ namespace Fluxify.Application.Services.Core
         public async Task<IDataResult<CreateUser.Response>> CreateAsync(Guid nameSpaceId, CreateUser.Request model)
         {
             var nameSpaceE = await NameSpaceRepository.GetSingleAsync(f => f.Id == nameSpaceId);
-            var avaibleSubscriber = await UserRepository.GetSingleOrDefaultAsync(f => f.Key == model.Key && f.NameSpaceId == nameSpaceE.Id);
-            var businessResult = await BusinessRuleEngine.Run(
-                    new DataMustBeAvaibleRule(avaibleSubscriber, "Subscriber is avaible. Please, set a different key")
+            var avaibleUser = await UserRepository.GetSingleOrDefaultAsync(f => f.Key == model.Key && f.NameSpaceId == nameSpaceE.Id);
+            await BusinessRuleEngine.RunAndThrow(
+                    new MustNotExistRule<User>(avaibleUser, "User is avaible. Please, set a different key")
             );
-            if (!businessResult.IsSuccess)
-                return new ErrorDataResult<CreateUser.Response>(message: businessResult.Message);
 
-            var subscriber = Mapper.Map<User>(model);
-            subscriber.NameSpaceId = nameSpaceId;
+            var user = Mapper.Map<User>(model);
+            user.NameSpaceId = nameSpaceId;
 
-            if (model.Topics != null && model.Topics.Count > 0)
-                subscriber.Topics = await TopicRepository.GetProjectedListAsync(s => new UserTopic { TopicId = s.Id },
+            if (model.Topics != null && model.Topics.Any())
+                user.Topics = await TopicRepository.GetProjectedListAsync(s => new UserTopic { TopicId = s.Id },
                                                                                 f => model.Topics.Contains(f.Slug));
 
-            await UserRepository.AddAsync(subscriber);
+            await UserRepository.AddAsync(user);
             await UserRepository.SaveChangesAsync();
 
-            var result = Mapper.Map<CreateUser.Response>(subscriber);
-            result.Token = _tokenService.GenerateToken(subscriber, nameSpaceE).Token;
+            var result = Mapper.Map<CreateUser.Response>(user);
+            result.Token = _tokenService.GenerateToken(user, nameSpaceE).Token;
 
 
-            return new SuccessDataResult<CreateUser.Response>(result, "Subscriber is created.");
+            return new SuccessDataResult<CreateUser.Response>(result, "User is created.");
         }
 
 
         public async Task<IDataResult<UserDto.Detail>> GetDetailAsync(Guid id)
         {
-            var subscriber = await UserRepository.GetSingleOrDefaultAsync(f => f.Id == id);
-            var businessResult = await BusinessRuleEngine.Run(
-                                new DataMustBeFoundRule(subscriber, "Subscriber is not found.")
+            var user = await UserRepository.GetSingleOrDefaultAsync(f => f.Id == id);
+            await BusinessRuleEngine.RunAndThrow(
+                                new MustExistRule<User>(user, "User is not found.")
                         );
-            if (!businessResult.IsSuccess)
-                return new ErrorDataResult<UserDto.Detail>(message: businessResult.Message);
 
-            var result = Mapper.Map<UserDto.Detail>(subscriber);
+            var result = Mapper.Map<UserDto.Detail>(user);
 
             return new SuccessDataResult<UserDto.Detail>(data: result);
         }
@@ -95,35 +91,31 @@ namespace Fluxify.Application.Services.Core
 
         public async Task<IDataResult<UpdateUser.Response>> UpdateAsync(Guid nameSpaceId, string key, UpdateUser.Request model)
         {
-            var subscriber = await UserRepository.GetSingleOrDefaultAsync(f => f.Key == key && f.NameSpaceId == nameSpaceId,
-                                                                          i => i.Include(x => x.NameSpace));
-            var businessResult = await BusinessRuleEngine.Run(
-                    new DataMustBeFoundRule(subscriber, "Subscriber is not found.")
+            var user = await UserRepository.GetSingleOrDefaultAsync(f => f.Key == key && f.NameSpaceId == nameSpaceId,
+                                                                    i => i.Include(x => x.NameSpace));
+            await BusinessRuleEngine.RunAndThrow(
+                    new MustExistRule<User>(user, "User is not found.")
             );
-            if (!businessResult.IsSuccess)
-                return new ErrorDataResult<UpdateUser.Response>(message: businessResult.Message);
 
-            subscriber = Mapper.Map(model, subscriber);
+            user = Mapper.Map(model, user);
 
-            await UserRepository.UpdateAsync(subscriber);
+            await UserRepository.UpdateAsync(user);
             await UserRepository.SaveChangesAsync();
 
-            var result = Mapper.Map<UpdateUser.Response>(subscriber);
-            result.Token = _tokenService.GenerateToken(subscriber, subscriber.NameSpace).Token;
+            var result = Mapper.Map<UpdateUser.Response>(user);
+            result.Token = _tokenService.GenerateToken(user, user.NameSpace).Token;
 
-            return new SuccessDataResult<UpdateUser.Response>(result, "Subscriber is updated.");
+            return new SuccessDataResult<UpdateUser.Response>(result, "User is updated.");
         }
 
         public async Task<IDataResult<UserDto.Detail>> GetDetailAsync(Guid nameSpaceId, string key)
         {
-            var subscriber = await UserRepository.GetSingleOrDefaultAsync(f => f.Key == key && f.NameSpaceId == nameSpaceId);
-            var businessResult = await BusinessRuleEngine.Run(
-                                new DataMustBeFoundRule(subscriber, "Subscriber is not found.")
+            var user = await UserRepository.GetSingleOrDefaultAsync(f => f.Key == key && f.NameSpaceId == nameSpaceId);
+            await BusinessRuleEngine.Run(
+                                new MustExistRule<User>(user, "User is not found.")
                         );
-            if (!businessResult.IsSuccess)
-                return new ErrorDataResult<UserDto.Detail>(message: businessResult.Message);
 
-            var result = Mapper.Map<UserDto.Detail>(subscriber);
+            var result = Mapper.Map<UserDto.Detail>(user);
 
             return new SuccessDataResult<UserDto.Detail>(data: result);
         }
@@ -133,8 +125,9 @@ namespace Fluxify.Application.Services.Core
             var user = await UserRepository.GetSingleOrDefaultAsync(f => f.NameSpaceId == nameSpaceId && f.Key == key,
                                                                     i => i.Include(x => x.NameSpace));
 
-            if (user == null)
-                return new ErrorDataResult<AccessToken>("User not found!");
+            await BusinessRuleEngine.RunAndThrow(
+                    new MustExistRule<User>(user)
+            );
 
             AccessToken token = _tokenService.GenerateToken(user, user.NameSpace);
 
