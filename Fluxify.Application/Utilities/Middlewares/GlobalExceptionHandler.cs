@@ -15,29 +15,32 @@ namespace Fluxify.Application.Utilities.Middlewares
     {
         public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
         {
-            var (statusCode, title, detail) = exception switch
+            var (statusCode, title, detail, metaData) = exception switch
             {
                 BusinessException ex => (
                     StatusCodes.Status400BadRequest,
                     ex.Code,
-                    ex.Message
+                    ex.Message,
+                    ex.Metadata
                 ),
 
 
                 _ => (
                     StatusCodes.Status500InternalServerError,
                     "Internal Server Error",
-                    "An unexpected error occurred on the server."
+                    "An unexpected error occurred on the server.",
+                    null
                 )
             };
 
-            var problemDetails = new ProblemDetails
+            var problemDetails = new
             {
-                Status = statusCode,
-                Title = title,
+                Success = false,
+                Code = title,
                 Detail = detail,
-                Instance = httpContext.Request.Path
+                MetaData = metaData
             };
+
 
             httpContext.Response.StatusCode = statusCode;
 
@@ -46,5 +49,4 @@ namespace Fluxify.Application.Utilities.Middlewares
             return true;
         }
     }
-}
 }

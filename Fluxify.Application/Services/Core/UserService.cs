@@ -45,7 +45,7 @@ namespace Fluxify.Application.Services.Core
             var nameSpaceE = await NameSpaceRepository.GetSingleAsync(f => f.Id == nameSpaceId);
             var avaibleUser = await UserRepository.GetSingleOrDefaultAsync(f => f.Key == model.Key && f.NameSpaceId == nameSpaceE.Id);
             await BusinessRuleEngine.RunAndThrow(
-                    new MustNotExistRule<User>(avaibleUser, "User is avaible. Please, set a different key")
+                    new MustNotExistRule<User>(avaibleUser, "User already exists. Please, set a different key")
             );
 
             var user = Mapper.Map<User>(model);
@@ -70,7 +70,7 @@ namespace Fluxify.Application.Services.Core
         {
             var user = await UserRepository.GetSingleOrDefaultAsync(f => f.Id == id);
             await BusinessRuleEngine.RunAndThrow(
-                                new MustExistRule<User>(user, "User is not found.")
+                                new MustExistRule<User>(user)
                         );
 
             var result = Mapper.Map<UserDto.Detail>(user);
@@ -94,7 +94,7 @@ namespace Fluxify.Application.Services.Core
             var user = await UserRepository.GetSingleOrDefaultAsync(f => f.Key == key && f.NameSpaceId == nameSpaceId,
                                                                     i => i.Include(x => x.NameSpace));
             await BusinessRuleEngine.RunAndThrow(
-                    new MustExistRule<User>(user, "User is not found.")
+                    new MustExistRule<User>(user)
             );
 
             user = Mapper.Map(model, user);
@@ -112,7 +112,7 @@ namespace Fluxify.Application.Services.Core
         {
             var user = await UserRepository.GetSingleOrDefaultAsync(f => f.Key == key && f.NameSpaceId == nameSpaceId);
             await BusinessRuleEngine.Run(
-                                new MustExistRule<User>(user, "User is not found.")
+                                new MustExistRule<User>(user)
                         );
 
             var result = Mapper.Map<UserDto.Detail>(user);

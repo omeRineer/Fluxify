@@ -30,7 +30,7 @@ namespace Fluxify.Application.Services.Core
         {
             var nameSpace = await NameSpaceRepository.GetSingleOrDefaultAsync(f => f.Signature == model.Signature);
             await BusinessRuleEngine.RunAndThrow(
-                    new MustNotExistRule<NameSpace>(nameSpace, "Namespace is avaible. Please, set a difference signature value")
+                    new MustNotExistRule<NameSpace>(nameSpace, "Namespace already exists. Please, set a difference signature value")
             );
 
             var newNameSpace = Mapper.Map<NameSpace>(model);
@@ -47,7 +47,7 @@ namespace Fluxify.Application.Services.Core
         {
             var nameSpace = await NameSpaceRepository.GetSingleOrDefaultAsync(f => f.Id == id);
             await BusinessRuleEngine.RunAndThrow(
-                    new MustExistRule<NameSpace>(nameSpace, "Namespace is not found")
+                    new MustExistRule<NameSpace>(nameSpace)
             );
 
 
@@ -65,7 +65,7 @@ namespace Fluxify.Application.Services.Core
         {
             var nameSpace = await NameSpaceRepository.GetSingleOrDefaultAsync(f => f.Id == id);
             await BusinessRuleEngine.RunAndThrow(
-                    new MustExistRule<NameSpace>(nameSpace, "Namespace is not found")
+                    new MustExistRule<NameSpace>(nameSpace)
             );
 
             var result = Mapper.Map<NameSpaceDto.Detail>(nameSpace);

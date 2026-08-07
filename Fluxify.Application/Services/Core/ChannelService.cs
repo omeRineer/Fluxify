@@ -33,7 +33,7 @@ namespace Fluxify.Application.Services.Core
         {
             var channel = await channelRepository.GetSingleOrDefaultAsync(f => f.Slug == model.Slug);
             await BusinessRuleEngine.RunAndThrow(
-                    new MustNotExistRule<Channel>(channel, "Channel is avaible")
+                    new MustNotExistRule<Channel>(channel)
             );
 
             var newChannel = Mapper.Map<Channel>(model);
@@ -49,7 +49,7 @@ namespace Fluxify.Application.Services.Core
         {
             var channel = await channelRepository.GetSingleOrDefaultAsync(f => f.Id == id);
             await BusinessRuleEngine.RunAndThrow(
-                    new MustExistRule<Channel>(channel, "Channel is not found")
+                    new MustExistRule<Channel>(channel)
             );
 
             channel = Mapper.Map(model, channel);
@@ -65,7 +65,7 @@ namespace Fluxify.Application.Services.Core
         {
             var channel = await channelRepository.GetSingleOrDefaultAsync(f => f.Id == id);
             await BusinessRuleEngine.RunAndThrow(
-                    new MustExistRule<Channel>(channel, "Channel is not found")
+                    new MustExistRule<Channel>(channel)
             );
 
             var result = Mapper.Map<ChannelDto.Detail>(channel);

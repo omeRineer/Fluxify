@@ -6,11 +6,11 @@ namespace Fluxify.Application.Rules.Common
     {
         private readonly T? _entity;
 
-        public override string Code => "ENTITY_ALREADY_EXISTS";
-
         public MustNotExistRule(T? entity, string? message = null)
         {
             _entity = entity;
+
+            Code = "ENTITY_ALREADY_EXISTS";
             Message = message ?? $"{typeof(T).Name} already exists.";
         }
 

@@ -11,11 +11,11 @@ namespace Fluxify.Application.Rules.Common
     {
         private readonly T? _entity;
 
-        public override string Code => "ENTITY_NOT_FOUND";
-
         public MustExistRule(T? entity, string? message = null)
         {
             _entity = entity;
+
+            Code = "ENTITY_NOT_FOUND";
             Message = message ?? $"{typeof(T).Name} not found.";
         }
 

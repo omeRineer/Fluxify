@@ -8,7 +8,7 @@ namespace Application.Rules
 {
     public abstract class BusinessRule
     {
-        public abstract string Code { get; }
+        public string Code { get; protected set; }
         public string? Message { get; protected set; }
         public abstract Task<BusinessRuleResult> InvokeAsync();
     }
