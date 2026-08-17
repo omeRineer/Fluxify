@@ -61,6 +61,7 @@ namespace Fluxify.Application
         public static void AddGlobalExceptionHandler(this IServiceCollection services)
         {
             services.AddExceptionHandler<GlobalExceptionHandler>();
+            services.AddProblemDetails();
         }
 
         public static void AddTokenAuthentication(this IServiceCollection services, JwtBearerEvents events = null)

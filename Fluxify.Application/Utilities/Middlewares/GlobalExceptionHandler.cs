@@ -35,10 +35,9 @@ namespace Fluxify.Application.Utilities.Middlewares
 
             var problemDetails = new
             {
-                Success = false,
-                Code = title,
-                Detail = detail,
-                MetaData = metaData
+                Status = statusCode,
+                Title = title,
+                Detail = detail
             };
 
 
