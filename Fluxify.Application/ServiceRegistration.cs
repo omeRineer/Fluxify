@@ -9,6 +9,7 @@ using Fluxify.Application.Services.Interfaces.Core;
 using Fluxify.Application.Services.Interfaces.Mongo;
 using Fluxify.Application.Services.Mongo;
 using Fluxify.Application.Utilities.Helpers;
+using Fluxify.Application.Utilities.Middlewares;
 using Fluxify.Application.Utilities.Token;
 using Fluxify.Configuration;
 using Microsoft.AspNetCore.Authentication;
@@ -55,6 +56,12 @@ namespace Fluxify.Application
         {
             services.AddAuthentication()
                 .AddScheme<FluxifyHubAuthenticationOptions, FluxifyHubAuthenticationHandler>("FluxifySecurityScheme", null);
+        }
+
+        public static void AddGlobalExceptionHandler(this IServiceCollection services)
+        {
+            services.AddExceptionHandler<GlobalExceptionHandler>();
+            services.AddProblemDetails();
         }
 
         public static void AddTokenAuthentication(this IServiceCollection services, JwtBearerEvents events = null)

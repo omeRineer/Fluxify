@@ -12,6 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 await builder.Services.AddRabbitMqAsync();
 builder.Services.AddControllers();
 builder.Services.AddApplication();
+builder.Services.AddGlobalExceptionHandler();
 builder.Services.AddApiKeyAuthentication();
 builder.Services.AddSessionContext<CurrentNameSpace>(httpContext =>
 {
@@ -74,6 +75,8 @@ app.UseSwaggerUI(c =>
 });
 
 app.UseCors();
+
+app.UseExceptionHandler();
 
 app.UseHttpsRedirection();
 

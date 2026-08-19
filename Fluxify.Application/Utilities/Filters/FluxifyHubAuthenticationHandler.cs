@@ -28,7 +28,7 @@ namespace Fluxify.Api.Hub.Auth
                 return AuthenticateResult.Fail("API Key is not provided.");
 
             var providedApiKey = headers.FirstOrDefault() ?? queries.FirstOrDefault();
-            var nameSpace = await NameSpaceRepository.GetSingleAsync(f => f.ApiKey == providedApiKey);
+            var nameSpace = await NameSpaceRepository.GetSingleOrDefaultAsync(f => f.ApiKey == providedApiKey);
 
             if (nameSpace == null)
                 return AuthenticateResult.Fail("Invalid API Key.");

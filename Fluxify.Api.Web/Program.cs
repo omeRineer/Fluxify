@@ -15,6 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 await builder.Services.AddRabbitMqAsync();
 builder.Services.AddControllers();
 builder.Services.AddApplication();
+builder.Services.AddGlobalExceptionHandler();
 builder.Services.AddTokenAuthentication();
 builder.Services.AddSessionContext<CurrentUser>(httpContext =>
 {
@@ -48,6 +49,8 @@ builder.Services.AddCors(options =>
 
 
 var app = builder.Build();
+
+app.UseExceptionHandler();
 
 app.UseCors();
 

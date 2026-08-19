@@ -3,6 +3,8 @@ using Fluxify.Application.Models.Dto.Chat;
 using Fluxify.Application.Models.Rest.Chat;
 using Fluxify.Application.Models.Rest.Common;
 using Fluxify.Application.Repositories;
+using Fluxify.Application.Rules;
+using Fluxify.Application.Rules.Common;
 using Fluxify.Application.Services.Interfaces.Core;
 using Fluxify.Application.Utilities.Result;
 using Fluxify.Domain.Entities.Core;
@@ -48,6 +50,10 @@ namespace Fluxify.Application.Services.Core
         {
             var chat = await _chatRepository.GetSingleOrDefaultAsync(f => f.Users.Any(x => x.UserId == userId) && f.Id == chatId,
                                                                      i => i.Include(x => x.CreatedUser).Include(i => i.Users));
+
+            await BusinessRuleEngine.RunAndThrow(
+                    new MustExistRule<Chat>(chat)
+            );
 
             var mappedEntity = _mapper.Map<ChatDto.Detail>(chat);
 

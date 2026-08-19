@@ -10,8 +10,6 @@ namespace Fluxify.Application.Models.Dto.UserTopic
     {
         public class List
         {
-            public Guid Id { get; set; }
-            public Guid TopicId { get; set; }
             public string Slug { get; set; }
             public string Name { get; set; }
         }
