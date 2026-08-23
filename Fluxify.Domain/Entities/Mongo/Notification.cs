@@ -22,9 +22,21 @@ namespace Fluxify.Domain.Entities.Mongo
         public int ContentType { get; set; }
         public string? Content { get; set; }
         public string? Thumbnail { get; set; }
-        public List<Guid> Topics { get; set; }
+        public string? Url { get; set; }
+        public Target? To { get; set; }
+        
 
         public Dictionary<string, object>? Properties { get; set; }
+
+
+
+        public class Target
+        {
+            public List<string> Topics { get; set; } = new();
+
+            [BsonRepresentation(BsonType.String)]
+            public List<Guid> Users { get; set; } = new();
+        }
 
     }
 }

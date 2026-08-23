@@ -14,7 +14,7 @@ namespace Fluxify.Domain.Entities.Core
         public Guid NameSpaceId { get; set; }
         public string DeviceId { get; set; }
         public int Platform { get; set; }
-        public string Token { get; set; }
+        public string? Token { get; set; }
         public bool IsActive { get; set; }
         public DateTime LastSeen { get; set; }
 

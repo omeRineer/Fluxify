@@ -7,22 +7,22 @@ namespace Fluxify.Application.Models.Rest.Channel
     {
         public class Request
         {
-            public string Key
+            public string Slug
             {
-                get => _Key;
-                set => _Key = value.ToLower(new CultureInfo("en-EN"));
+                get => _Slug;
+                set => _Slug = value.ToLower(new CultureInfo("en-EN"));
             }
             public string Name { get; set; }
             public List<Topic>? Topics { get; set; }
 
 
 
-            private string _Key;
+            private string _Slug;
 
 
             public class Topic
             {
-                public string Key { get; set; }
+                public string Slug { get; set; }
                 public string Name { get; set; }
             }
         }

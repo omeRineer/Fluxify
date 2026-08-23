@@ -10,7 +10,7 @@ namespace Fluxify.Application.Models.Dto.Topic
     {
         public class List
         {
-            public string Id { get; set; }
+            public string Slug { get; set; }
             public string Name { get; set; }
         }
     }

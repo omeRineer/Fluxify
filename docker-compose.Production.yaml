@@ -70,6 +70,38 @@ services:
     networks:
       - appnet
 
+  api.integration:
+    container_name: fluxify.api.integration
+    build:
+      context: .
+      dockerfile: Fluxify.Api.Integration/dockerfile.Production
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      db.mongo:
+        condition: service_started
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:1010
+    networks:
+      - appnet
+
+  api.web:
+    container_name: fluxify.api.web
+    build:
+      context: .
+      dockerfile: Fluxify.Api.Web/dockerfile.Production
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      db.mongo:
+        condition: service_started
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:1030
+    networks:
+      - appnet
+
   api.hub:
     container_name: fluxify.api.hub
     build:

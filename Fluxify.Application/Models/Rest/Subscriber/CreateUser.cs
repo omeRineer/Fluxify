@@ -12,15 +12,14 @@ namespace Fluxify.Application.Models.Rest.Subscriber
         public class Request
         {
             public string Key { get; set; }
-            public string Name { get; set; }
-            public string Email { get; set; }
+            public string? Name { get; set; }
+            public string? Email { get; set; }
             public List<string>? Topics { get; set; }
-            public DateTime? ExpireDate { get; set; }
         }
 
         public class Response : UserDto.Detail
         {
-
+            public string Token { get; set; }
         }
     }
 }

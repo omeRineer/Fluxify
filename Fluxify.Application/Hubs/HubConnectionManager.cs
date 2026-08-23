@@ -1,5 +1,7 @@
 ﻿using Fluxify.Application.Models.Enums;
 using Fluxify.Application.Models.Hub;
+using Fluxify.Application.Utilities.Helpers;
+using Fluxify.Domain.Enums;
 using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Generic;
@@ -10,22 +12,23 @@ using System.Threading.Tasks;
 
 namespace Fluxify.Application.Hubs
 {
-    public class HubConnectionManager<THub>
+    public class HubConnectionManager<THubUser>
+        where THubUser : HubUser, new()
     {
-        Dictionary<string, ConnectionUser> Connections { get; }
+        Dictionary<string, THubUser> Connections { get; }
         public HubConnectionManager()
         {
             Connections = new();
         }
 
-        public ConnectionUser GetConnection(string userId)
+        public THubUser GetConnection(Guid userId)
         {
             lock (Connections)
             {
-                return Connections.Values.Single(f => f.Id == Guid.Parse(userId));
+                return Connections.Values.Single(f => f.Id == userId);
             }
         }
-        public List<ConnectionUser> GetAllConnections(Guid nameSpace)
+        public List<THubUser> GetAllConnections(Guid nameSpace)
         {
             lock (Connections)
             {
@@ -33,38 +36,30 @@ namespace Fluxify.Application.Hubs
             }
         }
 
-        public ConnectionUser AddConnection(HubCallerContext context)
+        public THubUser AddConnection(HubCallerContext context)
         {
             lock (Connections)
             {
-                if (!Connections.TryGetValue(context.UserIdentifier, out ConnectionUser user))
+                var httpContext = context.GetHttpContext();
+                if (!Connections.TryGetValue(context.UserIdentifier, out THubUser user))
                 {
-                    user = new ConnectionUser
+                    user = new THubUser
                     {
                         Id = Guid.Parse(context.User.Claims.Single(f => f.Type == ClaimTypes.NameIdentifier).Value),
                         Key = context.User.Claims.Single(f => f.Type == FluxifyClaims.Key).Value,
-                        NameSpace = new ConnectionUser.NameSpaceInfo
+                        NameSpace = new HubUser.NameSpaceInfo
                         {
                             Id = Guid.Parse(context.User.Claims.Single(f => f.Type == FluxifyClaims.NameSpaceId).Value),
                             Signature = context.User.Claims.Single(f => f.Type == FluxifyClaims.NameSpace).Value
-                        },
-                        Status = new ConnectionUser.StatusInfo
-                        {
-                            Id = (int)UserAvailabilityStatus.Online
-                        },
-                        ConnectedDate = DateTime.UtcNow,
-                        Topics = context.User.Claims
-                            .Where(f => f.Type == FluxifyClaims.Topic)
-                            .Select(s => s.Value)
-                            .ToList()
+                        }
                     };
 
                     Connections[context.UserIdentifier] = user;
                 }
 
                 user.Connections.Add(context.ConnectionId,
-                                     new ConnectionUser.DeviceInfo(context.User.Claims.Single(f => f.Type == FluxifyClaims.Device).Value,
-                                                                   context.User.Claims.Single(f => f.Type == FluxifyClaims.Platform).Value));
+                                     new HubUser.DeviceInfo(httpContext?.Request?.Query[FluxifyHeaders.Device.DeviceId],
+                                                            httpContext?.Request?.Query[FluxifyHeaders.Device.Platform].FirstOrDefault() ?? EnumHelper.ToEnumString<DeviceType>((int)DeviceType.Web)));
 
                 return user;
             }

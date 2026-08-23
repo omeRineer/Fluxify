@@ -1,21 +1,25 @@
 ﻿using Fluxify.Application.Models.Common;
 using Fluxify.Application.Services.Interfaces.Mongo;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Channels;
 
 namespace Fluxify.Api.Web.Controllers
 {
     public class NotificationsController : BaseController
     {
-        readonly INotificationService NotificationService;
+        readonly INotificationService _notificationService;
         public NotificationsController(CurrentUser currentUser, INotificationService notificationService) : base(currentUser)
         {
-            NotificationService = notificationService;
+            _notificationService = notificationService;
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetNotificationsAsync()
+            => Response(await _notificationService.GetListAsync(CurrentUser.NameSpace.Id, CurrentUser.NameIdentifier));
+
+        [HttpGet("{id:guid}")]
+        public async Task<IActionResult> GetDetailAsync([FromRoute] Guid id)
+            => Response(await _notificationService.GetDetailAsync(CurrentUser.NameIdentifier, CurrentUser.NameSpace.Id, id));
+
     }
 }

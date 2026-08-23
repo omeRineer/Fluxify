@@ -6,11 +6,13 @@ using Fluxify.Application.Repositories;
 using Fluxify.Application.Services.Interfaces.Core;
 using Fluxify.Application.Utilities.Result;
 using Fluxify.Domain.Entities.Core;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Fluxify.Application.Models.Rest.Channel.CreateChannel.Request;
 
 namespace Fluxify.Application.Services.Core
 {
@@ -29,18 +31,7 @@ namespace Fluxify.Application.Services.Core
 
         public async Task<IDataResult<DataListResponse<UserTopicDto.List>>> GetListAsync(Guid userId)
         {
-            var userTopics = await UserTopicRepository.GetProjectedListAsync(
-                select: s=> new UserTopic 
-                {
-                    Id = s.Id,
-                    TopicId = s.TopicId,
-                    Topic = new Topic
-                    {
-                        Slug = s.Topic.Slug,
-                        Name = s.Topic.Name
-                    }
-                },
-                filter:f => f.UserId == userId);
+            var userTopics = await UserTopicRepository.GetListAsync(filter: f => f.UserId == userId, i => i.Include(x => x.Topic));
 
             var mappedList = _mapper.Map<List<UserTopicDto.List>>(userTopics);
 
@@ -49,18 +40,52 @@ namespace Fluxify.Application.Services.Core
             return new SuccessDataResult<DataListResponse<UserTopicDto.List>>(result);
         }
 
+        public async Task<List<string>> GetTopicsByUser(Guid userId)
+        {
+            var topics = await UserTopicRepository.GetProjectedListAsync(s => s.Topic.Slug, f => f.UserId == userId);
+
+            return topics;
+        }
+
         public async Task<IResult> SetAsync(Guid userId, Guid nameSpaceId, SetUserTopics.Request req)
         {
-            var topics = await TopicRepository.GetListAsync(f => req.Topics.Contains(f.Slug));
-            var userTopics = await UserTopicRepository.GetListAsync(f => f.UserId == userId);
+            if (!req.Removes.Any() && !req.News.Any())
+                return new SuccessResult("User topics are updated");
 
-            await UserTopicRepository.DeleteRangeAsync(userTopics.Select(s => s.Id));
-            await UserTopicRepository.AddRangeAsync(topics.Select(t => new UserTopic
+            var existingUserTopics = await UserTopicRepository.GetProjectedListAsync(
+                s => new { s.Id, s.Topic.Slug, s.TopicId },
+                f => f.UserId == userId && f.NameSpaceId == nameSpaceId
+            );
+
+            var topicIdsToDelete = existingUserTopics
+                .Where(f => req.Removes.Contains(f.Slug))
+                .Select(s => s.Id)
+                .ToList();
+
+            if (topicIdsToDelete.Any())
+                await UserTopicRepository.DeleteRangeAsync(topicIdsToDelete);
+
+            var existingTopicSlugs = existingUserTopics.Select(x => x.Slug).ToHashSet();
+            var newSlugsToAdd = req.News.Where(slug => !existingTopicSlugs.Contains(slug)).ToList();
+
+            if (newSlugsToAdd.Any())
             {
-                UserId = userId,
-                TopicId = t.Id,
-                NameSpaceId = nameSpaceId
-            }));
+                var topicIdsToAdd = await TopicRepository.GetProjectedListAsync(
+                    s => s.Id,
+                    f => newSlugsToAdd.Contains(f.Slug)
+                );
+
+                if (topicIdsToAdd.Any())
+                {
+                    await UserTopicRepository.AddRangeAsync(topicIdsToAdd.Select(topicId => new UserTopic
+                    {
+                        UserId = userId,
+                        TopicId = topicId,
+                        NameSpaceId = nameSpaceId
+                    }));
+                }
+            }
+
             await UserTopicRepository.SaveChangesAsync();
 
             return new SuccessResult("User topics are updated");

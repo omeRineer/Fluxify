@@ -10,22 +10,9 @@ namespace Fluxify.Application.Models.Common
     {
         public Guid NameIdentifier { get; set; }
         public string Key { get; set; }
-        public string ApiKey { get; set; }
         public string Name { get; set; }
 
-        public DeviceInfo Device { get; set; }
         public NameSpaceInfo NameSpace { get; set; }
-
-        public class DeviceInfo
-        {
-            public DeviceInfo(string device, string platform)
-            {
-                Device = device;
-                Platform = platform;
-            }
-            public string Device { get; }
-            public string Platform { get; }
-        }
 
         public class NameSpaceInfo
         {

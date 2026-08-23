@@ -14,5 +14,8 @@ namespace Fluxify.Application.Services.Interfaces.Core
     {
         Task<IResult> SetAsync(Guid userId, Guid nameSpaceId, SetUserTopics.Request req);
         Task<IDataResult<DataListResponse<UserTopicDto.List>>> GetListAsync(Guid userId);
+
+
+        Task<List<string>> GetTopicsByUser(Guid userId);
     }
 }
