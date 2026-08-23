@@ -23,6 +23,7 @@ namespace Fluxify.Configuration
         public static string[] AllowOrigins { get => ConfigurationRoot.GetSection("AllowOrigins").Get<string[]>(); }
         public static MongoDbOptions MongoDbOptions { get => ConfigurationRoot.GetSection("MongoDbOptions").Get<MongoDbOptions>(); }
         public static RabbitMqOptions RabbitMqOptions { get => ConfigurationRoot.GetSection("RabbitMqOptions").Get<RabbitMqOptions>(); }
+        public static TokenOptions TokenOptions { get => ConfigurationRoot.GetSection("TokenOptions").Get<TokenOptions>(); }
 
     }
 }

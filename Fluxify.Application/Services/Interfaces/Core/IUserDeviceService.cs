@@ -8,7 +8,8 @@ namespace Fluxify.Application.Services.Interfaces.Core
 {
     public interface IUserDeviceService
     {
-        Task<IResult> SetAsync(Guid userId, Guid nameSpaceId, SetUserDevice.Request req);
+        Task<IResult> RegisterAsync(Guid userId, Guid nameSpaceId, SetUserDevice model);
+        Task<IResult> RegisterAsync(string key, Guid nameSpaceId, SetUserDevice model);
         Task<IDataResult<DataListResponse<UserDeviceDto.List>>> GetListAsync(Guid userId);
 
     }

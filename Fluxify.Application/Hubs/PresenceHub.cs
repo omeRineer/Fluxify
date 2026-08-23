@@ -1,7 +1,10 @@
 ﻿using Fluxify.Application.Models.Enums;
 using Fluxify.Application.Models.Hub;
+using Fluxify.Application.Models.Rest.UserDevice;
 using Fluxify.Application.Models.SignalR;
 using Fluxify.Application.Services.Interfaces;
+using Fluxify.Application.Services.Interfaces.Core;
+using Fluxify.Application.Utilities.Helpers;
 using Fluxify.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
@@ -15,83 +18,93 @@ using System.Threading.Tasks;
 
 namespace Fluxify.Application.Hubs
 {
-    [Authorize(AuthenticationSchemes = "FluxifySecurityScheme")]
+    [Authorize]
     public class PresenceHub : Hub
     {
-        readonly HubConnectionManager<PresenceHub> HubConnectionManager;
-        public PresenceHub(HubConnectionManager<PresenceHub> hubConnectionManager)
+        readonly HubConnectionManager<PresenceHubUser> HubConnectionManager;
+        readonly IUserTopicService _userTopicService;
+        readonly IUserDeviceService _userDeviceService;
+        public PresenceHub(HubConnectionManager<PresenceHubUser> hubConnectionManager, IUserTopicService userTopicService, IUserDeviceService userDeviceService)
         {
             HubConnectionManager = hubConnectionManager;
+            _userTopicService = userTopicService;
+            _userDeviceService = userDeviceService;
         }
 
         public override async Task OnConnectedAsync()
         {
-            ConnectionUser connectionUser = HubConnectionManager.AddConnection(Context);
+            // TODO : Race condition riski
+            PresenceHubUser hubUser = HubConnectionManager.AddConnection(Context);
+            if (hubUser.Topics == null)
+                hubUser.Topics = await _userTopicService.GetTopicsByUser(hubUser.Id);
 
-            foreach (var topic in Context.User.Claims.Where(f => f.Type == FluxifyClaims.Topic))
-                await Groups.AddToGroupAsync(Context.ConnectionId, $"{connectionUser.NameSpace.Id}:{topic.Value}");
+            foreach (var topic in hubUser.Topics)
+                await Groups.AddToGroupAsync(Context.ConnectionId, $"{hubUser.NameSpace.Id}:{topic}");
 
-            await Groups.AddToGroupAsync(Context.ConnectionId, connectionUser.NameSpace.Signature);
+            await Groups.AddToGroupAsync(Context.ConnectionId, hubUser.NameSpace.Signature);
 
-            if (connectionUser.Connections.Count == 1)
+            if (hubUser.Connections.Count == 1)
             {
-                await Clients.Group(connectionUser.NameSpace.Signature).SendAsync(HubEvents.PresenceHub.ReceiveUserStates, new PushToClientUserStateInfoModel
+                await Clients.Group(hubUser.NameSpace.Signature).SendAsync(HubEvents.PresenceHub.ReceiveUserStatus, new UserStateInfoPayload
                 {
-                    UserId = Context.User.Claims.Single(f => f.Type == FluxifyClaims.Key).Value,
-                    Date = DateTime.UtcNow,
-                    Status = (int) UserAvailabilityStatus.Online
+                    Key = Context.User.Claims.Single(f => f.Type == FluxifyClaims.Key).Value,
+                    Status = EnumHelper.ToEnumString<UserAvailabilityStatus>((int)UserAvailabilityStatus.Online),
+                    Date = DateTime.UtcNow
                 });
-                
+
             }
+
+            var httpContext = Context.GetHttpContext();
+            var platform = httpContext?.Request?.Query[FluxifyHeaders.Device.Platform].FirstOrDefault();
+            await _userDeviceService.RegisterAsync(hubUser.Id, hubUser.NameSpace.Id, new SetUserDevice
+            {
+                DeviceId = httpContext?.Request?.Query[FluxifyHeaders.Device.DeviceId],
+                Platform = string.IsNullOrWhiteSpace(platform)
+                    ? EnumHelper.ToEnumString<DeviceType>((int)DeviceType.Web)
+                    : platform,
+                Token = httpContext?.Request?.Query[FluxifyHeaders.Device.Token].FirstOrDefault()
+            });
 
             await base.OnConnectedAsync();
         }
 
         public override async Task OnDisconnectedAsync(Exception exception)
         {
-            ConnectionUser connectionUser = HubConnectionManager.GetConnection(Context.User.Claims.Single(f => f.Type == ClaimTypes.NameIdentifier).Value);
+            PresenceHubUser connectionUser = HubConnectionManager.GetConnection(Guid.Parse(Context.User.Claims.Single(f => f.Type == ClaimTypes.NameIdentifier).Value));
             int connectionCount = HubConnectionManager.RemoveConnection(Context);
 
-            if(connectionCount == 0)
+            if (connectionCount == 0)
             {
-                await Clients.Group(connectionUser.NameSpace.Signature).SendAsync(HubEvents.PresenceHub.ReceiveUserStates, new PushToClientUserStateInfoModel
+                await Clients.Group(connectionUser.NameSpace.Signature).SendAsync(HubEvents.PresenceHub.ReceiveUserStatus, new UserStateInfoPayload
                 {
-                    UserId = Context.User.Claims.Single(f => f.Type == FluxifyClaims.Key).Value,
+                    Key = Context.User.Claims.Single(f => f.Type == FluxifyClaims.Key).Value,
                     Date = DateTime.UtcNow,
-                    Status = (int) UserAvailabilityStatus.Offline
+                    Status = EnumHelper.ToEnumString<UserAvailabilityStatus>((int)UserAvailabilityStatus.Offline)
                 });
             }
 
             await base.OnDisconnectedAsync(exception);
         }
 
-        public async Task GetOnlineUsers()
+
+
+        #region Events
+        public async Task SetAvailabilityStatus(string status)
         {
-            ConnectionUser connectionUser = HubConnectionManager.GetConnection(Context.User.Claims.Single(f => f.Type == ClaimTypes.NameIdentifier).Value);
+            PresenceHubUser connectionUser = HubConnectionManager.GetConnection(Guid.Parse(Context.User.Claims.Single(f => f.Type == ClaimTypes.NameIdentifier).Value));
 
-            var onlineSubscribers = HubConnectionManager.GetAllConnections(connectionUser.NameSpace.Id).Select(s => new PushToClientUserStateInfoModel
+            if (EnumHelper.HasValue<UserAvailabilityStatus>(status))
             {
-                UserId = s.Key,
-                Date = s.ConnectedDate,
-                Status = s.Status.Id,
-                Title = s.Status.Name
-            }).ToList();
-
-            await Clients.Caller.SendAsync(HubEvents.PresenceHub.ReceiveOnlineUsers, onlineSubscribers);
+                connectionUser.SetStatus(status);
+                await Clients.Group(connectionUser.NameSpace.Signature).SendAsync(HubEvents.PresenceHub.ReceiveUserStatus, new UserStateInfoPayload
+                {
+                    Key = connectionUser.Key,
+                    Status = status,
+                    Date = DateTime.UtcNow
+                });
+            }
         }
+        #endregion
 
-        public async Task SetAvailabilityStatus(int status)
-        {
-            ConnectionUser connectionUser = HubConnectionManager.GetConnection(Context.User.Claims.Single(f => f.Type == ClaimTypes.NameIdentifier).Value);
-
-            connectionUser.Status.Id = status;
-            await Clients.Group(connectionUser.NameSpace.Signature).SendAsync(HubEvents.PresenceHub.ReceiveUserStates, new PushToClientUserStateInfoModel
-            {
-                UserId = Context.User.Claims.Single(f => f.Type == FluxifyClaims.Key).Value,
-                Status = status,
-                Title = connectionUser.Status.Name,
-                Date = DateTime.UtcNow
-            });
-        }
     }
 }

@@ -6,23 +6,27 @@ using Fluxify.Application.Repositories;
 using Fluxify.Application.Services.Interfaces.Core;
 using Fluxify.Application.Utilities.Result;
 using Fluxify.Domain.Entities.Core;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Fluxify.Application.Models.Dto.Chat.ChatDto.Detail;
 
 namespace Fluxify.Application.Services.Core
 {
     public class UserDeviceService : IUserDeviceService
     {
         readonly IUserDeviceRepository UserDeviceRepository;
+        readonly IUserRepository _userRepository;
         readonly IMapper _mapper;
 
-        public UserDeviceService(IUserDeviceRepository userDeviceRepository, IMapper mapper)
+        public UserDeviceService(IUserDeviceRepository userDeviceRepository, IMapper mapper, IUserRepository userRepository)
         {
             UserDeviceRepository = userDeviceRepository;
             _mapper = mapper;
+            _userRepository = userRepository;
         }
 
         public async Task<IDataResult<DataListResponse<UserDeviceDto.List>>> GetListAsync(Guid userId)
@@ -36,38 +40,80 @@ namespace Fluxify.Application.Services.Core
             return new SuccessDataResult<DataListResponse<UserDeviceDto.List>>(result);
         }
 
-        public async Task<IResult> SetAsync(Guid userId, Guid nameSpaceId, SetUserDevice.Request req)
+        public async Task<IResult> RegisterAsync(Guid userId, Guid nameSpaceId, SetUserDevice model)
         {
-            var userDevice = await UserDeviceRepository.GetSingleOrDefaultAsync(x => x.UserId == userId && x.DeviceId == req.DeviceId);
+            var userDevice = await UserDeviceRepository.GetSingleOrDefaultAsync(
+                x => x.UserId == userId &&
+                     x.DeviceId == model.DeviceId);
 
-            var devicesWithSameToken = await UserDeviceRepository.GetListAsync(f => f.Token == req.Token &&
-                                                                                  (f.UserId != userId || f.DeviceId != req.DeviceId));
-            if (devicesWithSameToken.Any())
-            {
-                devicesWithSameToken.ForEach(device => device.IsActive = false);
+            var duplicatedDevices = await UserDeviceRepository.GetListAsync(x =>
+                    x.Token == model.Token &&
+                    x.IsActive);
 
-                await UserDeviceRepository.UpdateRangeAsync(devicesWithSameToken);
-            }
+            foreach (var device in duplicatedDevices)
+                device.IsActive = false;
 
             if (userDevice == null)
             {
-                userDevice = _mapper.Map<UserDevice>(req);
+                userDevice = _mapper.Map<UserDevice>(model);
                 userDevice.UserId = userId;
                 userDevice.NameSpaceId = nameSpaceId;
+                userDevice.IsActive = true;
 
                 await UserDeviceRepository.AddAsync(userDevice);
             }
             else
             {
-                userDevice.Token = req.Token;
+                userDevice.Token = model.Token;
+                userDevice.NameSpaceId = nameSpaceId;
                 userDevice.IsActive = true;
-
-                await UserDeviceRepository.UpdateAsync(userDevice);
+                userDevice.LastSeen = DateTime.UtcNow;
             }
 
             await UserDeviceRepository.SaveChangesAsync();
 
-            return new SuccessResult("User device is settled");
+            return new SuccessResult("User device has been registered.");
+        }
+
+        public async Task<IResult> RegisterAsync(string key, Guid nameSpaceId, SetUserDevice model)
+        {
+            var user = await _userRepository.GetProjectedSingleOrDefaultAsync(s => s.Id, f => f.Key == key);
+            if (user == null)
+                return new ErrorResult("User not found");
+
+            var userDevice = await UserDeviceRepository.GetSingleOrDefaultAsync(
+                x => x.User.Key == key &&
+                     x.NameSpaceId == nameSpaceId &&
+                     x.DeviceId == model.DeviceId,
+                i => i.Include(x => x.User));
+
+            var duplicatedDevices = await UserDeviceRepository.GetListAsync(x =>
+                    x.Token == model.Token &&
+                    x.IsActive);
+
+            foreach (var device in duplicatedDevices)
+                device.IsActive = false;
+
+            if (userDevice == null)
+            {
+                userDevice = _mapper.Map<UserDevice>(model);
+                userDevice.UserId = user;
+                userDevice.NameSpaceId = nameSpaceId;
+                userDevice.IsActive = true;
+
+                await UserDeviceRepository.AddAsync(userDevice);
+            }
+            else
+            {
+                userDevice.Token = model.Token;
+                userDevice.NameSpaceId = nameSpaceId;
+                userDevice.IsActive = true;
+                userDevice.LastSeen = DateTime.UtcNow;
+            }
+
+            await UserDeviceRepository.SaveChangesAsync();
+
+            return new SuccessResult("User device has been registered.");
         }
     }
 }

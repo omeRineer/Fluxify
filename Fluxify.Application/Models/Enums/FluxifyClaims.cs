@@ -10,10 +10,9 @@ namespace Fluxify.Application.Models.Enums
     {
         public const string NameSpaceId = "NameSpaceId";
         public const string NameSpace = "NameSpace";
+        public const string Signature = "Signature";
         public const string Key = "Key";
-        public const string ApiKey = "ApiKey";
-        public const string Topic = "Topic";
-        public const string Device = "Device";
-        public const string Platform = "Platform";
+        public const string Name = "Name";
+        public const string NameIdentifier = "NameIdentifier";
     }
 }

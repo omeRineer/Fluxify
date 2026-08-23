@@ -9,9 +9,14 @@ using Fluxify.Application.Services.Interfaces.Core;
 using Fluxify.Application.Services.Interfaces.Mongo;
 using Fluxify.Application.Services.Mongo;
 using Fluxify.Application.Utilities.Helpers;
+using Fluxify.Application.Utilities.Middlewares;
+using Fluxify.Application.Utilities.Token;
 using Fluxify.Configuration;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
@@ -35,42 +40,65 @@ namespace Fluxify.Application
             services.AddScoped<IUserTopicService, UserTopicService>();
             services.AddScoped<IChannelService, ChannelService>();
             services.AddScoped<ITopicService, TopicService>();
-
-            services.AddHttpContextAccessor();
-            services.AddAuthentication()
-                .AddScheme<FluxifyHubAuthenticationOptions, FluxifyHubAuthenticationHandler>("FluxifySecurityScheme", null);
-
-
-            services.AddScoped<CurrentUser>(i =>
-            {
-                var httpContextAccessor = i.GetService<IHttpContextAccessor>();
-                var user = httpContextAccessor?.HttpContext?.User;
-                var userClaims = user.Claims
-                    .GroupBy(k => k.Type)
-                    .ToDictionary(g => g.Key, g => g.First().Value);
+            services.AddScoped<IMessageService, MessageService>();
+            services.AddScoped<IChatService, ChatService>();
+            services.AddScoped<IChatUserService, ChatUserService>();
 
 
-                if (user != null && user.Identity.IsAuthenticated)
-                    return new CurrentUser
-                    {
-                        NameIdentifier = Guid.Parse(userClaims[ClaimTypes.NameIdentifier]),
-                        ApiKey = userClaims[FluxifyClaims.ApiKey],
-                        Key = userClaims[FluxifyClaims.Key],
-                        NameSpace = new CurrentUser.NameSpaceInfo(Guid.Parse(userClaims[FluxifyClaims.NameSpaceId]),
-                                                                  userClaims[FluxifyClaims.NameSpace]),
-                        Name = userClaims[ClaimTypes.Name],
-                        Device = new CurrentUser.DeviceInfo(userClaims[FluxifyClaims.Device], userClaims[FluxifyClaims.Platform])
-                    };
+            services.AddScoped<IAuthService, AuthService>();
+            services.AddSingleton<ITokenService, JwtService>();
 
-                return new CurrentUser();
-            });
 
-            services.AddAutoMapper(opt =>
-            {
-                
-            }, Assembly.GetExecutingAssembly());
+            services.AddAutoMapper(opt => { }, Assembly.GetExecutingAssembly());
         }
 
+        public static void AddApiKeyAuthentication(this IServiceCollection services)
+        {
+            services.AddAuthentication()
+                .AddScheme<FluxifyHubAuthenticationOptions, FluxifyHubAuthenticationHandler>("FluxifySecurityScheme", null);
+        }
+
+        public static void AddGlobalExceptionHandler(this IServiceCollection services)
+        {
+            services.AddExceptionHandler<GlobalExceptionHandler>();
+            services.AddProblemDetails();
+        }
+
+        public static void AddTokenAuthentication(this IServiceCollection services, JwtBearerEvents events = null)
+        {
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                            .AddJwtBearer(opt =>
+                            {
+                                opt.TokenValidationParameters = new TokenValidationParameters
+                                {
+                                    ValidateIssuer = true,
+                                    ValidateAudience = true,
+                                    ValidateLifetime = false,
+                                    ValidateIssuerSigningKey = true,
+
+                                    ValidIssuer = AppConfiguration.TokenOptions.Issuer,
+                                    ValidAudience = AppConfiguration.TokenOptions.Audience,
+                                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(AppConfiguration.TokenOptions.SecurityKey))
+
+                                };
+
+                                if (events != null)
+                                    opt.Events = events;
+                            });
+
+        }
+
+        public static void AddSessionContext<TSession>(this IServiceCollection services, Func<HttpContext, TSession> func)
+            where TSession : class, new()
+        {
+            services.AddHttpContextAccessor();
+            services.AddScoped<TSession>(i =>
+            {
+                var httpContextAccessor = i.GetService<IHttpContextAccessor>();
+
+                return func(httpContextAccessor.HttpContext);
+            });
+        }
 
     }
 }

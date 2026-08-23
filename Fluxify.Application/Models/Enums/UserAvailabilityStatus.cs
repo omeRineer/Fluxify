@@ -11,6 +11,6 @@ namespace Fluxify.Application.Models.Enums
         Offline,
         Online,
         Busy,
-        DoNotDisturb
+        Away
     }
 }
