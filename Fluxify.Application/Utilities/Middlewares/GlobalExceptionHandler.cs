@@ -37,7 +37,7 @@ namespace Fluxify.Application.Utilities.Middlewares
             {
                 Status = statusCode,
                 Title = title,
-                Detail = detail
+                Message = detail
             };
 
 

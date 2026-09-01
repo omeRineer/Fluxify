@@ -31,13 +31,13 @@ namespace Fluxify.Application.Services.Mongo
             _mapper = mapper;
         }
 
-        public async Task<IResult> AddAsync(Guid userId, Guid notificationId)
+        public async Task<IResult> AddAsync(Guid userId, Guid[] notificationIds)
         {
-            await UserNotificationRepository.InsertAsync(new UserNotification
+            await UserNotificationRepository.InsertManyAsync(notificationIds.Select(s => new UserNotification
             {
-                NotificationId = notificationId,
+                NotificationId = s,
                 UserId = userId
-            });
+            }));
 
             return new SuccessResult();
         }

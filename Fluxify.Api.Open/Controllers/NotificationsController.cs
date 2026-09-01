@@ -34,8 +34,9 @@ namespace Fluxify.Api.Open.Controllers
                                                                  CurrentUser.NameIdentifier, 
                                                                  id));
 
-        [HttpPut("{id}/read")]
-        public async Task<IActionResult> ReadAsync([FromRoute] Guid id)
-            => Response(await UserNotificationService.AddAsync(CurrentUser.NameIdentifier, id));
+        [HttpPost("mark-as-read")]
+        public async Task<IActionResult> MarkAsReadAsync([FromBody] Guid[] notifications)
+            => Response(await UserNotificationService.AddAsync(CurrentUser.NameIdentifier, notifications));
+
     }
 }
