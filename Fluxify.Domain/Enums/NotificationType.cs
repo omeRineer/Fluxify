@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Fluxify.Domain.Enums
 {
-    public enum NotificationLevelType
+    public enum NotificationType
     {
         Info,
         Warning,
