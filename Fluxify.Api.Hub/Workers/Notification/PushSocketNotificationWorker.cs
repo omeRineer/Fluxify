@@ -50,7 +50,7 @@ namespace Fluxify.Api.Hub.Workers.Notification
                                      {
                                          Id = message.Id,
                                          Date = message.Date,
-                                         Level = EnumHelper.ToEnumString<NotificationLevelType>(message.Level),
+                                         Type = EnumHelper.ToEnumString<NotificationType>(message.Type),
                                          Title = message.Title,
                                          Summary = message.Summary,
                                          Url = message.Url,

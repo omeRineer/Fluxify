@@ -18,7 +18,6 @@ namespace Fluxify.Api.Integration.Controllers
         [HttpPost("create")]
         public async Task<IActionResult> CreateAsync([FromBody] CreateNotification.Request request)
             => Response(await _notificationService.CreateAsync(CurrentNameSpace.NameIdentifier,
-                                                             CurrentNameSpace.NameIdentifier,
                                                              request));
 
     }
