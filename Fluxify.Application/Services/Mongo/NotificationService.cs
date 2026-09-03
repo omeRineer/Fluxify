@@ -51,11 +51,10 @@ namespace Fluxify.Application.Services.Mongo
             UserRepository = userRepository;
         }
 
-        public async Task<IResult> CreateAsync(Guid nameSpaceId, Guid userId, CreateNotification.Request req)
+        public async Task<IResult> CreateAsync(Guid nameSpaceId, CreateNotification.Request req)
         {
             var newNotification = _mapper.Map<Notification>(req);
             newNotification.NameSpace = nameSpaceId;
-            newNotification.Sender = userId;
 
             if (req.To?.Users != null)
             {
@@ -114,13 +113,11 @@ namespace Fluxify.Application.Services.Mongo
 
 
             var notification = await NotificationRepository.GetByIdAsync(id);
-            var user = await UserRepository.GetSingleAsync(f => f.Id == notification.Sender);
             var result = new NotificationDto.Detail
             {
                 Id = notification.Id,
                 Type = EnumHelper.ToEnumString<NotificationType>(notification.Type),
                 ContentType = EnumHelper.ToEnumString<NotificationContentType>(notification.ContentType),
-                Sender = user.Key,
                 Title = notification.Title,
                 Summary = notification.Summary,
                 Content = notification.Content,
