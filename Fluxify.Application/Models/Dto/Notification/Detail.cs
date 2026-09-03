@@ -13,7 +13,7 @@ namespace Fluxify.Application.Models.Dto.Notification
         {
             public Guid Id { get; set; }
             public string Sender { get; set; }
-            public string Level { get; set; }
+            public string Type { get; set; }
             public string ContentType { get; set; }
             public string? Content { get; set; }
             public string Title { get; set; }
@@ -30,8 +30,7 @@ namespace Fluxify.Application.Models.Dto.Notification
         {
             public Guid Id { get; set; }
             public string Sender { get; set; }
-            public string Level { get; set; }
-            public string ContentType { get; set; }
+            public string Type { get; set; }
             public string Title { get; set; }
             public string Summary { get; set; }
             public string? Thumbnail { get; set; }

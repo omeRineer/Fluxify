@@ -16,7 +16,7 @@ namespace Fluxify.Domain.Entities.Mongo
         [BsonRepresentation(BsonType.String)]
         public Guid Sender { get; set; }
 
-        public int Level { get; set; }
+        public int Type { get; set; }
         public string Title { get; set; }
         public string Summary { get; set; }
         public int ContentType { get; set; }

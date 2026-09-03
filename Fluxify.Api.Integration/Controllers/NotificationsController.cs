@@ -15,9 +15,10 @@ namespace Fluxify.Api.Integration.Controllers
             _notificationService = notificationService;
         }
 
-        [HttpPost("fire")]
-        public async Task<IActionResult> FireAsync([FromBody] FireNotification.Request request)
-            => Response(await _notificationService.FireAsync(CurrentNameSpace.NameIdentifier,
+        [HttpPost("create")]
+        public async Task<IActionResult> CreateAsync([FromBody] CreateNotification.Request request)
+            => Response(await _notificationService.CreateAsync(CurrentNameSpace.NameIdentifier,
+                                                             CurrentNameSpace.NameIdentifier,
                                                              request));
 
     }

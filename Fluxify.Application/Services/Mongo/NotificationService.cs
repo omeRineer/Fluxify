@@ -69,7 +69,7 @@ namespace Fluxify.Application.Services.Mongo
                                               {
                                                   Id = newNotification.Id,
                                                   NameSpaceId = nameSpaceId,
-                                                  Level = newNotification.Level,
+                                                  Type = newNotification.Type,
                                                   Title = newNotification.Title,
                                                   Summary = newNotification.Summary,
                                                   Date = newNotification.CreateDate,
@@ -118,7 +118,7 @@ namespace Fluxify.Application.Services.Mongo
             var result = new NotificationDto.Detail
             {
                 Id = notification.Id,
-                Level = EnumHelper.ToEnumString<NotificationLevelType>(notification.Level),
+                Type = EnumHelper.ToEnumString<NotificationType>(notification.Type),
                 ContentType = EnumHelper.ToEnumString<NotificationContentType>(notification.ContentType),
                 Sender = user.Key,
                 Title = notification.Title,
@@ -133,31 +133,6 @@ namespace Fluxify.Application.Services.Mongo
             return new SuccessDataResult<NotificationDto.Detail>(result);
         }
 
-        public async Task<IResult> FireAsync(Guid nameSpaceId, FireNotification.Request req)
-        {
-            var message = new SendNotificationEvent
-            {
-                NameSpaceId = nameSpaceId,
-                Level = (int)EnumHelper.Parse(req.Level, NotificationLevelType.Info),
-                Title = req.Title,
-                Summary = req.Summary,
-                Date = DateTime.UtcNow,
-                Topics = req.To?.Topics,
-                Url = req.Url,
-                Thumbnail = req.Thumbnail
-            };
-
-            if (req.To?.Users != null)
-            {
-                var targetUsers = await UserRepository.GetProjectedListAsync(s => s.Id, f => f.NameSpaceId == nameSpaceId && req.To.Users.Contains(f.Key));
-                message.Users = targetUsers;
-            }
-
-            await EventPublisher.PublishAsync("notification-topic",
-                                              message,
-                                              "notification.created");
-
-            return new SuccessResult("Notification is fired");
-        }
+        
     }
 }
