@@ -19,9 +19,9 @@ namespace Fluxify.Application.MappingProfiles
         {
             CreateMap<Notification, NotificationDto.Detail>()
                 .ForMember(des => des.ContentType, opt => opt.MapFrom(src => ((NotificationContentType)src.ContentType).ToString()))
-                .ForMember(des => des.Type, opt => opt.MapFrom(src => ((NotificationType)src.Type).ToString()));
+                .ForMember(des => des.Type, opt => opt.MapFrom(src => EnumHelper.ToEnumString<NotificationType>(src.Type, true)));
             CreateMap<Notification, NotificationDto.List>()
-                .ForMember(des => des.Type, opt => opt.MapFrom(src => ((NotificationType)src.Type).ToString()));
+                .ForMember(des => des.Type, opt => opt.MapFrom(src => EnumHelper.ToEnumString<NotificationType>(src.Type, true)));
 
             CreateMap<CreateNotification.Request, Notification>()
                 .ForMember(des => des.Id, opt => opt.MapFrom(src => Guid.NewGuid()))
