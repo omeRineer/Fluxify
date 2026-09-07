@@ -4,6 +4,6 @@ namespace Fluxify.Application.Models.Rest.Notification
 {
     public class NotificationQuery : QueryOptions
     {
-
+        public bool IsRead { get; set; } = false;
     }
 }

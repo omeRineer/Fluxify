@@ -11,7 +11,7 @@ namespace Fluxify.Application.Models.Common.Pagination
         public int Page { get; init; }
         public int Size { get; init; }
         public long TotalCount { get; init; }
-        public List<TEntity>? Data { get; set; }
+        public List<TEntity> Data { get; set; }
     }
 
 }

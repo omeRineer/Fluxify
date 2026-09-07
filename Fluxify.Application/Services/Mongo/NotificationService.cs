@@ -82,22 +82,24 @@ namespace Fluxify.Application.Services.Mongo
 
             return new SuccessResult("Notification is created");
         }
-        public async Task<IDataResult<DataListResponse<NotificationDto.List>>> GetListAsync(Guid nameSpaceId, Guid userId, NotificationQuery query)
+        public async Task<IDataResult<PageListResponse<NotificationDto.List>>> GetListAsync(Guid nameSpaceId, Guid userId, NotificationQuery query)
         {
             var userTopics = await UserTopicRepository.GetProjectedListAsync(s => s.Topic.Slug,
                                                                              x => x.UserId == userId);
             var userNotifications = await UserNotificationRepository.GetListAsync(x => x.UserId == userId);
+            var readNotificationIds = userNotifications.Select(un => un.NotificationId).ToList();
 
             var notifications = await NotificationRepository.GetPagedAsync(query.Page,
                                                                            query.Size,
                                                                            x => x.NameSpace == nameSpaceId &&
+                                                                               (query.IsRead ? readNotificationIds.Contains(x.Id) : !readNotificationIds.Contains(x.Id)) &&
                                                                                (
                                                                                  x.To == null ||
                                                                                  (x.To != null && (x.To.Topics.Any(o => userTopics.Contains(o)) || x.To.Users.Contains(userId)))
                                                                                ),
                                                                            Builders<Notification>.Sort.Descending(x => x.CreateDate));
 
-            var mappedList = _mapper.Map<List<NotificationDto.List>>(notifications);
+            var mappedList = _mapper.Map<List<NotificationDto.List>>(notifications.Data);
             mappedList.ForEach(x =>
             {
                 if (userNotifications.Any(un => un.NotificationId == x.Id))
@@ -106,9 +108,13 @@ namespace Fluxify.Application.Services.Mongo
                     x.IsRead = false;
             });
 
-            var result = DataListResponse<NotificationDto.List>.Load(mappedList.OrderBy(o => o.IsRead).ToList());
+            var result = new PageListResponse<NotificationDto.List>
+            {
+                Data = mappedList,
+                TotalCount = notifications.TotalCount
+            };
 
-            return new SuccessDataResult<DataListResponse<NotificationDto.List>>(result);
+            return new SuccessDataResult<PageListResponse<NotificationDto.List>>(result);
         }
         public async Task<IDataResult<NotificationDto.Detail>> GetDetailAsync(Guid nameSpaceId, Guid userId, Guid id)
         {
@@ -132,30 +138,6 @@ namespace Fluxify.Application.Services.Mongo
             };
 
             return new SuccessDataResult<NotificationDto.Detail>(result);
-        }
-
-        public async Task<IDataResult<DataListResponse<NotificationDto.List>>> GetUnreadListAsync(Guid nameSpaceId, Guid userId, NotificationQuery query)
-        {
-            var userTopics = await UserTopicRepository.GetProjectedListAsync(s => s.Topic.Slug,
-                                                                             x => x.UserId == userId);
-            var userNotifications = await UserNotificationRepository.GetListAsync(x => x.UserId == userId);
-            var readNotificationIds = userNotifications.Select(un => un.NotificationId).ToList();
-
-            var notifications = await NotificationRepository.GetPagedAsync(query.Page,
-                                                                           query.Size,
-                                                                           x => x.NameSpace == nameSpaceId &&
-                                                                                !readNotificationIds.Contains(x.Id) &&
-                                                                               (
-                                                                                 x.To == null ||
-                                                                                 (x.To != null && (x.To.Topics.Any(o => userTopics.Contains(o)) || x.To.Users.Contains(userId)))
-                                                                               ),
-                                                                           Builders<Notification>.Sort.Descending(x => x.CreateDate));
-
-            var mappedList = _mapper.Map<List<NotificationDto.List>>(notifications);
-
-            var result = DataListResponse<NotificationDto.List>.Load(mappedList);
-
-            return new SuccessDataResult<DataListResponse<NotificationDto.List>>(result);
         }
     }
 }
