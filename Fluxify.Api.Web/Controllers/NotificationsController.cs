@@ -22,16 +22,12 @@ namespace Fluxify.Api.Web.Controllers
         public async Task<IActionResult> GetListAsync([FromQuery] NotificationQuery query)
             => Response(await _notificationService.GetListAsync(CurrentUser.NameSpace.Id, CurrentUser.NameIdentifier, query));
 
-        [HttpGet("unreads")]
-        public async Task<IActionResult> GetUnreadListAsync([FromQuery] NotificationQuery query)
-            => Response(await _notificationService.GetUnreadListAsync(CurrentUser.NameSpace.Id, CurrentUser.NameIdentifier, query));
-
         [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetDetailAsync([FromRoute] Guid id)
             => Response(await _notificationService.GetDetailAsync(CurrentUser.NameIdentifier, CurrentUser.NameSpace.Id, id));
 
         [HttpPost("mark-as-read")]
-        public async Task<IActionResult> MarkAsReadAsync([FromBody] Guid[] notifications)
+        public async Task<IActionResult> MarkAsReadAsync([FromBody] Guid notifications)
             => Response(await _userNotificationService.AddAsync(CurrentUser.NameIdentifier, notifications));
 
     }
