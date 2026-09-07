@@ -27,6 +27,7 @@ using Fluxify.Application.Services.Interfaces.Mongo;
 using Fluxify.Application.Repositories.Base;
 using Fluxify.Application.Repositories.Mongo;
 using Fluxify.Application.Models.Events;
+using MongoDB.Driver;
 
 namespace Fluxify.Application.Services.Mongo
 {
@@ -81,17 +82,20 @@ namespace Fluxify.Application.Services.Mongo
 
             return new SuccessResult("Notification is created");
         }
-        public async Task<IDataResult<DataListResponse<NotificationDto.List>>> GetListAsync(Guid nameSpaceId, Guid userId)
+        public async Task<IDataResult<DataListResponse<NotificationDto.List>>> GetListAsync(Guid nameSpaceId, Guid userId, NotificationQuery query)
         {
             var userTopics = await UserTopicRepository.GetProjectedListAsync(s => s.Topic.Slug,
                                                                              x => x.UserId == userId);
             var userNotifications = await UserNotificationRepository.GetListAsync(x => x.UserId == userId);
 
-            var notifications = await NotificationRepository.GetListAsync(x => x.NameSpace == nameSpaceId &&
+            var notifications = await NotificationRepository.GetPagedAsync(query.Page,
+                                                                           query.Size,
+                                                                           x => x.NameSpace == nameSpaceId &&
                                                                                (
                                                                                  x.To == null ||
                                                                                  (x.To != null && (x.To.Topics.Any(o => userTopics.Contains(o)) || x.To.Users.Contains(userId)))
-                                                                               ));
+                                                                               ),
+                                                                           Builders<Notification>.Sort.Descending(x => x.CreateDate));
 
             var mappedList = _mapper.Map<List<NotificationDto.List>>(notifications);
             mappedList.ForEach(x =>
@@ -130,6 +134,28 @@ namespace Fluxify.Application.Services.Mongo
             return new SuccessDataResult<NotificationDto.Detail>(result);
         }
 
-        
+        public async Task<IDataResult<DataListResponse<NotificationDto.List>>> GetUnreadListAsync(Guid nameSpaceId, Guid userId, NotificationQuery query)
+        {
+            var userTopics = await UserTopicRepository.GetProjectedListAsync(s => s.Topic.Slug,
+                                                                             x => x.UserId == userId);
+            var userNotifications = await UserNotificationRepository.GetListAsync(x => x.UserId == userId);
+            var readNotificationIds = userNotifications.Select(un => un.NotificationId).ToList();
+
+            var notifications = await NotificationRepository.GetPagedAsync(query.Page,
+                                                                           query.Size,
+                                                                           x => x.NameSpace == nameSpaceId &&
+                                                                                !readNotificationIds.Contains(x.Id) &&
+                                                                               (
+                                                                                 x.To == null ||
+                                                                                 (x.To != null && (x.To.Topics.Any(o => userTopics.Contains(o)) || x.To.Users.Contains(userId)))
+                                                                               ),
+                                                                           Builders<Notification>.Sort.Descending(x => x.CreateDate));
+
+            var mappedList = _mapper.Map<List<NotificationDto.List>>(notifications);
+
+            var result = DataListResponse<NotificationDto.List>.Load(mappedList);
+
+            return new SuccessDataResult<DataListResponse<NotificationDto.List>>(result);
+        }
     }
 }

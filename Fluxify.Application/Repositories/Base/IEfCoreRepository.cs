@@ -1,4 +1,5 @@
-﻿using Fluxify.Domain;
+﻿using Fluxify.Application.Models.Common.Pagination;
+using Fluxify.Domain;
 using Microsoft.EntityFrameworkCore.Query;
 using System;
 using System.Collections.Generic;
@@ -16,11 +17,11 @@ namespace Fluxify.Application.Repositories.Base
                                    Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
                                    bool isTracking = true);
 
-        //Task<PageData<TEntity>> GetListByPaginationAsync(PaginationParameter paginationParameter,
-        //                                 Expression<Func<TEntity, bool>> filter = null,
-        //                                 Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>> includes = null,
-        //                                 Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
-        //                                 bool isTracking = true);
+        Task<PageData<TEntity>> GetListByPaginationAsync(int page = 0, int size = 10,
+                                         Expression<Func<TEntity, bool>> filter = null,
+                                         Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>> includes = null,
+                                         Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
+                                         bool isTracking = true);
 
         Task<TEntity?> GetFirstOrDefaultAsync(Expression<Func<TEntity, bool>> filter,
                          Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>> includes = null,

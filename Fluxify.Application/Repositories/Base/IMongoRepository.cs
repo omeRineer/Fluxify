@@ -1,4 +1,5 @@
-﻿using Fluxify.Domain;
+﻿using Fluxify.Application.Models.Common.Pagination;
+using Fluxify.Domain;
 using MongoDB.Driver;
 using System.Linq.Expressions;
 
@@ -39,6 +40,13 @@ namespace Fluxify.Application.Repositories.Base
 
         Task<List<TDocument>> GetListAsync(
             Expression<Func<TDocument, bool>>? filter = null,
+            CancellationToken cancellationToken = default);
+
+        Task<PageData<TDocument>> GetPagedAsync(
+            int page = 0,
+            int size = 10,
+            Expression<Func<TDocument, bool>>? filter = null,
+            SortDefinition<TDocument>? sort = null,
             CancellationToken cancellationToken = default);
 
         #endregion

@@ -1,4 +1,5 @@
-﻿using Fluxify.Application.Repositories.Base;
+﻿using Fluxify.Application.Models.Common.Pagination;
+using Fluxify.Application.Repositories.Base;
 using Fluxify.Domain;
 using Fluxify.Persistance.Context;
 using MongoDB.Driver;
@@ -86,6 +87,39 @@ namespace Fluxify.Persistance.Repositories.Base
             return Collection
                 .Find(filter)
                 .ToListAsync(cancellationToken);
+        }
+
+        public virtual async Task<PageData<TDocument>> GetPagedAsync(
+            int page = 0,
+            int size = 10,
+            Expression<Func<TDocument, bool>>? filter = null,
+            SortDefinition<TDocument>? sort = null,
+            CancellationToken cancellationToken = default)
+        {
+            filter ??= _ => true;
+
+            sort ??= Builders<TDocument>.Sort.Ascending(x => x.Id);
+
+            var totalCountTask = Collection.CountDocumentsAsync(
+                filter,
+                cancellationToken: cancellationToken);
+
+            var itemsTask = Collection
+                .Find(filter)
+                .Sort(sort)
+                .Skip(page * size)
+                .Limit(size)
+                .ToListAsync(cancellationToken);
+
+            await Task.WhenAll(totalCountTask, itemsTask);
+
+            return new PageData<TDocument>
+            {
+                Data = await itemsTask,
+                TotalCount = await totalCountTask,
+                Page = page,
+                Size = size
+            };
         }
 
         #endregion

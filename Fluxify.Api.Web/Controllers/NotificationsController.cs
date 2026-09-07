@@ -1,4 +1,6 @@
 ﻿using Fluxify.Application.Models.Common;
+using Fluxify.Application.Models.Common.Pagination;
+using Fluxify.Application.Models.Rest.Notification;
 using Fluxify.Application.Services.Interfaces.Mongo;
 using Fluxify.Application.Services.Mongo;
 using Microsoft.AspNetCore.Http;
@@ -17,8 +19,12 @@ namespace Fluxify.Api.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetNotificationsAsync()
-            => Response(await _notificationService.GetListAsync(CurrentUser.NameSpace.Id, CurrentUser.NameIdentifier));
+        public async Task<IActionResult> GetListAsync([FromQuery] NotificationQuery query)
+            => Response(await _notificationService.GetListAsync(CurrentUser.NameSpace.Id, CurrentUser.NameIdentifier, query));
+
+        [HttpGet("unreads")]
+        public async Task<IActionResult> GetUnreadListAsync([FromQuery] NotificationQuery query)
+            => Response(await _notificationService.GetUnreadListAsync(CurrentUser.NameSpace.Id, CurrentUser.NameIdentifier, query));
 
         [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetDetailAsync([FromRoute] Guid id)
