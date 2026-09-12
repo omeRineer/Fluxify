@@ -16,6 +16,8 @@ using Fluxify.Domain.Entities.Mongo;
 using Fluxify.Application.Services.Interfaces.Mongo;
 using Fluxify.Application.Repositories.Base;
 using Fluxify.Application.Repositories.Mongo;
+using MongoDB.Driver;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 
 namespace Fluxify.Application.Services.Mongo
@@ -23,12 +25,16 @@ namespace Fluxify.Application.Services.Mongo
     public class UserNotificationService : IUserNotificationService
     {
         readonly IUserNotificationRepository UserNotificationRepository;
+        readonly IUserTopicRepository UserTopicRepository;
+        readonly INotificationRepository NotificationRepository;
         readonly IMapper _mapper;
 
-        public UserNotificationService(IUserNotificationRepository userNotificationRepository, IMapper mapper)
+        public UserNotificationService(IUserNotificationRepository userNotificationRepository, IMapper mapper, INotificationRepository notificationRepository, IUserTopicRepository userTopicRepository)
         {
             UserNotificationRepository = userNotificationRepository;
             _mapper = mapper;
+            NotificationRepository = notificationRepository;
+            UserTopicRepository = userTopicRepository;
         }
 
         public async Task<IResult> AddAsync(Guid userId, Guid notificationId)
@@ -41,6 +47,5 @@ namespace Fluxify.Application.Services.Mongo
 
             return new SuccessResult();
         }
-
     }
 }
