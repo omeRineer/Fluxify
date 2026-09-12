@@ -92,11 +92,9 @@ namespace Fluxify.Application.Services.Mongo
             var notifications = await NotificationRepository.GetPagedAsync(query.Page,
                                                                            query.Size,
                                                                            x => x.NameSpace == nameSpaceId &&
+                                                                                x.CreateDate <= query.LastDate &&
                                                                                (query.IsRead ? readNotificationIds.Contains(x.Id) : !readNotificationIds.Contains(x.Id)) &&
-                                                                               (
-                                                                                 x.To == null ||
-                                                                                 (x.To != null && (x.To.Topics.Any(o => userTopics.Contains(o)) || x.To.Users.Contains(userId)))
-                                                                               ),
+                                                                               (x.To == null || (x.To != null && (x.To.Topics.Any(o => userTopics.Contains(o)) || x.To.Users.Contains(userId)))),
                                                                            Builders<Notification>.Sort.Descending(x => x.CreateDate));
 
             var mappedList = _mapper.Map<List<NotificationDto.List>>(notifications.Data);

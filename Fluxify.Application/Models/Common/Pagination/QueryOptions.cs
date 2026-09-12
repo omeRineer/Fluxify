@@ -9,10 +9,10 @@ namespace Fluxify.Application.Models.Common.Pagination
 {
     public abstract class QueryOptions
     {
-        public int Page { get; set; }
+        public int Page { get; set; } = 0;
 
         [Range(10, 50)]
-        public int Size { get; set; }
+        public int Size { get; set; } = 20;
 
         public string? Search { get; set; }
 
