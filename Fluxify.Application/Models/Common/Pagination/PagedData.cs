@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Fluxify.Application.Models.Common.Pagination
 {
-    public class PageData<TEntity>
+    public class PagedData<TEntity>
     {
         public int Page { get; init; }
         public int Size { get; init; }

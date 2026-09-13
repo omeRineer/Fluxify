@@ -42,7 +42,7 @@ namespace Fluxify.Application.Repositories.Base
             Expression<Func<TDocument, bool>>? filter = null,
             CancellationToken cancellationToken = default);
 
-        Task<PageData<TDocument>> GetPagedAsync(
+        Task<PagedData<TDocument>> GetPagedAsync(
             int page = 0,
             int size = 10,
             Expression<Func<TDocument, bool>>? filter = null,

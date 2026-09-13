@@ -32,15 +32,15 @@ namespace Fluxify.Application.Services.Core
         }
 
 
-        public async Task<IDataResult<DataListResponse<TopicDto.List>>> GetListAsync()
+        public async Task<IDataResult<PagedDataResponse<TopicDto.List>>> GetListAsync(TopicQuery query)
         {
-            var topicList = await topicRepository.GetListAsync();
+            var pagedData = await topicRepository.GetPagedListAsync(query.Page, query.Size);
 
-            var mappedList = _mapper.Map<List<TopicDto.List>>(topicList);
+            var mappedList = _mapper.Map<List<TopicDto.List>>(pagedData.Data);
 
-            var result = DataListResponse<TopicDto.List>.Load(mappedList);
+            var pagedResponse = PagedDataResponse<TopicDto.List>.Load(mappedList, pagedData.TotalCount);
 
-            return new SuccessDataResult<DataListResponse<TopicDto.List>>(result);
+            return new SuccessDataResult<PagedDataResponse<TopicDto.List>>(pagedResponse);
         }
     }
 }

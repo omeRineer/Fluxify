@@ -228,7 +228,7 @@ namespace Fluxify.Persistance.Repositories.Base
             return await query.Select(select).SingleOrDefaultAsync();
         }
 
-        public async Task<PageData<TEntity>> GetListByPaginationAsync(int page = 0, int size = 10, Expression<Func<TEntity, bool>> filter = null, Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>> includes = null, Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null, bool isTracking = true)
+        public async Task<PagedData<TEntity>> GetPagedListAsync(int page = 0, int size = 10, Expression<Func<TEntity, bool>> filter = null, Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>> includes = null, Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null, bool isTracking = true)
         {
             IQueryable<TEntity> query = Table.AsQueryable();
 
@@ -239,7 +239,7 @@ namespace Fluxify.Persistance.Repositories.Base
 
             query = query.Skip(page * size).Take(size);
 
-            return new PageData<TEntity>
+            return new PagedData<TEntity>
             {
                 Page = page,
                 Size = size,

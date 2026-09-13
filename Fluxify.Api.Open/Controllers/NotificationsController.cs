@@ -23,11 +23,9 @@ namespace Fluxify.Api.Open.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetNotificationsAsync()
-            => Response(await NotificationService.GetListAsync(CurrentUser.NameSpace.Id, CurrentUser.NameIdentifier));
+        public async Task<IActionResult> GetListAsync([FromQuery] NotificationQuery query)
+            => Response(await NotificationService.GetListAsync(CurrentUser.NameSpace.Id, CurrentUser.NameIdentifier, query));
 
-
-        // TODO : Owner check
         [HttpGet("{id}")]
         public async Task<IActionResult> GetDetailAsync([FromRoute] Guid id)
             => Response(await NotificationService.GetDetailAsync(CurrentUser.NameSpace.Id, 
@@ -35,8 +33,8 @@ namespace Fluxify.Api.Open.Controllers
                                                                  id));
 
         [HttpPost("mark-as-read")]
-        public async Task<IActionResult> MarkAsReadAsync([FromBody] Guid[] notifications)
-            => Response(await UserNotificationService.AddAsync(CurrentUser.NameIdentifier, notifications));
+        public async Task<IActionResult> MarkAsReadAsync([FromBody] Guid id)
+            => Response(await UserNotificationService.MarkAsReadAsync(CurrentUser.NameIdentifier, id));
 
     }
 }

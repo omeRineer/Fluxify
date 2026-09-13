@@ -16,7 +16,7 @@ namespace Fluxify.Api.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetListAsync()
-            => Response(await UserService.GetListAsync(CurrentUser.NameSpace.Id));
+        public async Task<IActionResult> GetListAsync([FromQuery] UserQuery query)
+            => Response(await UserService.GetListAsync(CurrentUser.NameSpace.Id, query));
     }
 }

@@ -27,8 +27,8 @@ namespace Fluxify.Api.Web.Controllers
             => Response(await _notificationService.GetDetailAsync(CurrentUser.NameIdentifier, CurrentUser.NameSpace.Id, id));
 
         [HttpPost("mark-as-read")]
-        public async Task<IActionResult> MarkAsReadAsync([FromBody] Guid notifications)
-            => Response(await _userNotificationService.AddAsync(CurrentUser.NameIdentifier, notifications));
+        public async Task<IActionResult> MarkAsReadAsync([FromBody] Guid notification)
+            => Response(await _userNotificationService.MarkAsReadAsync(CurrentUser.NameIdentifier, notification));
 
     }
 }

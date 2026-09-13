@@ -75,14 +75,14 @@ namespace Fluxify.Application.Services.Mongo
                                                   Date = newNotification.CreateDate,
                                                   Topics = newNotification.To?.Topics,
                                                   Users = newNotification.To?.Users,
-                                                  Url = newNotification.Url,
-                                                  Thumbnail = newNotification.Thumbnail
+                                                  Thumbnail = newNotification.Thumbnail,
+                                                  Properties = newNotification.Properties
                                               },
                                               "notification.created");
 
             return new SuccessResult("Notification is created");
         }
-        public async Task<IDataResult<PageListResponse<NotificationDto.List>>> GetListAsync(Guid nameSpaceId, Guid userId, NotificationQuery query)
+        public async Task<IDataResult<PagedDataResponse<NotificationDto.List>>> GetListAsync(Guid nameSpaceId, Guid userId, NotificationQuery query)
         {
             var userTopics = await UserTopicRepository.GetProjectedListAsync(s => s.Topic.Slug,
                                                                              x => x.UserId == userId);
@@ -106,13 +106,13 @@ namespace Fluxify.Application.Services.Mongo
                     x.IsRead = false;
             });
 
-            var result = new PageListResponse<NotificationDto.List>
+            var result = new PagedDataResponse<NotificationDto.List>
             {
                 Data = mappedList,
                 TotalCount = notifications.TotalCount
             };
 
-            return new SuccessDataResult<PageListResponse<NotificationDto.List>>(result);
+            return new SuccessDataResult<PagedDataResponse<NotificationDto.List>>(result);
         }
         public async Task<IDataResult<NotificationDto.Detail>> GetDetailAsync(Guid nameSpaceId, Guid userId, Guid id)
         {

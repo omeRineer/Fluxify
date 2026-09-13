@@ -78,14 +78,16 @@ namespace Fluxify.Application.Services.Core
             return new SuccessDataResult<UserDto.Detail>(data: result);
         }
 
-        public async Task<IDataResult<DataListResponse<UserDto.List>>> GetListAsync(Guid nameSpaceId)
+        public async Task<IDataResult<PagedDataResponse<UserDto.List>>> GetListAsync(Guid nameSpaceId, UserQuery query)
         {
-            var users = await UserRepository.GetListAsync(f => f.NameSpaceId == nameSpaceId);
+            var pagedData = await UserRepository.GetPagedListAsync(query.Page, 
+                                                               query.Size,
+                                                               f => f.NameSpaceId == nameSpaceId);
 
-            var mappedList = Mapper.Map<List<UserDto.List>>(users);
+            var mappedList = Mapper.Map<List<UserDto.List>>(pagedData.Data);
 
-            var result = DataListResponse<UserDto.List>.Load(mappedList);
-            return new SuccessDataResult<DataListResponse<UserDto.List>>(result);
+            var result = PagedDataResponse<UserDto.List>.Load(mappedList, pagedData.TotalCount);
+            return new SuccessDataResult<PagedDataResponse<UserDto.List>>(result);
 
         }
 

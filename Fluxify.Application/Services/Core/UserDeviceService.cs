@@ -3,6 +3,8 @@ using Fluxify.Application.Models.Dto.UserDevice;
 using Fluxify.Application.Models.Rest.Common;
 using Fluxify.Application.Models.Rest.UserDevice;
 using Fluxify.Application.Repositories;
+using Fluxify.Application.Rules.Common;
+using Fluxify.Application.Rules;
 using Fluxify.Application.Services.Interfaces.Core;
 using Fluxify.Application.Utilities.Result;
 using Fluxify.Domain.Entities.Core;
@@ -29,15 +31,13 @@ namespace Fluxify.Application.Services.Core
             _userRepository = userRepository;
         }
 
-        public async Task<IDataResult<DataListResponse<UserDeviceDto.List>>> GetListAsync(Guid userId)
+        public async Task<IDataResult<List<UserDeviceDto.List>>> GetListAsync(Guid userId)
         {
             var devices = await UserDeviceRepository.GetListAsync(x => x.UserId == userId);
 
             var mappedList = _mapper.Map<List<UserDeviceDto.List>>(devices);
 
-            var result = DataListResponse<UserDeviceDto.List>.Load(mappedList);
-
-            return new SuccessDataResult<DataListResponse<UserDeviceDto.List>>(result);
+            return new SuccessDataResult<List<UserDeviceDto.List>>(mappedList);
         }
 
         public async Task<IResult> RegisterAsync(Guid userId, Guid nameSpaceId, SetUserDevice model)
@@ -78,8 +78,9 @@ namespace Fluxify.Application.Services.Core
         public async Task<IResult> RegisterAsync(string key, Guid nameSpaceId, SetUserDevice model)
         {
             var user = await _userRepository.GetProjectedSingleOrDefaultAsync(s => s.Id, f => f.Key == key);
-            if (user == null)
-                return new ErrorResult("User not found");
+            await BusinessRuleEngine.RunAndThrow(
+                    new MustExistRule<Guid>(user, "User not found!")
+            );
 
             var userDevice = await UserDeviceRepository.GetSingleOrDefaultAsync(
                 x => x.User.Key == key &&

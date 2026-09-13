@@ -19,7 +19,6 @@ namespace Fluxify.Domain.Entities.Mongo
         public int ContentType { get; set; }
         public string? Content { get; set; }
         public string? Thumbnail { get; set; }
-        public string? Url { get; set; }
         public Target? To { get; set; }
         
 

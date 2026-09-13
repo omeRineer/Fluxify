@@ -53,7 +53,7 @@ namespace Fluxify.Api.Hub.Workers.Notification
                                          Type = EnumHelper.ToEnumString<NotificationType>(message.Type),
                                          Title = message.Title,
                                          Summary = message.Summary,
-                                         Url = message.Url,
+                                         Properties = message.Properties,
                                          Thumbnail = message.Thumbnail
                                      });
 

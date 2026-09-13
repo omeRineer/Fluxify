@@ -21,8 +21,8 @@ namespace Fluxify.Api.Integration.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetListAsync()
-            => Response(await UserService.GetListAsync(CurrentNameSpace.NameIdentifier));
+        public async Task<IActionResult> GetListAsync([FromQuery] UserQuery query)
+            => Response(await UserService.GetListAsync(CurrentNameSpace.NameIdentifier, query));
 
         [HttpGet("{key}")]
         public async Task<IActionResult> GetDetailAsync([FromRoute] string key)
