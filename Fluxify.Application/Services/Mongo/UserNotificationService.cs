@@ -37,8 +37,12 @@ namespace Fluxify.Application.Services.Mongo
             UserTopicRepository = userTopicRepository;
         }
 
-        public async Task<IResult> AddAsync(Guid userId, Guid notificationId)
+        public async Task<IResult> MarkAsReadAsync(Guid userId, Guid notificationId)
         {
+            var isRead = await UserNotificationRepository.ExistsAsync(x => x.UserId == userId && x.NotificationId == notificationId);
+            if (isRead)
+                return new SuccessResult();
+
             await UserNotificationRepository.InsertAsync(new UserNotification
             {
                 NotificationId = notificationId,

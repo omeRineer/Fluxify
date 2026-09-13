@@ -13,7 +13,7 @@ namespace Fluxify.Application.Services.Interfaces.Core
 {
     public interface ITopicService
     {
-        Task<IDataResult<DataListResponse<TopicDto.List>>> GetListAsync();
+        Task<IDataResult<PagedDataResponse<TopicDto.List>>> GetListAsync(TopicQuery query);
 
     }
 }

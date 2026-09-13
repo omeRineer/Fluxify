@@ -20,7 +20,7 @@ namespace Fluxify.Application.Services.Interfaces.Core
         Task<IDataResult<UpdateUser.Response>> UpdateAsync(Guid nameSpaceId, string key, UpdateUser.Request model);
         Task<IDataResult<UserDto.Detail>> GetDetailAsync(Guid id);
         Task<IDataResult<UserDto.Detail>> GetDetailAsync(Guid nameSpaceId, string key);
-        Task<IDataResult<DataListResponse<UserDto.List>>> GetListAsync(Guid nameSpaceId);
+        Task<IDataResult<PagedDataResponse<UserDto.List>>> GetListAsync(Guid nameSpaceId, UserQuery query);
         Task<IDataResult<AccessToken>> GetTokenAsync(Guid nameSpaceId, string key);
 
 

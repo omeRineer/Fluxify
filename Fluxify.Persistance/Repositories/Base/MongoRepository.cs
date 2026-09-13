@@ -89,7 +89,7 @@ namespace Fluxify.Persistance.Repositories.Base
                 .ToListAsync(cancellationToken);
         }
 
-        public virtual async Task<PageData<TDocument>> GetPagedAsync(
+        public virtual async Task<PagedData<TDocument>> GetPagedAsync(
             int page = 0,
             int size = 10,
             Expression<Func<TDocument, bool>>? filter = null,
@@ -113,7 +113,7 @@ namespace Fluxify.Persistance.Repositories.Base
 
             await Task.WhenAll(totalCountTask, itemsTask);
 
-            return new PageData<TDocument>
+            return new PagedData<TDocument>
             {
                 Data = await itemsTask,
                 TotalCount = await totalCountTask,

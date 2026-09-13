@@ -12,7 +12,7 @@ namespace Fluxify.Application.Services.Interfaces.Mongo
 {
     public interface IUserNotificationService
     {
-        Task<IResult> AddAsync(Guid userId, Guid notificationId);
+        Task<IResult> MarkAsReadAsync(Guid userId, Guid notificationId);
 
     }
 }

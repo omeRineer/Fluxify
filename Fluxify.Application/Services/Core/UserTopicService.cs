@@ -29,15 +29,14 @@ namespace Fluxify.Application.Services.Core
             _mapper = mapper;
         }
 
-        public async Task<IDataResult<DataListResponse<UserTopicDto.List>>> GetListAsync(Guid userId)
+        public async Task<IDataResult<List<UserTopicDto.List>>> GetListAsync(Guid userId)
         {
-            var userTopics = await UserTopicRepository.GetListAsync(filter: f => f.UserId == userId, i => i.Include(x => x.Topic));
+            var userTopics = await UserTopicRepository.GetListAsync(filter: f => f.UserId == userId, 
+                                                                    i => i.Include(x => x.Topic));
 
-            var mappedList = _mapper.Map<List<UserTopicDto.List>>(userTopics);
+            var mappedList = _mapper.Map<List<UserTopicDto.List>>(userTopics.Select(s=> s.Topic));
 
-            var result = DataListResponse<UserTopicDto.List>.Load(mappedList);
-
-            return new SuccessDataResult<DataListResponse<UserTopicDto.List>>(result);
+            return new SuccessDataResult<List<UserTopicDto.List>>(mappedList);
         }
 
         public async Task<List<string>> GetTopicsByUser(Guid userId)

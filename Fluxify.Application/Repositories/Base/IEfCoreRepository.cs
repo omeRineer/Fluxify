@@ -17,7 +17,7 @@ namespace Fluxify.Application.Repositories.Base
                                    Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
                                    bool isTracking = true);
 
-        Task<PageData<TEntity>> GetListByPaginationAsync(int page = 0, int size = 10,
+        Task<PagedData<TEntity>> GetPagedListAsync(int page = 0, int size = 10,
                                          Expression<Func<TEntity, bool>> filter = null,
                                          Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>> includes = null,
                                          Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,

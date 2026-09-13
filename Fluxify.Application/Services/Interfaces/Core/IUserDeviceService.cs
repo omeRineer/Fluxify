@@ -10,7 +10,7 @@ namespace Fluxify.Application.Services.Interfaces.Core
     {
         Task<IResult> RegisterAsync(Guid userId, Guid nameSpaceId, SetUserDevice model);
         Task<IResult> RegisterAsync(string key, Guid nameSpaceId, SetUserDevice model);
-        Task<IDataResult<DataListResponse<UserDeviceDto.List>>> GetListAsync(Guid userId);
+        Task<IDataResult<List<UserDeviceDto.List>>> GetListAsync(Guid userId);
 
     }
 }

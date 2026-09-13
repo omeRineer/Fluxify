@@ -51,10 +51,7 @@ namespace Fluxify.Api.Hub.Workers.Notification
                                                                         message.Title,
                                                                         message.Summary,
                                                                         message.Thumbnail,
-                                                                        new()
-                                                                        {
-                                                                            { "url", message.Url }
-                                                                        });
+                                                                        message.Properties?.ToDictionary(k=> k.Key?.ToString(), v=> v.Value?.ToString()));
 
         }
     }

@@ -13,7 +13,7 @@ namespace Fluxify.Application.Services.Interfaces.Core
     public interface IUserTopicService
     {
         Task<IResult> SetAsync(Guid userId, Guid nameSpaceId, SetUserTopics.Request req);
-        Task<IDataResult<DataListResponse<UserTopicDto.List>>> GetListAsync(Guid userId);
+        Task<IDataResult<List<UserTopicDto.List>>> GetListAsync(Guid userId);
 
 
         Task<List<string>> GetTopicsByUser(Guid userId);
