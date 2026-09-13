@@ -16,7 +16,6 @@ namespace Fluxify.Application.Models.Rest.Notification
             public string? ContentType { get; set; }
             public string? Content { get; set; }
             public string? Thumbnail { get; set; }
-            public string? Url { get; set; }
             public Target? To { get; set; }
             
 
