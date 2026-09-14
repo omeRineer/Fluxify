@@ -22,7 +22,7 @@ namespace Fluxify.Domain.Entities.Mongo
         public Target? To { get; set; }
         
 
-        public Dictionary<string, object>? Properties { get; set; }
+        public BsonDocument? Properties { get; set; }
 
 
 

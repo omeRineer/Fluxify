@@ -28,6 +28,8 @@ using Fluxify.Application.Repositories.Base;
 using Fluxify.Application.Repositories.Mongo;
 using Fluxify.Application.Models.Events;
 using MongoDB.Driver;
+using System.Text.Json;
+using MongoDB.Bson;
 
 namespace Fluxify.Application.Services.Mongo
 {
@@ -76,7 +78,7 @@ namespace Fluxify.Application.Services.Mongo
                                                   Topics = newNotification.To?.Topics,
                                                   Users = newNotification.To?.Users,
                                                   Thumbnail = newNotification.Thumbnail,
-                                                  Properties = newNotification.Properties
+                                                  Properties = req.Properties
                                               },
                                               "notification.created");
 
@@ -131,7 +133,7 @@ namespace Fluxify.Application.Services.Mongo
                 Content = notification.Content,
                 IsRead = isRead,
                 CreateDate = notification.CreateDate,
-                Properties = notification.Properties,
+                Properties = notification.Properties?.ToDictionary(),
                 Thumbnail = notification.Thumbnail
             };
 
