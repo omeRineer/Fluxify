@@ -62,6 +62,7 @@ builder.Services.AddInfrastructure();
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<HubConnectionManager<PresenceHubUser>>();
 builder.Services.AddSingleton<HubConnectionManager<ChatHubUser>>();
+builder.Services.AddSingleton<HubConnectionManager<NotificationHubUser>>();
 builder.Services.AddCors(options =>
                             options.AddDefaultPolicy(policy =>
                             {
@@ -84,5 +85,6 @@ app.UseAuthorization();
 
 app.MapHub<PresenceHub>("/hub/presence");
 app.MapHub<ChatHub>("/hub/chat");
+app.MapHub<ChatHub>("/hub/notification");
 
 app.Run();
