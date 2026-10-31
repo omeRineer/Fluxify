@@ -19,6 +19,11 @@ namespace Fluxify.Api.Web.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> LoginAsync([FromBody] Login.Request req)
             => Response(await _authService.LoginAsync(req));
-            
+
+        [Authorize]
+        [HttpPost("check/password")]
+        public async Task<IActionResult> CheckByPasswordAsync(string password)
+            => Response(await _authService.CheckUserAsync(CurrentUser.NameIdentifier, password));
+
     }
 }

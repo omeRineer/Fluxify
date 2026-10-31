@@ -85,6 +85,6 @@ app.UseAuthorization();
 
 app.MapHub<PresenceHub>("/hub/presence");
 app.MapHub<ChatHub>("/hub/chat");
-app.MapHub<ChatHub>("/hub/notification");
+app.MapHub<NotificationHub>("/hub/notification");
 
 app.Run();

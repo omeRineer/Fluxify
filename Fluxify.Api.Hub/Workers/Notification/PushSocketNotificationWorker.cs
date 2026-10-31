@@ -56,19 +56,6 @@ namespace Fluxify.Api.Hub.Workers.Notification
                                          Properties = message.Properties,
                                          Thumbnail = message.Thumbnail
                                      });
-
-            //await _hubContext.Clients.Groups(message.Topics.Select(s => $"{message.NameSpaceId}:{s}"))
-            //                         .SendAsync(HubEvents.PresenceHub.ReceiveNotification,
-            //                         new NotificationPayload
-            //                         {
-            //                             Id = message.Id,
-            //                             Date = message.Date,
-            //                             Level = EnumHelper.ToEnumString<NotificationLevelType>(message.Level),
-            //                             Title = message.Title,
-            //                             Summary = message.Summary,
-            //                             Url = message.Url,
-            //                             Thumbnail = message.Thumbnail
-            //                         });
         }
     }
 }
