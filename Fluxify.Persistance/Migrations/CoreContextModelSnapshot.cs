@@ -207,6 +207,12 @@ namespace Fluxify.Persistance.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime>("AccountDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("BirthdayDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -227,6 +233,12 @@ namespace Fluxify.Persistance.Migrations
 
                     b.Property<Guid>("NameSpaceId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("Phone")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
