@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Fluxify.Api.Web.Controllers
 {
-    [AllowAnonymous]
+    
     public class AuthController : BaseController
     {
         readonly IAuthService _authService;
@@ -16,11 +16,11 @@ namespace Fluxify.Api.Web.Controllers
             _authService = authService;
         }
 
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> LoginAsync([FromBody] Login.Request req)
             => Response(await _authService.LoginAsync(req));
 
-        [Authorize]
         [HttpPost("check/password")]
         public async Task<IActionResult> CheckByPasswordAsync(string password)
             => Response(await _authService.CheckUserAsync(CurrentUser.NameIdentifier, password));

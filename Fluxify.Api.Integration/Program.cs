@@ -74,9 +74,9 @@ app.UseSwaggerUI(c =>
     c.SwaggerEndpoint("/integrationapi/swagger/v1/swagger.json", "Fluxify Integration API v1");
 });
 
-app.UseCors();
-
 app.UseExceptionHandler();
+
+app.UseCors();
 
 app.UseHttpsRedirection();
 
