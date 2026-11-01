@@ -16,9 +16,7 @@ namespace Fluxify.Application.MappingProfiles
             CreateMap<User, CreateUser.Response>().IncludeBase<User, UserDto.Detail>();
             CreateMap<User, UpdateUser.Response>().IncludeBase<User, UserDto.Detail>();
             CreateMap<User, ChatDto.Detail.User>();
-            CreateMap<User, UserDto.Profile>()
-                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.Credential!.UserName))
-                .ForMember(dest => dest.Password, opt => opt.MapFrom(src => src.Credential!.Password));
+            CreateMap<User, UserDto.Profile>();
             CreateMap<User, UpdateProfile.Response>().IncludeBase<User, UserDto.Profile>();
 
             CreateMap<CreateUser.Request, User>()
