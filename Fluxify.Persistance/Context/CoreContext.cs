@@ -24,12 +24,6 @@ namespace Fluxify.Persistance.Context
         public DbSet<UserTopic> UserTopics { get; set; }
         public DbSet<Credential> Credentials { get; set; }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<User>()
-                .Property(p => p.AccountDate)
-                .HasDefaultValue(DateTime.UtcNow.AddDays(-10));
-        }
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
