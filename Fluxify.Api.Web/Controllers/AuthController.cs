@@ -22,7 +22,7 @@ namespace Fluxify.Api.Web.Controllers
             => Response(await _authService.LoginAsync(req));
 
         [HttpPost("check/password")]
-        public async Task<IActionResult> CheckByPasswordAsync(string password)
+        public async Task<IActionResult> CheckByPasswordAsync([FromBody] string password)
             => Response(await _authService.CheckUserAsync(CurrentUser.NameIdentifier, password));
 
     }
