@@ -22,9 +22,10 @@ namespace Fluxify.Application.Services.Core
         readonly IUserRepository UserRepository;
         private readonly IMapper Mapper;
 
-        public ProfileService(IUserRepository userRepository)
+        public ProfileService(IUserRepository userRepository, IMapper mapper)
         {
             UserRepository = userRepository;
+            Mapper = mapper;
         }
 
         public async Task<IDataResult<UserDto.Profile>> GetDetailAsync(Guid id)
