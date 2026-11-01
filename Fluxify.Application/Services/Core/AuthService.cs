@@ -37,7 +37,7 @@ namespace Fluxify.Application.Services.Core
 
         public async Task<IResult> CheckUserAsync(Guid id, string password)
         {
-            var credentialUser = await _credentialRepository.GetSingleOrDefaultAsync(f => f.Id == id && f.Password == password);
+            var credentialUser = await _credentialRepository.GetSingleOrDefaultAsync(f => f.UserId == id && f.Password == password);
 
             await BusinessRuleEngine.RunAndThrow(
                     new MustExistRule<Credential>(credentialUser, "Password is not correct!")
