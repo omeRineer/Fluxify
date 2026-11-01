@@ -80,7 +80,7 @@ namespace Fluxify.Application.Services.Core
 
         public async Task<IDataResult<PagedDataResponse<UserDto.List>>> GetListAsync(Guid nameSpaceId, UserQuery query)
         {
-            var pagedData = await UserRepository.GetPagedListAsync(query.Page, 
+            var pagedData = await UserRepository.GetPagedListAsync(query.Page,
                                                                query.Size,
                                                                f => f.NameSpaceId == nameSpaceId);
 
@@ -135,5 +135,7 @@ namespace Fluxify.Application.Services.Core
 
             return new SuccessDataResult<AccessToken>(token);
         }
+
+        
     }
 }

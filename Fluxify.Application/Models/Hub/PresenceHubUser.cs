@@ -7,7 +7,6 @@ namespace Fluxify.Application.Models.Hub
     public class PresenceHubUser : HubUser
     {
         public string Status { get; private set; }
-        public List<string>? Topics { get; set; }
 
         public PresenceHubUser()
         {

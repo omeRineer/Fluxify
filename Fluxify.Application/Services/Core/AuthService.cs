@@ -20,6 +20,7 @@ namespace Fluxify.Application.Services.Core
     public interface IAuthService
     {
         Task<IDataResult<AccessToken>> LoginAsync(Login.Request req);
+        Task<IResult> CheckUserAsync(Guid id, string password);
     }
     public class AuthService : IAuthService
     {
@@ -32,6 +33,18 @@ namespace Fluxify.Application.Services.Core
             _tokenService = tokenService;
             _userRepository = userRepository;
             _credentialRepository = credentialRepository;
+        }
+
+        public async Task<IResult> CheckUserAsync(Guid id, string password)
+        {
+            var credentialUser = await _credentialRepository.GetSingleOrDefaultAsync(f => f.Id == id && f.Password == password);
+
+            await BusinessRuleEngine.RunAndThrow(
+                    new MustExistRule<Credential>(credentialUser, "Password is not correct!")
+                );
+
+            return new SuccessResult();
+
         }
 
         public async Task<IDataResult<AccessToken>> LoginAsync(Login.Request req)

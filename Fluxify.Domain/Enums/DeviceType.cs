@@ -10,6 +10,7 @@ namespace Fluxify.Domain.Enums
     {
         Android,
         Ios,
-        Web
+        Web,
+        Windows
     }
 }

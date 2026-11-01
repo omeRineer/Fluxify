@@ -3,7 +3,10 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# Spectation
 k6/
+/Fluxify.Configuration/appsettings.Production.json
+
 # User-specific files55
 *.rsuser
 *.suo

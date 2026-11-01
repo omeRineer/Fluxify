@@ -1,4 +1,5 @@
 ﻿using Fluxify.Application.Models.Common;
+using Fluxify.Application.Models.Rest.Profile;
 using Fluxify.Application.Services.Core;
 using Fluxify.Application.Services.Interfaces.Core;
 using Fluxify.Application.Services.Interfaces.Mongo;
@@ -10,19 +11,21 @@ namespace Fluxify.Api.Web.Controllers
 {
     public class MeController : BaseController
     {
-        readonly IChatService _chatService;
-        readonly IUserService _userService;
-        readonly INotificationService _notificationService;
-        public MeController(CurrentUser currentUser, IChatService chatService, IUserService userService, INotificationService notificationService) : base(currentUser)
+        readonly IProfileService _profileService;
+
+        public MeController(CurrentUser currentUser, IProfileService profileService) : base(currentUser)
         {
-            _chatService = chatService;
-            _userService = userService;
-            _notificationService = notificationService;
+            _profileService = profileService;
         }
 
-        [HttpGet("profile")]
-        public async Task<IActionResult> GetProfileAsync()
-            => Response(await _userService.GetDetailAsync(CurrentUser.NameIdentifier));
+        [HttpGet]
+        public async Task<IActionResult> GetAsync()
+            => Response(await _profileService.GetDetailAsync(CurrentUser.NameIdentifier));
+
+        [HttpPost("save")]
+        public async Task<IActionResult> UpdateAsync(UpdateProfile.Request req)
+            => Response(await _profileService.UpdateAsync(CurrentUser.NameIdentifier, req));
+
 
     }
 }

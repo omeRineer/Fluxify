@@ -11,9 +11,13 @@ namespace Fluxify.Domain.Entities.Core
     public class User : CoreEntity<Guid>
     {
         public Guid NameSpaceId { get; set; }
+        public string? Title { get; set; }
         public string Name { get; set; }
         public string Email { get; set; }
+        public string? Phone { get; set; }
         public string Key { get; set; }
+        public DateTime? BirthdayDate { get; set; }
+        public DateTime AccountDate { get; set; }
 
 
         public virtual NameSpace NameSpace { get; set; }

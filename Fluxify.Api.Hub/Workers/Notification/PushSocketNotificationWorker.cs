@@ -21,10 +21,10 @@ namespace Fluxify.Api.Hub.Workers.Notification
         protected override string QueueName => "notification-socket";
         protected override int RetryCount => 3;
 
-        private readonly IHubContext<PresenceHub> _hubContext;
-        readonly HubConnectionManager<PresenceHubUser> _connectionManager;
+        private readonly IHubContext<NotificationHub> _hubContext;
+        readonly HubConnectionManager<NotificationHubUser> _connectionManager;
 
-        public PushSocketNotificationWorker(IChannel channel, IHubContext<PresenceHub> hubContext, HubConnectionManager<PresenceHubUser> connectionManager)
+        public PushSocketNotificationWorker(IChannel channel, IHubContext<NotificationHub> hubContext, HubConnectionManager<NotificationHubUser> connectionManager)
             : base(channel)
         {
             _hubContext = hubContext;
@@ -56,19 +56,6 @@ namespace Fluxify.Api.Hub.Workers.Notification
                                          Properties = message.Properties,
                                          Thumbnail = message.Thumbnail
                                      });
-
-            //await _hubContext.Clients.Groups(message.Topics.Select(s => $"{message.NameSpaceId}:{s}"))
-            //                         .SendAsync(HubEvents.PresenceHub.ReceiveNotification,
-            //                         new NotificationPayload
-            //                         {
-            //                             Id = message.Id,
-            //                             Date = message.Date,
-            //                             Level = EnumHelper.ToEnumString<NotificationLevelType>(message.Level),
-            //                             Title = message.Title,
-            //                             Summary = message.Summary,
-            //                             Url = message.Url,
-            //                             Thumbnail = message.Thumbnail
-            //                         });
         }
     }
 }

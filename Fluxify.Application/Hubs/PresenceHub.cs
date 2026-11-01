@@ -22,12 +22,10 @@ namespace Fluxify.Application.Hubs
     public class PresenceHub : Hub
     {
         readonly HubConnectionManager<PresenceHubUser> HubConnectionManager;
-        readonly IUserTopicService _userTopicService;
         readonly IUserDeviceService _userDeviceService;
-        public PresenceHub(HubConnectionManager<PresenceHubUser> hubConnectionManager, IUserTopicService userTopicService, IUserDeviceService userDeviceService)
+        public PresenceHub(HubConnectionManager<PresenceHubUser> hubConnectionManager, IUserDeviceService userDeviceService)
         {
             HubConnectionManager = hubConnectionManager;
-            _userTopicService = userTopicService;
             _userDeviceService = userDeviceService;
         }
 
@@ -35,11 +33,6 @@ namespace Fluxify.Application.Hubs
         {
             // TODO : Race condition riski
             PresenceHubUser hubUser = HubConnectionManager.AddConnection(Context);
-            if (hubUser.Topics == null)
-                hubUser.Topics = await _userTopicService.GetTopicsByUser(hubUser.Id);
-
-            foreach (var topic in hubUser.Topics)
-                await Groups.AddToGroupAsync(Context.ConnectionId, $"{hubUser.NameSpace.Id}:{topic}");
 
             await Groups.AddToGroupAsync(Context.ConnectionId, hubUser.NameSpace.Signature);
 
