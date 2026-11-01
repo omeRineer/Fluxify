@@ -21,6 +21,7 @@ namespace Fluxify.Application.MappingProfiles
                 .ForMember(dest => dest.Password, opt => opt.MapFrom(src => src.Credential!.Password));
             CreateMap<User, UpdateProfile.Response>().IncludeBase<User, UserDto.Profile>();
 
+            CreateMap<UpdateProfile.Request, User>();
             CreateMap<CreateUser.Request, User>()
                 .ForMember(dest => dest.Topics, opt => opt.Ignore())
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => string.IsNullOrEmpty(src.Name) ? $"USR:{src.Key}" : src.Name));

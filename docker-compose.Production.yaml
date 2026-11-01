@@ -4,8 +4,7 @@ services:
     image: nginx:latest
     container_name: fluxify.nginx
     ports:
-      - "80:80"
-      - "443:443"
+      - "1020:80"
     networks: 
       - appnet
     volumes:
