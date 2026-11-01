@@ -13,8 +13,9 @@ namespace Fluxify.Application.Models.Rest.Profile
         {
             public string? Title { get; set; }
             public string Name { get; set; }
-            public string Email { get; set; }
+            public string? Email { get; set; }
             public string? Phone { get; set; }
+            public DateTime? BirthdayDate { get; set; }
         }
 
         public class Response : UserDto.Profile

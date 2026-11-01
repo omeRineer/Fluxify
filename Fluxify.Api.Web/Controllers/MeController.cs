@@ -23,7 +23,7 @@ namespace Fluxify.Api.Web.Controllers
             => Response(await _profileService.GetDetailAsync(CurrentUser.NameIdentifier));
 
         [HttpPost("save")]
-        public async Task<IActionResult> UpdateAsync(UpdateProfile.Request req)
+        public async Task<IActionResult> UpdateAsync([FromBody] UpdateProfile.Request req)
             => Response(await _profileService.UpdateAsync(CurrentUser.NameIdentifier, req));
 
 

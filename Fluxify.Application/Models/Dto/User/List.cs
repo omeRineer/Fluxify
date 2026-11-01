@@ -12,9 +12,12 @@ namespace Fluxify.Application.Models.Dto.User
         {
             public Guid Id { get; set; }
             public Guid NameSpaceId { get; set; }
-            public string Name { get; set; }
-            public string Email { get; set; }
             public string Key { get; set; }
+            public string? Title { get; set; }
+            public string Name { get; set; }
+            public string? Email { get; set; }
+            public string? Phone { get; set; }
+            
         }
     }
 }
